@@ -4,22 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import SearchBar from '../../components/SearchBar'; 
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
-
-// Temporary mock data for events
-const mockUpcomingEvents = [
-  { id: '1', name: 'Hello Future: Building a Wonderland', type: 'Exhibition', date: '01 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/helloFuture.jpg') },
-  { id: '2', name: 'Sea Chanty Project', type: 'Exhibition', date: '05 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/seaChantyProject.jpg') },
-];
-
-const mockPopularEvents = [
-  { id: '1', name: 'Singapore Night Festival', type: 'Festival', date: '10 Dec 2024', location: 'Singapore Night Festival', image: require('../../assets/events/SNF.png') },
-  { id: '2', name: 'Hello Future: Building a Wonderland', type: 'Exhibition', date: '12 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/helloFuture.jpg') },
-];
-
-const mockNearbyEvents = [
-  { id: '1', name: 'Singapore Night Festival', type: 'Festival', date: '10 Dec 2024', location: 'Singapore Night Festival', image: require('../../assets/events/SNF.png') },
-  { id: '2', name: 'Hello Future: Building a Wonderland', type: 'Exhibition', date: '01 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/helloFuture.jpg') },
-];
+import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
