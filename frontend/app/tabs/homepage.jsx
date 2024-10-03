@@ -45,7 +45,7 @@ const Homepage = ({ navigation }) => {
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
         <TouchableOpacity style={styles.bookmarkButton}>
-          <FontAwesome name="bookmark-o" size={20} color="#888" />
+          <FontAwesome name="bookmark-o" size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
     );
@@ -60,37 +60,38 @@ const Homepage = ({ navigation }) => {
           <Image source={event.image} style={styles.eventImage} />
           <Text style={styles.upcomingEventTitle}>{event.name}</Text>
           <Text style={styles.upcomingEventLocation}>{event.location}</Text>
-        </View>
-  
-        {/* Date and Action Buttons in One Row */}
-        <View style={styles.eventRow}>
           {/* Date Toggle Buttons */}
           <View style={styles.dateToggleContainer}>
-            {mockUpcomingEvents.map((upEvent, index) => (
-              <TouchableOpacity
-                key={upEvent.id}
-                onPress={() => setCurrentUpcomingEventIndex(index)}
-                style={[
-                  styles.dateButton,
-                  currentUpcomingEventIndex === index && styles.activeDateButton,
-                ]}
-              >
-                <Text style={styles.dateButtonText}>{upEvent.date}</Text>
-              </TouchableOpacity>
-            ))}
+            {mockUpcomingEvents.map((upEvent, index) => {
+              const formattedDate = upEvent.date.split(' ').slice(0, 2).join(' '); // Extract day and month only
+              return (
+                <TouchableOpacity
+                  key={upEvent.id}
+                  onPress={() => setCurrentUpcomingEventIndex(index)}
+                  style={[
+                    styles.dateButton,
+                    currentUpcomingEventIndex === index && styles.activeDateButton,
+                  ]}
+                >
+                  <Text style={styles.dateButtonText}>{formattedDate}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
+      </View>
   
           {/* Share and Details Buttons */}
           <View style={styles.eventActionsContainer}>
             <TouchableOpacity style={styles.shareButton}>
-              <Text style={styles.shareButtonText}>Share</Text>
+              <FontAwesome name="share" size={12} color="#EE1C43" />
+              <Text style={styles.shareButtonText}> Share</Text> 
             </TouchableOpacity>
             <TouchableOpacity style={styles.detailsButton}>
-              <Text style={styles.detailsButtonText}>Details</Text>
+              <FontAwesome name="info" size={12} color="#FFF" />
+              <Text style={styles.detailsButtonText}> Details</Text> 
             </TouchableOpacity>
           </View>
         </View>
-      </View>
     );
   };
   
@@ -115,18 +116,33 @@ const Homepage = ({ navigation }) => {
         </Pressable>
       </View>
 
+      {/* Title */}
+      <View style={styles.mainHeader}>
+        <Text style={styles.mainTitle}>Community Connection</Text>
+        <Text style={styles.mainSubtitle}>Enjoy Arts & Culture.</Text>
+      </View>
+
       {/* Filter Buttons */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
-        {filters.map(filter => (
-          <TouchableOpacity key={filter} onPress={() => setSelectedFilter(filter)}>
-            <Text style={[styles.filterButton, selectedFilter === filter && styles.activeFilterButton]}>
-              {filter}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-
+      <ScrollView 
+  horizontal 
+  showsHorizontalScrollIndicator={false} 
+  contentContainerStyle={styles.filterContainer}
+>
+  {filters.map((filter) => (
+    <TouchableOpacity
+      key={filter}
+      onPress={() => setSelectedFilter(filter)}
+      style={[
+        styles.filterButton, 
+        selectedFilter === filter && styles.activeFilterButton,
+      ]}
+    >
+      <Text style={selectedFilter === filter ? styles.activeFilterText : styles.inactiveFilterText}>
+        {filter}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
       {/* Search Bar */}
       <View style={styles.searchBarContainer}>
         <SearchBar onSearchPress={handleSearchPress} />
@@ -178,38 +194,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: '5%',
+    paddingHorizontal: '6%',
     paddingBottom: '5%',
-    paddingTop: '15%',
+    paddingTop: '17%',
     backgroundColor: '#FBF3F1',
   },
   location: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#5D7971',
+    color: '#000',
+  },
+  mainHeader: {
+    paddingHorizontal: '5%',
+    paddingBottom: 3,
+  },
+  mainTitle:{
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  mainSubtitle:{
+    fontSize: 14,
+    color: '#666',
   },
   filterContainer: {
     paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  filterButtons: {
+    paddingTop: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '90%',
+    marginHorizontal: 5,
   },
   filterButton: {
     paddingHorizontal: 15,
     paddingVertical: 5,
+    marginRight: 5,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#FF93B3',
-    color: '#EE1C43',
-    fontWeight: '500',
-    backgroundColor: 'transparent',
   },
   activeFilterButton: {
-    backgroundColor: '#EE1C43',
+    backgroundColor: '#EE1C43', 
+    borderColor: '#EE1C43',
+  },
+  activeFilterText: {
     color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  inactiveFilterText: {
+    color: '#EE1C43', 
+    fontWeight: '500',
   },
   searchBarContainer: {
     paddingHorizontal: 20,
@@ -217,7 +248,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
-    marginVertical: 10,
+    marginVertical: 5,
   },
   sectionTitle: {
     fontSize: 18,
@@ -260,16 +291,17 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   eventName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
+    paddingBottom: 5,
   },
   eventDateLocation: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   eventLocation: {
-    marginLeft: 5,
-    fontSize: 12,
+    marginLeft: 3,
+    fontSize: 11,
     color: '#888',
   },
   eventDate: {
@@ -279,19 +311,28 @@ const styles = StyleSheet.create({
   },
   bookmarkButton: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 100,
     right: 10,
+    backgroundColor: '#888',
+    padding: 5,
+    borderRadius: 5,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   upcomingEventCard: {
     width: '100%',
     height: 175,
     backgroundColor: '#fff',
-    marginBottom: 10,
-    borderRadius: 10,
+    marginBottom: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 3,
+    marginBottom: 10,
   },
   upcomingEventImage: {
     width: '100%',
@@ -309,56 +350,79 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#AAA',
     paddingLeft: 10,
+    paddingBottom: 5,
   },
   eventRow: {
     flexDirection: 'row',
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    paddingHorizontal: 10, 
+    backgroundColor: '#FFFFFF',
+    marginTop: -10,
   },
   dateToggleContainer: {
     flexDirection: 'row', 
+    justifyContent: 'flex-start',
+    left: -1,
   },
   dateButton: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#DDD',
+    borderWidth: 1,
+    borderTopWidth: 0,
+    borderColor: '#D9D9D9',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
     paddingVertical: 5,
     paddingHorizontal: 10,
-    marginRight: 5,
-    borderRadius: 5,
+    borderRadius: 10,
+    marginTop: 3,
   },
   activeDateButton: {
-    backgroundColor: '#FF93B3',
+    backgroundColor: '#FFFFFF',
   },
   dateButtonText: {
-    color: '#FFF',
+    color: '#000',
     fontWeight: '600',
     fontSize: 10,
   },
   eventActionsContainer: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: -5, 
+    paddingHorizontal: 8, // Aligns the buttons within the card width
   },
   shareButton: {
-    backgroundColor: '#FF93B3',
-    paddingVertical: 8,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#FFF',
+    borderColor: '#FF93B3',
+    borderWidth: 1,
+    paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 20,
+    marginRight: 5,
   },
   shareButtonText: {
-    color: '#FFF',
+    color: '#EE1C43',
     fontWeight: '600',
     fontSize: 12,
+    marginLeft: 3,
   },
   detailsButton: {
+    flexDirection: 'row', 
+    alignItems: 'center',
     backgroundColor: '#EE1C43',
-    paddingVertical: 8,
+    paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 20,
   },
   detailsButtonText: {
     color: '#FFF',
     fontWeight: '600',
     fontSize: 12,
-
+    marginLeft: 3,
   },
 });
 
