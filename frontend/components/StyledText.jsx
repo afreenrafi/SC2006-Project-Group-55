@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'CrimsonProRegular',
+    fontWeight: 'normal',
   },
 });
 
