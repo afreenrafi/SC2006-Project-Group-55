@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, FlatList, Alert, TouchableOpacity, Text, Pressable, ScrollView} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import SearchBar from '../../components/SearchBar'; 
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
+import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
 const Homepage = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
+  const [savedEvents, setSavedEvents] = useState(mockSavedEvents); // Bookmark to Save Events
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.type === selectedFilter);
   const filteredNearbyEvents = selectedFilter === 'All' ? mockNearbyEvents : mockNearbyEvents.filter(event => event.type === selectedFilter);
 
+  const toggleBookmark = (event) => {
+    setSavedEvents((prevSavedEvents) => {
+      if (prevSavedEvents.some((e) => e.id === event.id)) {
+        return prevSavedEvents.filter((e) => e.id !== event.id); // Remove if already saved
+      } else {
+        return [...prevSavedEvents, event]; // Add new event
+      }
+    });
+  };
+
   const renderEventCard = ({ item }) => {
+    const isBookmarked = savedEvents.some((e) => e.id === item.id);
     return (
       <View style={styles.eventCard}>
         <Image source={item.image} style={styles.eventImage} />
@@ -29,8 +40,15 @@ const Homepage = ({ navigation }) => {
           </View>
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
-        <TouchableOpacity style={styles.bookmarkButton}>
-          <FontAwesome name="bookmark-o" size={20} color="#FFF" />
+        <TouchableOpacity
+          style={styles.bookmarkButton}
+          onPress={() => toggleBookmark(item)}
+        >          
+        <FontAwesome 
+          name={isBookmarked ? "bookmark" : "bookmark-o"} 
+          size={20} 
+          color={isBookmarked ? "#EE1C43" : "#FFF"} 
+        />
         </TouchableOpacity>
       </View>
     );
@@ -109,24 +127,24 @@ const Homepage = ({ navigation }) => {
 
       {/* Filter Buttons */}
       <ScrollView 
-  horizontal 
-  showsHorizontalScrollIndicator={false} 
-  contentContainerStyle={styles.filterContainer}
->
-  {filters.map((filter) => (
-    <TouchableOpacity
-      key={filter}
-      onPress={() => setSelectedFilter(filter)}
-      style={[
-        styles.filterButton, 
-        selectedFilter === filter && styles.activeFilterButton,
-      ]}
-    >
-      <Text style={selectedFilter === filter ? styles.activeFilterText : styles.inactiveFilterText}>
-        {filter}
-      </Text>
-    </TouchableOpacity>
-  ))}
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.filterContainer}
+      >
+      {filters.map((filter) => (
+        <TouchableOpacity
+          key={filter}
+          onPress={() => setSelectedFilter(filter)}
+          style={[
+            styles.filterButton, 
+            selectedFilter === filter && styles.activeFilterButton,
+          ]}
+        >
+          <Text style={selectedFilter === filter ? styles.activeFilterText : styles.inactiveFilterText}>
+            {filter}
+          </Text>
+        </TouchableOpacity>
+      ))}
 </ScrollView>
       {/* Search Bar */}
       <View style={styles.searchBarContainer}>
@@ -298,7 +316,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 100,
     right: 10,
-    backgroundColor: '#888',
+    backgroundColor: '#CCC',
     padding: 5,
     borderRadius: 5,
     fontSize: 12,
@@ -351,17 +369,15 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     backgroundColor: '#DDD',
-    borderWidth: 1,
-    borderTopWidth: 0,
-    borderColor: '#D9D9D9',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
     paddingVertical: 5,
     paddingHorizontal: 10,
-    borderRadius: 10,
-    marginTop: 3,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    marginTop:3,
+    marginRight: 5,
+    borderWidth: 1,
+    borderColor: '#EEE', // Similar color to blend
+    borderTopWidth: 0, // Removing top border to "merge"
   },
   activeDateButton: {
     backgroundColor: '#FFFFFF',
@@ -373,10 +389,10 @@ const styles = StyleSheet.create({
   },
   eventActionsContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end', 
     alignItems: 'center',
-    marginTop: -5, 
-    paddingHorizontal: 8, // Aligns the buttons within the card width
+    marginTop: 10, 
+    paddingHorizontal: 10, // Ensure proper alignment with the card width
   },
   shareButton: {
     flexDirection: 'row', 
@@ -385,10 +401,10 @@ const styles = StyleSheet.create({
     borderColor: '#FF93B3',
     borderWidth: 1,
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12, // Padding to adjust button size
     borderRadius: 20,
-    marginRight: 5,
-  },
+    marginRight: 10,
+  },  
   shareButtonText: {
     color: '#EE1C43',
     fontWeight: '600',
@@ -400,9 +416,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#EE1C43',
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12, // Padding to adjust button size
     borderRadius: 20,
-  },
+  },  
   detailsButtonText: {
     color: '#FFF',
     fontWeight: '600',

@@ -2,10 +2,10 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import DirectMessage from './directMessage';
 import Homepage from './homepage';
 import Profile from './profile';
 import Ticket from './ticket';
+import SavedEventsPage from './savedEvents'
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 
 const navTheme = {
@@ -30,7 +30,7 @@ const Tabs = () => {
               iconName = focused ? 'home-outline' : 'home';
             } else if (route.name === 'Ticket') {
               iconName = focused ? 'ticket-outline' : 'ticket';
-            } else if (route.name === 'DirectMessage') {
+            } else if (route.name === 'SavedEventsPage') {
               iconName = focused ? 'bookmark-outline' : 'bookmark';
             } else if (route.name === 'Profile') {
               iconName = focused ? 'person-outline' : 'person';
@@ -55,7 +55,7 @@ const Tabs = () => {
       >
         <Tab.Screen options={{ headerShown: false }} name="Homepage" component={Homepage} />
         <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} />
-        <Tab.Screen options={{ headerShown: false }} name="DirectMessage" component={DirectMessage} />
+        <Tab.Screen options={{ headerShown: false }} name="SavedEventsPage" component={SavedEventsPage} />
         <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} />
       </Tab.Navigator>
   );
