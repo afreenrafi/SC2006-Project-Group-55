@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Tabs from './tabs/_layout'; // Adjust the path if necessary
 import PostWithComments from './utils/PostWithComments'; // Adjust the path if necessary
 import Login from './auth/Login'; // Adjust the path if necessary
+import Details from './startup/Details';
+import Setup from './startup/Setup';
 import SearchItem from './utils/SearchItem'; // Adjust the path if necessary
 import ImagePickerComponent from './utils/ImagePickerComponent'; // Adjust the path if necessary
 
@@ -14,7 +16,26 @@ const MainLayout = () => {
       <Stack.Screen
         name="auth"
         component={Login}
-        options={{ headerShown: false }}
+        options={{ headerShown: false,
+          title: 'Login', 
+          gestureEnabled: false
+         }}
+      />
+      <Stack.Screen
+        name="startup/Details"
+        component={Details}
+        options={{ headerShown: false,
+          title: 'Your Details', 
+          gestureEnabled: false
+         }}
+      />
+      <Stack.Screen
+        name="startup/Setup"
+        component={Setup}
+        options={{ headerShown: false,
+          title: 'Setup', 
+          gestureEnabled: false
+         }}
       />
       <Stack.Screen
         name="tabs"
