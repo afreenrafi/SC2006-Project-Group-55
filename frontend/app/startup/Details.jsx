@@ -4,7 +4,7 @@ import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import StyledInput from "../../components/StyledInput";
 import RoundBtn from "../../components/RoundBtn";
-
+// import GenderPicker from "../../components/GenderPicker";
 
 const Details = ({ route }) => {
   const navigation = useNavigation();
@@ -16,20 +16,30 @@ const Details = ({ route }) => {
   const [editedAge, setAge] = useState(age);
   const [editedEmail, setEmail] = useState(email);
 
-  // Dummy API call to simulate submitting the user details
-  const submitUserDetails = async () => {
+  const handleAgeChange = (text) => {
+    // Ensure the input is a valid number and within the allowed range
+    const numericAge = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    if (numericAge === '' || (parseInt(numericAge) >= 0 && parseInt(numericAge) <= 120)) {
+      setAge(numericAge);
+    }
+  };
+
+  // Dummy API call that simulates submitting the user details
+  const submitUserDetails = async (email, firstName, lastName, age, gender) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve({ editedEmail });  
-      }, 2000);
+        console.log("Submitting the following data:");
+        console.log({ email, firstName, lastName, age, gender });  // Log the data that would be submitted
+        resolve({ email });  // Simulate that the email is returned from the API
+      }, 2000);  // Simulate a 2-second delay
     });
   };
 
   const handleNext = async () => {
     try {
-      const result = await submitUserDetails();  // Simulate sending data
-      console.log("User details submitted:", result);
-      navigation.navigate('NextPage', { email: result.email });  // Navigate to new page with email
+      const userEmail = await submitUserDetails();  // Simulate sending data
+      console.log("User details submitted:", userEmail);
+      navigation.navigate('startup/Setup', { email: userEmail.email });  // Navigate to new page with email
     } catch (error) {
       console.error("Failed to submit details:", error);
     }
@@ -46,11 +56,12 @@ const Details = ({ route }) => {
         <StyledText size={30} textContent="Your Details" fontFam="MontserratSemibold"/>
 
         <View style={styles.inputs}>
-          <StyledInput label={"Last Name"} data={lastName} onChangeText={setLastName}/>
-          <StyledInput label={"First Name"} data={firstName} onChangeText={setFirstName}/>
-          <StyledInput label={"Gender"} data={gender} onChangeText={setGender}/>
-          <StyledInput label={"Age"} data={age} onChangeText={setAge}/>
-          <StyledInput label={"Email"} data={email} onChangeText={setEmail}/>
+          <StyledInput label={"Last Name"} data={editedLastName} onChangeText={setLastName}/>
+          <StyledInput label={"First Name"} data={editedFirstName} onChangeText={setFirstName}/>
+          <StyledInput label={"Gender"} data={editedGender} onChangeText={setGender}/>
+          {/* <GenderPicker label="Gender" selectedValue={gender} onValueChange={setGender} /> */}
+          <StyledInput label={"Age"} data={editedAge} onChangeText={handleAgeChange} type="numeric"/>
+          <StyledInput label={"Email"} data={editedEmail} onChangeText={setEmail}/>
         {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
         </View>
         <View style={styles.btnContainer}>

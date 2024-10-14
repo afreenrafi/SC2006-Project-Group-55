@@ -4,22 +4,22 @@ import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import StyledInput from "../../components/StyledInput";
 import RoundBtn from "../../components/RoundBtn";
+import Entypo from '@expo/vector-icons/Entypo';
 
 
 const Setup = ({ route }) => {
   const navigation = useNavigation();
+
   const { email } = route.params;
+
+  const [Username, setUsername] = useState('');
+  const [Role, setRole] = useState('');
+  const [Password, setPassword] = useState('');
+  const [rePassword, setRePassword] = useState('');
 
  
 
-  // Dummy API call to simulate submitting the user details
-//   const submitUserDetails = async () => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve({ editedEmail });  
-//       }, 2000);
-//     });
-//   };
+
 
   const handleNext = async () => {
     // try {
@@ -44,8 +44,20 @@ const Setup = ({ route }) => {
         <View style={styles.inputs}>
           <StyledInput label={"Username"} />
           <StyledInput label={"Role"} />
-          <StyledInput label={"Password"} />
-          <StyledInput label={"Re-enter Password"} />
+          <StyledInput label={"Password"} pwd="true"/>
+          <View style={styles.bullets}>
+            <Entypo name="dot-single" size={24} color="#8B8B8B" />
+            <StyledText size={18} textContent="must include at least 8 characters" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
+          </View>
+          <View style={styles.bullets}>
+            <Entypo name="dot-single" size={24} color="#8B8B8B" />
+            <StyledText size={18} textContent="must include at least 1 special character" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
+          </View>
+          <View style={styles.bullets}>
+            <Entypo name="dot-single" size={24} color="#8B8B8B" />
+            <StyledText size={18} textContent="must include at least 1 number" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
+          </View>
+          <StyledInput label={"Re-enter Password"} pwd="true"/>
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
         </View>
         <View style={styles.btnContainer}>
@@ -72,6 +84,10 @@ const styles = StyleSheet.create({
   btnContainer:{
     width: "100%",
     paddingHorizontal: "5%",
+  },
+  bullets: {
+    display: 'flex',
+    flexDirection: 'row'
   }
 
 });

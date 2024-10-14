@@ -30,7 +30,7 @@ const RoundBtn = ({ alignment = "center", onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 70,
+    // marginTop: 30,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#CA3550',
