@@ -8,7 +8,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import SelectInput from "../../components/SelectInput";
 
 
-const Setup = ({ route }) => {
+const OrgValidation = ({ route }) => {
   const navigation = useNavigation();
 
   const { email } = route.params;
@@ -132,7 +132,7 @@ const Setup = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Account Setup" fontFam="MontserratSemibold"/>
+        <StyledText size={30} textContent="Organisation Validation" fontFam="MontserratSemibold"/>
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
           {usernameError ? <StyledText size={16} textContent={usernameError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
@@ -245,4 +245,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default Setup;
+export default OrgValidation;

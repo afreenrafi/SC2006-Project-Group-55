@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { TextInput, View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import * as Font from 'expo-font';
 
-const StyledInput = ({ label, data, onChangeText, type="string", pwd="false", edit="true" }) => {
+
+const StyledInput = ({ label, data, onPress }) => {
   // const [text, onChangeText] = React.useState({data});
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -19,15 +20,19 @@ const StyledInput = ({ label, data, onChangeText, type="string", pwd="false", ed
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{label}</Text>
-      <TextInput 
-        style={styles.input}
-        value={data}
-        placeholder={label}
-        onChangeText={onChangeText}
-        keyboardType={type}
-        secureTextEntry={pwd}
-        editable={edit}
-      />
+      <TouchableOpacity style={styles.inputCont} onPress={onPress}>
+        <Text 
+            style={styles.input}
+            // value={data}
+            // placeholder={label}
+            // onChangeText={onChangeText}
+            // keyboardType={type}
+            // secureTextEntry={pwd}
+            // editable={false}
+        >
+            {data}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -39,14 +44,20 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 5,
   },
-  input: {
-    borderRadius: 50,
+  inputCont:{
+    width: "100%",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent:"center",
     borderWidth: 1,
     borderColor: "#000000",
     height: 40,
-    width: "100%",
     borderStyle: 'solid',
     paddingHorizontal: 10,
+    borderRadius: 50,
+  },
+  input: {
+   
   },
   text: {
     fontFamily: "CrimsonProRegular",

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import * as Font from 'expo-font';
 
-const StyledText = ({ size = 20, textContent = "text", alignment="center", fontFam="MontserratBold", fontColor="#000"}) => {
+const StyledText = ({ size = 20, textContent = "text", alignment="center", fontFam="MontserratBold", fontColor="#000", underline="false"}) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ const StyledText = ({ size = 20, textContent = "text", alignment="center", fontF
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.text, { fontSize: size, textAlign: alignment, fontFamily: fontFam, color: fontColor }]}>
+      <Text style={[styles.text, { fontSize: size, textAlign: alignment, fontFamily: fontFam, color: fontColor, textDecorationLine: underline === "true" ? 'underline' : 'none' }]}>
         {textContent}
       </Text>
     </View>
