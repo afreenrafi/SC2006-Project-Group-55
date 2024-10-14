@@ -11,10 +11,18 @@ const Homepage = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
   const [savedEvents, setSavedEvents] = useState(mockSavedEvents); // Bookmark to Save Events
+  const [filteredEvents, setFilteredEvents] = useState([]); // For search results
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.type === selectedFilter);
   const filteredNearbyEvents = selectedFilter === 'All' ? mockNearbyEvents : mockNearbyEvents.filter(event => event.type === selectedFilter);
+
+  const allEvents = [
+    ...mockUpcomingEvents,
+    ...mockPopularEvents,
+    ...mockNearbyEvents,
+    ...mockSavedEvents,
+  ];
 
   const toggleBookmark = (event) => {
     setSavedEvents((prevSavedEvents) => {
@@ -99,11 +107,15 @@ const Homepage = ({ navigation }) => {
   };
   
   const handleSearchPress = (searchQuery) => {
-    if (searchQuery.trim()) {
-      navigation.navigate('utils/SearchItem', { inputItem: searchQuery });
-    } else {
-      Alert.alert('Please enter a search query');
-    }
+    const lowerQuery = searchQuery.toLowerCase();
+    const results = allEvents.filter(
+      (event) =>
+        event.name.toLowerCase().includes(lowerQuery) ||
+        event.type.toLowerCase().includes(lowerQuery) ||
+        event.location.toLowerCase().includes(lowerQuery)
+    );
+    const uniqueResults = [...new Map(results.map(event => [event.id, event])).values()]; // Ensuring unique results by ID
+    setFilteredEvents(uniqueResults);
   };
 
   return (
@@ -146,6 +158,7 @@ const Homepage = ({ navigation }) => {
         </TouchableOpacity>
       ))}
 </ScrollView>
+
       {/* Search Bar */}
       <View style={styles.searchBarContainer}>
         <SearchBar onSearchPress={handleSearchPress} />
@@ -157,34 +170,53 @@ const Homepage = ({ navigation }) => {
         {renderUpcomingEvent()}
       </View>
 
-      {/* Popular Events Section */}
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Most Popular</Text>
-          </View>
+      {/* Display Search Results */}
+      {filteredEvents.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Search Results</Text>
           <FlatList 
             horizontal
-            data={filteredPopularEvents}
+            data={filteredEvents}
             renderItem={renderEventCard}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.flatListContainer}
           />
         </View>
+      )}
 
-      {/* Nearby Events Section */}
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nearby</Text>
+      {/* Hide Popular and Nearby if search results exist */}
+      {filteredEvents.length === 0 && (
+        <>
+          {/* Popular Events Section */}
+          <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Most Popular</Text>
+              </View>
+              <FlatList 
+                horizontal
+                data={filteredPopularEvents}
+                renderItem={renderEventCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.flatListContainer}
+              />
           </View>
-          <FlatList 
-            horizontal
-            data={filteredNearbyEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
-        </View>
-      </ScrollView>
+
+          {/* Nearby Events Section */}
+          <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Nearby</Text>
+              </View>
+              <FlatList 
+                horizontal
+                data={filteredNearbyEvents}
+                renderItem={renderEventCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.flatListContainer}
+              />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
 };
 
@@ -366,6 +398,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'flex-start',
     left: -1,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   dateButton: {
     backgroundColor: '#DDD',
@@ -374,7 +411,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     marginTop:3,
-    marginRight: 5,
+    marginRight: 3,
     borderWidth: 1,
     borderColor: '#EEE', // Similar color to blend
     borderTopWidth: 0, // Removing top border to "merge"

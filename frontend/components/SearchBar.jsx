@@ -2,21 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Pressable, StyleSheet, Keyboard } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
-const itemList = ['Plastic Bottle', 'Plastic bag', 'Plastic', 'Metal Cans', 'Metal Bottle', 'Metal Bag', 'Glass Bottle', 'T-Shirts'];
+const getRandomItem = () => "Search for events"; // Simplified placeholder
 
-const getRandomItem = () => itemList[Math.floor(Math.random() * itemList.length)];
-
-const SearchBar = ({ navigation, onSearchPress, handleUploadedImage }) => {
+const SearchBar = ({ onSearchPress }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [placeholder, setPlaceholder] = useState('');
 
-  let initial = getRandomItem();
-
   useEffect(() => {
-    setPlaceholder(initial);
+    setPlaceholder(getRandomItem());
   }, []);
-
-
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
@@ -24,13 +18,13 @@ const SearchBar = ({ navigation, onSearchPress, handleUploadedImage }) => {
 
   const handlePress = () => {
     if (searchQuery === '') {
-      onSearchPress(initial);
+      onSearchPress(placeholder); // Search with placeholder if input is empty
     } else {
       onSearchPress(searchQuery);
     }
 
     Keyboard.dismiss();
-    setSearchQuery(getRandomItem());
+    setSearchQuery(''); // Clear search input after submission
   };
 
   return (
@@ -39,17 +33,12 @@ const SearchBar = ({ navigation, onSearchPress, handleUploadedImage }) => {
         <TextInput
           style={styles.searchBar}
           placeholder={placeholder}
-          placeholderTextColor="#FFF"
+          placeholderTextColor="#000"
           value={searchQuery}
           onChangeText={handleSearchChange}
         />
         <Pressable style={styles.searchBtn} onPress={handlePress}>
-          <FontAwesome name="search" size={20} color="#fff" />
-        </Pressable>
-      </View>
-      <View style={styles.searchCamera}>
-        <Pressable style={styles.cameraBtn} onPress={() => navigation.navigate('utils/ImagePickerComponent', { handleUploadedImage })}>
-          <FontAwesome name="camera" size={20} color="#fff" />
+          <FontAwesome name="search" size={20} color="#DDD" />
         </Pressable>
       </View>
     </View>
@@ -58,39 +47,29 @@ const SearchBar = ({ navigation, onSearchPress, handleUploadedImage }) => {
 
 const styles = StyleSheet.create({
   searchCont: {
-    position: 'absolute',
-    zIndex: 11,
-    top: 90,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 5,
     width: '100%',
-    paddingHorizontal: 30,
+    paddingHorizontal: 3,
     marginTop: 20,
   },
   searchText: {
-    width: '100%',
-    position: 'relative',
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 20,
+    borderColor: '#DDD',
+    backgroundColor: '#FFF',
+    paddingHorizontal: 10,
   },
   searchBar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    flex: 1,
     padding: 10,
-    borderRadius: 4,
-    color: '#fff',
+    color: '#000',
   },
   searchBtn: {
-    position: 'absolute',
-    right: 0,
     padding: 6,
-  },
-  cameraBtn: {
-    padding: 6,
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 
