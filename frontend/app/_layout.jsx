@@ -5,6 +5,7 @@ import PostWithComments from './utils/PostWithComments'; // Adjust the path if n
 import Login from './auth/Login'; // Adjust the path if necessary
 import Details from './startup/Details';
 import Setup from './startup/Setup';
+import OrgValidation from './startup/OrgValidation';
 import SearchItem from './utils/SearchItem'; // Adjust the path if necessary
 import ImagePickerComponent from './utils/ImagePickerComponent'; // Adjust the path if necessary
 
@@ -33,10 +34,17 @@ const MainLayout = () => {
         name="startup/Setup"
         component={Setup}
         options={{ headerShown: false,
-          title: 'Setup', 
-          gestureEnabled: false
+          title: 'Setup'
          }}
       />
+      <Stack.Screen
+        name="startup/OrgValidation"
+        component={OrgValidation}
+        options={{ headerShown: false,
+          title: 'Organisation Validation'
+         }}
+      />
+
       <Stack.Screen
         name="tabs"
         component={Tabs}
