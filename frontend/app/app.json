@@ -1,0 +1,24 @@
+{
+    "expo": {
+      "name": "MyApp",
+      "slug": "my-app",
+      "version": "1.0.0",
+      "scheme": "cultivate",   
+      "platforms": [
+        "ios",
+        "android",
+        "web"
+      ],
+      "ios": {
+        "bundleIdentifier": "com.cultivate.example",
+        "supportsTablet": true
+      },
+      "android": {
+        "package": "com.cultivate.example"
+      },
+      "web": {
+        "favicon": "./assets/favicon.png"
+     }
+    }
+  }
+  

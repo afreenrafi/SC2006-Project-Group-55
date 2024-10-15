@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 
-const SingpassBtn = ({ size = 20, alignment = "center", onPress }) => {
+const RoundBtn = ({ alignment = "center", onPress }) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
@@ -16,24 +18,27 @@ const SingpassBtn = ({ size = 20, alignment = "center", onPress }) => {
   }
 
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.container, styles.iosShadow, styles.androidShadow]}>
-      <Text style={[styles.text, { fontSize: size, textAlign: alignment }]}>
-        Login with
+    <TouchableOpacity onPress={onPress} style={[styles.container, styles.iosShadow, styles.androidShadow, {justifyContent: alignment}]}>
+      <FontAwesome5 name="arrow-circle-right" size={24} color="#ffffff"/>
+      <Text style={[styles.text]}>
+        Next
       </Text>
-      <Image style={styles.logo} source={require('../assets/logo/singpass_logo.png')} />
+      {/* <Image style={styles.logo} source={require('../assets/logo/singpass_logo.png')} /> */}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 70,
+    // marginTop: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#CA3550',
     borderRadius: 50,
     paddingHorizontal: 30,
+    height: 50,
+    width: "100%",
+    gap: 10
   },
   iosShadow: {
     shadowColor: '#000000',
@@ -47,14 +52,11 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'MontserratBold', // Ensure the correct font is applied
+    color: "#ffffff",
+    fontSize: 24,
+    textAlign: "center"
   },
-  logo: {
-    height: 50,
-    width: '35%',
-    marginLeft: 10,
-    marginTop: 5,
-    resizeMode: 'contain',
-  },
+  
 });
 
-export default SingpassBtn;
+export default RoundBtn;
