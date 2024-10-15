@@ -1,37 +1,41 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, FlatList, Alert, TouchableOpacity, Text, Pressable, ScrollView} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import SearchBar from '../../components/SearchBar'; 
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
-
-// Temporary mock data for events
-const mockUpcomingEvents = [
-  { id: '1', name: 'Hello Future: Building a Wonderland', type: 'Exhibition', date: '01 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/helloFuture.jpg') },
-  { id: '2', name: 'Sea Chanty Project', type: 'Exhibition', date: '05 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/seaChantyProject.jpg') },
-];
-
-const mockPopularEvents = [
-  { id: '1', name: 'Singapore Night Festival', type: 'Festival', date: '10 Dec 2024', location: 'Singapore Night Festival', image: require('../../assets/events/SNF.png') },
-  { id: '2', name: 'Hello Future: Building a Wonderland', type: 'Exhibition', date: '12 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/helloFuture.jpg') },
-];
-
-const mockNearbyEvents = [
-  { id: '1', name: 'Singapore Night Festival', type: 'Festival', date: '10 Dec 2024', location: 'Singapore Night Festival', image: require('../../assets/events/SNF.png') },
-  { id: '2', name: 'Hello Future: Building a Wonderland', type: 'Exhibition', date: '01 Dec 2024', location: 'Singapore Arts Museum', image: require('../../assets/events/helloFuture.jpg') },
-];
+import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
 const Homepage = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
+  const [savedEvents, setSavedEvents] = useState(mockSavedEvents); // Bookmark to Save Events
+  const [filteredEvents, setFilteredEvents] = useState([]); // For search results
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.type === selectedFilter);
   const filteredNearbyEvents = selectedFilter === 'All' ? mockNearbyEvents : mockNearbyEvents.filter(event => event.type === selectedFilter);
 
+  const allEvents = [
+    ...mockUpcomingEvents,
+    ...mockPopularEvents,
+    ...mockNearbyEvents,
+    ...mockSavedEvents,
+  ];
+
+  const toggleBookmark = (event) => {
+    setSavedEvents((prevSavedEvents) => {
+      if (prevSavedEvents.some((e) => e.id === event.id)) {
+        return prevSavedEvents.filter((e) => e.id !== event.id); // Remove if already saved
+      } else {
+        return [...prevSavedEvents, event]; // Add new event
+      }
+    });
+  };
+
   const renderEventCard = ({ item }) => {
+    const isBookmarked = savedEvents.some((e) => e.id === item.id);
     return (
       <View style={styles.eventCard}>
         <Image source={item.image} style={styles.eventImage} />
@@ -44,8 +48,15 @@ const Homepage = ({ navigation }) => {
           </View>
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
-        <TouchableOpacity style={styles.bookmarkButton}>
-          <FontAwesome name="bookmark-o" size={20} color="#888" />
+        <TouchableOpacity
+          style={styles.bookmarkButton}
+          onPress={() => toggleBookmark(item)}
+        >          
+        <FontAwesome 
+          name={isBookmarked ? "bookmark" : "bookmark-o"} 
+          size={20} 
+          color={isBookmarked ? "#EE1C43" : "#FFF"} 
+        />
         </TouchableOpacity>
       </View>
     );
@@ -60,46 +71,51 @@ const Homepage = ({ navigation }) => {
           <Image source={event.image} style={styles.eventImage} />
           <Text style={styles.upcomingEventTitle}>{event.name}</Text>
           <Text style={styles.upcomingEventLocation}>{event.location}</Text>
-        </View>
-  
-        {/* Date and Action Buttons in One Row */}
-        <View style={styles.eventRow}>
           {/* Date Toggle Buttons */}
           <View style={styles.dateToggleContainer}>
-            {mockUpcomingEvents.map((upEvent, index) => (
-              <TouchableOpacity
-                key={upEvent.id}
-                onPress={() => setCurrentUpcomingEventIndex(index)}
-                style={[
-                  styles.dateButton,
-                  currentUpcomingEventIndex === index && styles.activeDateButton,
-                ]}
-              >
-                <Text style={styles.dateButtonText}>{upEvent.date}</Text>
-              </TouchableOpacity>
-            ))}
+            {mockUpcomingEvents.map((upEvent, index) => {
+              const formattedDate = upEvent.date.split(' ').slice(0, 2).join(' '); // Extract day and month only
+              return (
+                <TouchableOpacity
+                  key={upEvent.id}
+                  onPress={() => setCurrentUpcomingEventIndex(index)}
+                  style={[
+                    styles.dateButton,
+                    currentUpcomingEventIndex === index && styles.activeDateButton,
+                  ]}
+                >
+                  <Text style={styles.dateButtonText}>{formattedDate}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
+      </View>
   
           {/* Share and Details Buttons */}
           <View style={styles.eventActionsContainer}>
             <TouchableOpacity style={styles.shareButton}>
-              <Text style={styles.shareButtonText}>Share</Text>
+              <FontAwesome name="share" size={12} color="#EE1C43" />
+              <Text style={styles.shareButtonText}> Share</Text> 
             </TouchableOpacity>
             <TouchableOpacity style={styles.detailsButton}>
-              <Text style={styles.detailsButtonText}>Details</Text>
+              <FontAwesome name="info" size={12} color="#FFF" />
+              <Text style={styles.detailsButtonText}> Details</Text> 
             </TouchableOpacity>
           </View>
         </View>
-      </View>
     );
   };
   
   const handleSearchPress = (searchQuery) => {
-    if (searchQuery.trim()) {
-      navigation.navigate('utils/SearchItem', { inputItem: searchQuery });
-    } else {
-      Alert.alert('Please enter a search query');
-    }
+    const lowerQuery = searchQuery.toLowerCase();
+    const results = allEvents.filter(
+      (event) =>
+        event.name.toLowerCase().includes(lowerQuery) ||
+        event.type.toLowerCase().includes(lowerQuery) ||
+        event.location.toLowerCase().includes(lowerQuery)
+    );
+    const uniqueResults = [...new Map(results.map(event => [event.id, event])).values()]; // Ensuring unique results by ID
+    setFilteredEvents(uniqueResults);
   };
 
   return (
@@ -115,17 +131,33 @@ const Homepage = ({ navigation }) => {
         </Pressable>
       </View>
 
-      {/* Filter Buttons */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContainer}>
-        {filters.map(filter => (
-          <TouchableOpacity key={filter} onPress={() => setSelectedFilter(filter)}>
-            <Text style={[styles.filterButton, selectedFilter === filter && styles.activeFilterButton]}>
-              {filter}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {/* Title */}
+      <View style={styles.mainHeader}>
+        <Text style={styles.mainTitle}>Community Connection</Text>
+        <Text style={styles.mainSubtitle}>Enjoy Arts & Culture.</Text>
+      </View>
 
+      {/* Filter Buttons */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.filterContainer}
+      >
+      {filters.map((filter) => (
+        <TouchableOpacity
+          key={filter}
+          onPress={() => setSelectedFilter(filter)}
+          style={[
+            styles.filterButton, 
+            selectedFilter === filter && styles.activeFilterButton,
+          ]}
+        >
+          <Text style={selectedFilter === filter ? styles.activeFilterText : styles.inactiveFilterText}>
+            {filter}
+          </Text>
+        </TouchableOpacity>
+      ))}
+</ScrollView>
 
       {/* Search Bar */}
       <View style={styles.searchBarContainer}>
@@ -138,34 +170,53 @@ const Homepage = ({ navigation }) => {
         {renderUpcomingEvent()}
       </View>
 
-      {/* Popular Events Section */}
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Most Popular</Text>
-          </View>
+      {/* Display Search Results */}
+      {filteredEvents.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Search Results</Text>
           <FlatList 
             horizontal
-            data={filteredPopularEvents}
+            data={filteredEvents}
             renderItem={renderEventCard}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.flatListContainer}
           />
         </View>
+      )}
 
-      {/* Nearby Events Section */}
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nearby</Text>
+      {/* Hide Popular and Nearby if search results exist */}
+      {filteredEvents.length === 0 && (
+        <>
+          {/* Popular Events Section */}
+          <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Most Popular</Text>
+              </View>
+              <FlatList 
+                horizontal
+                data={filteredPopularEvents}
+                renderItem={renderEventCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.flatListContainer}
+              />
           </View>
-          <FlatList 
-            horizontal
-            data={filteredNearbyEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
-        </View>
-      </ScrollView>
+
+          {/* Nearby Events Section */}
+          <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Nearby</Text>
+              </View>
+              <FlatList 
+                horizontal
+                data={filteredNearbyEvents}
+                renderItem={renderEventCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.flatListContainer}
+              />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
 };
 
@@ -178,38 +229,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: '5%',
+    paddingHorizontal: '6%',
     paddingBottom: '5%',
-    paddingTop: '15%',
+    paddingTop: '17%',
     backgroundColor: '#FBF3F1',
   },
   location: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#5D7971',
+    color: '#000',
+  },
+  mainHeader: {
+    paddingHorizontal: '5%',
+    paddingBottom: 3,
+  },
+  mainTitle:{
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  mainSubtitle:{
+    fontSize: 14,
+    color: '#666',
   },
   filterContainer: {
     paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  filterButtons: {
+    paddingTop: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '90%',
+    marginHorizontal: 5,
   },
   filterButton: {
     paddingHorizontal: 15,
     paddingVertical: 5,
+    marginRight: 5,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#FF93B3',
-    color: '#EE1C43',
-    fontWeight: '500',
-    backgroundColor: 'transparent',
   },
   activeFilterButton: {
-    backgroundColor: '#EE1C43',
+    backgroundColor: '#EE1C43', 
+    borderColor: '#EE1C43',
+  },
+  activeFilterText: {
     color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  inactiveFilterText: {
+    color: '#EE1C43', 
+    fontWeight: '500',
   },
   searchBarContainer: {
     paddingHorizontal: 20,
@@ -217,7 +283,7 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 20,
-    marginVertical: 10,
+    marginVertical: 5,
   },
   sectionTitle: {
     fontSize: 18,
@@ -260,16 +326,17 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   eventName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
+    paddingBottom: 5,
   },
   eventDateLocation: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   eventLocation: {
-    marginLeft: 5,
-    fontSize: 12,
+    marginLeft: 3,
+    fontSize: 11,
     color: '#888',
   },
   eventDate: {
@@ -279,19 +346,28 @@ const styles = StyleSheet.create({
   },
   bookmarkButton: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 100,
     right: 10,
+    backgroundColor: '#CCC',
+    padding: 5,
+    borderRadius: 5,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   upcomingEventCard: {
     width: '100%',
     height: 175,
     backgroundColor: '#fff',
-    marginBottom: 10,
-    borderRadius: 10,
+    marginBottom: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 10,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 3,
+    marginBottom: 10,
   },
   upcomingEventImage: {
     width: '100%',
@@ -309,56 +385,82 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#AAA',
     paddingLeft: 10,
+    paddingBottom: 5,
   },
   eventRow: {
     flexDirection: 'row',
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    paddingHorizontal: 10, 
+    backgroundColor: '#FFFFFF',
+    marginTop: -10,
   },
   dateToggleContainer: {
     flexDirection: 'row', 
+    justifyContent: 'flex-start',
+    left: -1,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   dateButton: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#DDD',
     paddingVertical: 5,
     paddingHorizontal: 10,
-    marginRight: 5,
-    borderRadius: 5,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    marginTop:3,
+    marginRight: 3,
+    borderWidth: 1,
+    borderColor: '#EEE', // Similar color to blend
+    borderTopWidth: 0, // Removing top border to "merge"
   },
   activeDateButton: {
-    backgroundColor: '#FF93B3',
+    backgroundColor: '#FFFFFF',
   },
   dateButtonText: {
-    color: '#FFF',
+    color: '#000',
     fontWeight: '600',
     fontSize: 10,
   },
   eventActionsContainer: {
     flexDirection: 'row',
+    justifyContent: 'flex-end', 
+    alignItems: 'center',
+    marginTop: 10, 
+    paddingHorizontal: 10, // Ensure proper alignment with the card width
   },
   shareButton: {
-    backgroundColor: '#FF93B3',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#FFF',
+    borderColor: '#FF93B3',
+    borderWidth: 1,
+    paddingVertical: 5,
+    paddingHorizontal: 12, // Padding to adjust button size
+    borderRadius: 20,
+    marginRight: 10,
+  },  
   shareButtonText: {
-    color: '#FFF',
+    color: '#EE1C43',
     fontWeight: '600',
     fontSize: 12,
+    marginLeft: 3,
   },
   detailsButton: {
+    flexDirection: 'row', 
+    alignItems: 'center',
     backgroundColor: '#EE1C43',
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
+    paddingVertical: 5,
+    paddingHorizontal: 12, // Padding to adjust button size
+    borderRadius: 20,
+  },  
   detailsButtonText: {
     color: '#FFF',
     fontWeight: '600',
     fontSize: 12,
-
+    marginLeft: 3,
   },
 });
 

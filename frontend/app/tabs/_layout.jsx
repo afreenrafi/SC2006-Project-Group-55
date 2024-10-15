@@ -2,11 +2,10 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import DirectMessage from './directMessage';
 import Homepage from './homepage';
 import Profile from './profile';
-import SharingPlace from './sharingPlace';
-import CreatePost from './CreatePost';
+import Ticket from './ticket';
+import SavedEventsPage from './savedEvents'
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 
 const navTheme = {
@@ -29,26 +28,23 @@ const Tabs = () => {
 
             if (route.name === 'Homepage') {
               iconName = focused ? 'home-outline' : 'home';
-            } else if (route.name === 'SharingPlace') {
-              iconName = focused ? 'storefront-outline' : 'storefront';
-            } else if (route.name === 'DirectMessage') {
-              iconName = focused ? 'chatbox-outline' : 'chatbox';
+            } else if (route.name === 'Ticket') {
+              iconName = focused ? 'ticket-outline' : 'ticket';
+            } else if (route.name === 'SavedEventsPage') {
+              iconName = focused ? 'bookmark-outline' : 'bookmark';
             } else if (route.name === 'Profile') {
               iconName = focused ? 'person-outline' : 'person';
-            } else if (route.name === 'CreatePost') {
-              iconName = focused ? 'add-circle-outline' : 'add-circle';
             }
-
             return (
               <View style={[styles.iconContainer, focused && styles.focusedIconContainer]}>
                 <Ionicons name={iconName} size={size} color={color} />
               </View>
             );
           },
-          tabBarActiveTintColor: 'white',
-          tabBarInactiveTintColor: 'white',
+          tabBarActiveTintColor: '#FFF',
+          tabBarInactiveTintColor: '#000',
           tabBarStyle: {
-            backgroundColor: '#5D7971',
+            backgroundColor: '#FFF',
           },
           // tabBarActiveBackgroundColor: 'rgba(255, 255, 255, 0.3)',
           tabBarItemStyle: {
@@ -58,9 +54,8 @@ const Tabs = () => {
         })}
       >
         <Tab.Screen options={{ headerShown: false }} name="Homepage" component={Homepage} />
-        <Tab.Screen options={{ headerShown: false }} name="SharingPlace" component={SharingPlace} />
-        <Tab.Screen options={{ headerShown: false }} name="CreatePost" component={CreatePost} />
-        <Tab.Screen options={{ headerShown: false }} name="DirectMessage" component={DirectMessage} />
+        <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} />
+        <Tab.Screen options={{ headerShown: false }} name="SavedEventsPage" component={SavedEventsPage} />
         <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} />
       </Tab.Navigator>
   );
@@ -76,7 +71,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent', // default background color
   },
   focusedIconContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)', // background color when focused
+    backgroundColor: '#EE1C43', // background color when focused
   },
 });
 
