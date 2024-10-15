@@ -13,7 +13,6 @@ function App() {
   return (
     <div className="App">
       {/* Start of Codes */}
-      <div></div>
 
       <div>
         <BrowserRouter>
