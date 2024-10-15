@@ -106,7 +106,7 @@ const Setup = ({ route }) => {
         }
         else{
           //to home page
-          // navigation.navigate('Home page', { email: result.email, role: result.role });
+          navigation.navigate('events/EventsPage', { email: result.email, role: result.role });
         }
         
       }
