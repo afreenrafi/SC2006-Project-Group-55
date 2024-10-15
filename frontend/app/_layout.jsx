@@ -3,9 +3,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Tabs from './tabs/_layout'; // Adjust the path if necessary
 import PostWithComments from './utils/PostWithComments'; // Adjust the path if necessary
 import Login from './auth/Login'; // Adjust the path if necessary
+//startup pages
 import Details from './startup/Details';
 import Setup from './startup/Setup';
 import OrgValidation from './startup/OrgValidation';
+//event pages
+import EventsPage from './events/EventsPage';
+
 import SearchItem from './utils/SearchItem'; // Adjust the path if necessary
 import ImagePickerComponent from './utils/ImagePickerComponent'; // Adjust the path if necessary
 
@@ -42,6 +46,13 @@ const MainLayout = () => {
         component={OrgValidation}
         options={{ headerShown: false,
           title: 'Organisation Validation'
+         }}
+      />
+      <Stack.Screen
+        name="events/EventsPage"
+        component={EventsPage}
+        options={{ headerShown: false,
+          title: 'Event Page'
          }}
       />
 
