@@ -18,6 +18,7 @@ import userRoutes from "./routes/userRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config(); // Load environment variables
+console.log("MongoDB URI:", process.env.MONGO_URL);
 
 const app = express();
 
@@ -37,7 +38,7 @@ app.use("/api/userRoutes", userRoutes); // Handle user routes (update, delete)
 const PORT = process.env.PORT || 5000; // Default port
 
 mongoose
-	.connect(process.env.MONGO_URL)
+	.connect(process.env.MONGO_URI)
 	.then(() => {
 		app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
 	})
