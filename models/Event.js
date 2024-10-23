@@ -96,14 +96,6 @@ const EventSchema = new mongoose.Schema({
       },
     },
   },
-  eventLocation: { 
-    type: String, 
-    required: true 
-  },
-  eventType: { 
-    type: String, 
-    required: true 
-  }, 
   eventStartDate: {
     type: Date,
     required: true,
@@ -154,6 +146,39 @@ const EventSchema = new mongoose.Schema({
         return errors.join("\n");
       },
     },
+  },
+  eventTicketQuantity: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  name: { 
+    type: String, 
+    required: true 
+  }, // Adding fields from the second schema
+  date: { 
+    type: Date, 
+    required: true 
+  },
+  time: { 
+    type: String, 
+    required: true 
+  },
+  location: { 
+    type: String, 
+    required: true 
+  },
+  type: { 
+    type: String, 
+    required: true 
+  }, // Ensure this is included if filtering by type
+  latitude: { 
+    type: Number, 
+    required: true 
+  },
+  longitude: { 
+    type: Number, 
+    required: true 
   },
   availableTickets: { 
     type: Number, 

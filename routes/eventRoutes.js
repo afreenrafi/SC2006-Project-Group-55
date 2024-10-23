@@ -1,3 +1,4 @@
+//routes/eventRoutes.js
 import express from 'express';
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
@@ -46,18 +47,12 @@ router.post('/', createEvent); // Create a new event
 router.get('/events', async (req, res) => {
   try {
     const filters = {};
-    const { eventType, eventLocation, eventStartDate, availableTickets } = req.query;
+    const { type, location, date, availableTickets } = req.query; 
 
     // Apply filters if they exist
-    if (eventType) filters.eventType = eventType;
-    if (eventLocation) filters.eventLocation = eventLocation;
-    if (eventStartDate) filters.eventStartDate = eventStartDate;
-    if (date) {
-      const startDate = new Date(eventStartDate);
-      const endDate = new Date(eventEndDate);
-      endDate.setDate(endDate.getDate() + 1);
-      filters.eventStartDate = { $gte: startDate, $lt: endDate };
-    }
+    if (type) filters.type = type;
+    if (location) filters.location = location;
+    if (date) filters.date = date;
 
     // Optional filter for events with available tickets
     if (availableTickets) filters.availableTickets = { $gt: 0 };
@@ -75,10 +70,6 @@ router.get('/events', async (req, res) => {
 router.get('/events/:id', async (req, res) => {
   console.log(`Fetching event with ID: ${req.params.id}`);
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid event ID format' });
-    }
-
     const event = await Event.findById(req.params.id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
@@ -153,6 +144,9 @@ router.post('/book', async (req, res) => {
   }
 });
 
+
+
+
 // Chargeable Event Booking Route
 router.post('/book/chargeable', async (req, res) => {
   const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -220,7 +214,7 @@ router.post('/book/chargeable', async (req, res) => {
     }
 
     // Send confirmation email for chargeable event booking
-    await sendConfirmationEmail(userEmail, userName, event.eventName, quantity); // Use the email service
+    await sendConfirmationEmail(userEmail, userName, event.name, quantity); // Use the email service
     res.json({ message: 'Booking confirmed and email sent', booking });
   } catch (error) {
     console.error('Error booking event:', error);
