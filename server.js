@@ -38,18 +38,27 @@ app.use('/api/authRoutes', authRoutes); // Authentication routes
 app.use('/api/userRoutes', userRoutes); // User management routes
 app.use('/api/events', eventRoutes); // Event management routes from the second code
 
-// API route to fetch all events (this is optional if handled in eventRoutes)
+// GET route to fetch events with multiple filters and sort by price in ascending order
 app.get('/api/events', async (req, res) => {
-  const type = req.query.type; // Get the event type from query parameters
+  const { eventType, eventLocation, eventStartDate, availableTickets } = req.query;
+
+  // Construct query object based on provided filters
+  const query = {};
+  if (eventType && eventType !== 'All') query.eventType = eventType;
+  if (eventLocation) query.eventLocation = eventLocation;
+  if (eventStartDate) query.eventStartDate = { $gte: new Date(eventStartDate) };
+  if (availableTickets) query.availableTickets = { $gte: parseInt(availableTickets) };
+
   try {
-    const query = type && type !== 'All' ? { type } : {};
-    const events = await Event.find(query);
+    // Execute the query with filters and sort by price in ascending order
+    const events = await Event.find(query).sort({ price: 1 });
     res.json(events);
   } catch (error) {
     console.error('Error retrieving events:', error);
     res.status(500).json({ message: 'Error retrieving events' });
   }
 });
+
 
 // POST route to create a new event (this is optional if handled in eventRoutes)
 app.post('/api/events', async (req, res) => {

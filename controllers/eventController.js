@@ -1,10 +1,11 @@
 // controllers/eventController.js
 import Event from '../models/Event.js';
+import axios from 'axios';
 
-// Get all events or filter by type
+// Get all events or filter by event type
 export const getAllEvents = async (req, res) => {
   try {
-    const filter = req.query.type ? { type: req.query.type } : {};
+    const filter = req.query.eventType ? { eventType: req.query.eventType } : {};
     const events = await Event.find(filter);
     if (events.length === 0) {
       return res.status(404).json({ message: "No Events Found" });
@@ -19,7 +20,7 @@ export const getAllEvents = async (req, res) => {
 export const searchEvents = async (req, res) => {
   try {
     const searchQuery = req.query.q || '';
-    const events = await Event.find({ name: new RegExp(searchQuery, 'i') });
+    const events = await Event.find({ eventName: new RegExp(searchQuery, 'i') });
     if (events.length === 0) {
       return res.status(404).json({ message: "No Events Found" });
     }
@@ -29,7 +30,7 @@ export const searchEvents = async (req, res) => {
   }
 };
 
-// Get event details
+// Get event details by ID
 export const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -41,10 +42,6 @@ export const getEventById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
-import axios from 'axios';
 
 // Geocode event location using MapBox API
 const geocodeLocation = async (location) => {
@@ -72,18 +69,22 @@ const geocodeLocation = async (location) => {
 
 // Create a new event with geocoded location
 export const createEvent = async (req, res) => {
-  const { name, date, time, location, price, type } = req.body;
+  const { eventName, eventDescription, eventLocation, eventType, eventStartDate, eventEndDate, eventOpen, eventClose, price, availableTickets } = req.body;
 
   try {
-    const coordinates = await geocodeLocation(location);
+    const coordinates = await geocodeLocation(eventLocation);
     
     const newEvent = new Event({
-      name,
-      date,
-      time,
-      location,
+      eventName,
+      eventDescription,
+      eventLocation,
+      eventType,
+      eventStartDate,
+      eventEndDate,
+      eventOpen,
+      eventClose,
       price,
-      type,
+      availableTickets,
       longitude: coordinates.longitude,
       latitude: coordinates.latitude
     });
