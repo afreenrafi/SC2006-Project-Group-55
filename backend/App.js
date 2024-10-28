@@ -10,7 +10,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // IMPORT NECESSARY ROUTES
+import authRoutes from "./routes/authRoute.js";
+import userRoutes from "./routes/userRoute.js";
 import eventRoute from "./routes/eventRoute.js";
+import faqRoute from "./routes/faqRoute.js";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -33,20 +36,26 @@ app.use(helmet());
 app.use(morgan("common"));
 
 // HANDLE INCOMING JSON REQUESTS WITH SIZE LIMIT OF 10MB
-app.use(bodyParser.json({ limit: "10mb", extended: true })); 
+app.use(bodyParser.json({ limit: "10mb", extended: true }));
 
 // HANDLE INCOMING URL-ENCODED REQUESTS
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: true })); 
-
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 
 // ALLOW CROSS-ORIGIN REQUESTS
 // ESSENTIAL FOR APIS ACCESSED BY FRONTENDS HOSTED ON DIFFERENT DOMAINS
 app.use(cors());
 
-// API ROUTES FOR USER MANAGEMENT AND AUTHENTICATION 
+// API ROUTES FOR USER MANAGEMENT AND AUTHENTICATION
+
+// HANDLE USER ROUTES (CRUD)
+app.use("/api/authRoutes", authRoutes);
+app.use("/api/userRoutes", userRoutes);
 
 // HANDLE EVENT ROUTES (CRUD)
-app.use("/api/eventRoute", eventRoute); 
+app.use("/api/eventRoute", eventRoute);
+
+// HANDLE EVENT ROUTES (CRUD)
+app.use("/api/faqRoute", faqRoute);
 
 // MONGOOSE SETUP
 

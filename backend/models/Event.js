@@ -35,9 +35,6 @@ function validateEventEndDate(eventEndDate, eventStartDate) {
     errors.push("End Date must be greater than or equal to the Start Date!");
   }
 
-  if (eventEndDate < todayDate) {
-    errors.push("End Date cannot be in the past!");
-  }
   return errors;
 }
 
@@ -45,10 +42,22 @@ function validateEventEndDate(eventEndDate, eventStartDate) {
 function validateEventPrice(value) {
   const errors = [];
   if (value < 0) {
-    errors.push("Event Price must be greater than or equal to 0.");
+    errors.push("Event Price must be greater than or equal to 0!");
   }
   if (!/^\d+(\.\d{1,2})?$/.test(value)) {
-    errors.push(" Event Price must be rounded to 2 decimal places.");
+    errors.push(" Event Price must be rounded to 2 decimal places!");
+  }
+  return errors;
+}
+
+// EVENTTICKETQUANTITY
+function validateEventTicketQuantity(value) {
+  const errors = [];
+  if (value < 1) {
+    errors.push("Event Ticket Quantity must be greater than or equal to 1!");
+  }
+  if (!Number.isInteger(value)) {
+    errors.push(" Event Ticket Quantity must be an integer!");
   }
   return errors;
 }
@@ -139,6 +148,21 @@ const EventSchema = new mongoose.Schema({
       },
       message: function (props) {
         const errors = validateEventPrice(props.value);
+        return errors.join("\n");
+      },
+    },
+  },
+  eventTicketQuantity: {
+    type: Number,
+    required: true,
+    min: 1,
+    validate: {
+      validator: function (value) {
+        const errors = validateEventTicketQuantity(value);
+        return errors.length === 0;
+      },
+      message: function (props) {
+        const errors = validateEventTicketQuantity(props.value);
         return errors.join("\n");
       },
     },
