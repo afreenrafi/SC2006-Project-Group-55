@@ -2,56 +2,119 @@
 import express from "express";
 import multer from "multer";
 import {
-  registerUser,
-  loginUser,
-  updateUserProfile,
-  deleteUserAccount,
+  createUser,
+  userLogin,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
 } from "../controllers/userController.js";
-import isAuth from "../middleware/auth.js";
-import User from "../models/User.js";
+import isAuth from "../middleware/authMiddleware.js";
 
 // INSTANTIATE ROUTER
 const router = express.Router();
 
-// Configure multer for file uploads
+// CONFIGURE MULTER FOR FILE UPLOADS
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Folder where files will be saved
+    cb(null, "uploads/"); // FOLDER WHERE FILES WILL BE SAVED
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // Unique filename
+    cb(null, Date.now() + "-" + file.originalname); // UNIQUE FILENAME
   },
 });
 
-// Create the upload instance
 const upload = multer({ storage: storage });
 
+
+// DEFINE ROUTES FOR USER ENTITY
+
+// CREATE
+// router.post("/register", upload.single("eventPermitId"), createUser);
 // Use the upload middleware in the registration route
 router.post("/register", upload.single("eventPermitId"), async (req, res) => {
-  const { username, password, role } = req.body;
+  const { userId, userName, userPassword, userEmail, userDob, userRole, organiserEventPermitId, artistVerified } = req.body;
   try {
-    // Create a new user
-    const newUser = new User({
-      username,
-      password,
-      role,
-      eventPermitId: req.file ? req.file.path : null, // Store the file path if uploaded
-    });
+    switch (userRole) {
+      case "Public":
+        createdUser = new User({
+          userId: userId,
+          userName: userName,
+          userPassword: userPassword,
+          userEmail: userEmail,
+          userDob: userDob,
+          userRole: userRole,
+        });
+        break;
 
-    await newUser.save();
+      case "Organiser":
+        createdUser = new Organiser({
+          userId: userId,
+          userName: userName,
+          userPassword: userPassword,
+          userEmail: userEmail,
+          userDob: userDob,
+          userRole: userRole,
+          organiserEventPermitId: req.file ? req.file.path : null,
+        });
+        break;
+
+      case "Artist":
+        createdUser = new Artist({
+          userId: userId,
+          userName: userName,
+          userPassword: userPassword,
+          userEmail: userEmail,
+          userDob: userDob,
+          userRole: userRole,
+          artistVerified: artistVerified,
+        });
+        break;
+    }
+
+    await createdUser.save();
     res.status(201).send("User registered successfully");
   } catch (error) {
     res.status(400).send(error.message);
   }
 });
 
-// Define other routes
-router.post("/login", loginUser);
-router.put("/update/:username", isAuth, updateUserProfile);
-router.delete("/delete/:username", isAuth, deleteUserAccount);
+// READ
+// ENABLE THIS ONCE ISAUTH FROM AUTHMIDDLEWARE.JS IS WORKING FINE
+// router.get("/all", isAuth, getAllUsers);
+// router.get("/:userId", isAuth, getUserById);
 
-// Export the router
+router.get("/all", getAllUsers);
+router.get("/:userId", getUserById);
+
+// UPDATE
+// ENABLE THIS ONCE ISAUTH FROM AUTHMIDDLEWARE.JS IS WORKING FINE
+// router.put("/update/:userId", isAuth, updateUser);
+
+router.put("/update/:userId", updateUser);
+
+// DELETE
+// ENABLE THIS ONCE ISAUTH FROM AUTHMIDDLEWARE.JS IS WORKING FINE
+// router.delete("/delete/:userId", isAuth, deleteUser);
+
+router.delete("/delete/:userId", deleteUser);
+
+// LOGIN
+router.post("/login", userLogin);
+
+
 export default router;
+
+
+
+
+
+
+// // Define other routes
+// router.post("/login", loginUser);
+// router.put("/update/:username", isAuth, updateUserProfile);
+// router.delete("/delete/:username", isAuth, deleteUserAccount);
+
 
 // router.post('/verify-artist', isAuth, async (req, res) => {
 //     const { artistUsername } = req.body;
