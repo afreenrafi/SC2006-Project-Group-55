@@ -14,6 +14,7 @@ import authRoutes from "./routes/authRoute.js";
 import userRoutes from "./routes/userRoute.js";
 import eventRoute from "./routes/eventRoute.js";
 import faqRoute from "./routes/faqRoute.js";
+import bookingRoute from "./routes/bookingRoute.js";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -48,14 +49,17 @@ app.use(cors());
 // API ROUTES FOR USER MANAGEMENT AND AUTHENTICATION
 
 // HANDLE USER ROUTES (CRUD)
-app.use("/api/authRoutes", authRoutes);
-app.use("/api/userRoutes", userRoutes);
+app.use("/api/authRoute", authRoutes);
+app.use("/api/userRoute", userRoutes);
 
 // HANDLE EVENT ROUTES (CRUD)
 app.use("/api/eventRoute", eventRoute);
 
 // HANDLE EVENT ROUTES (CRUD)
 app.use("/api/faqRoute", faqRoute);
+
+// HANDLE BOOKING ROUTES (C)
+app.use("/api/bookingRoute", bookingRoute);
 
 // MONGOOSE SETUP
 

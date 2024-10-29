@@ -1,115 +1,195 @@
+// BUSINESS LOGIC FOR USER ENTITY (CRUD)
 // IMPORT NECESSARY LIBRARIES
-import User from "../models/User.js";
+import { User, Organiser, Artist } from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-// READING ALL INSTANCES OF USER ENTITY
-export const getAllEvents = async (req, res) => {
+// CREATING NEW INSTANCE OF USER ENTITY
+export const createUser = async (req, res) => {
   try {
-    const events = await User.find(); // Fetch all events from the database
-    res.status(200).json(events); // Send back the events in the response
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEUSER
+    const {
+      userId,
+      userName,
+      userPassword,
+      userEmail,
+      userDob,
+      userRole,
+      organiserEventPermitId,
+      artistVerified,
+    } = req.body;
+
+    // CHECKS IF EXISTING USERS IN DATABASE HAVE THE SAME USERID AS NEW USER
+    const existingUser = await User.findOne({ userId: userId });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "User Id has already been taken!" });
+    }
+
+    // HASH USERPASSWORD FOR ADDITIONAL SECURITY
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(userPassword, salt);
+
+    // INSTANTIATING NEW USER OBJECT
+    let createdUser = null;
+
+    switch (userRole) {
+      case "Public":
+        createdUser = new User({
+          userId: userId,
+          userName: userName,
+          userPassword: hashedPassword,
+          userEmail: userEmail,
+          userDob: userDob,
+          userRole: userRole,
+        });
+        break;
+
+      case "Organiser":
+        createdUser = new Organiser({
+          userId: userId,
+          userName: userName,
+          userPassword: hashedPassword,
+          userEmail: userEmail,
+          userDob: userDob,
+          userRole: userRole,
+          organiserEventPermitId: organiserEventPermitId,
+        });
+        break;
+
+      case "Artist":
+        createdUser = new Artist({
+          userId: userId,
+          userName: userName,
+          userPassword: hashedPassword,
+          userEmail: userEmail,
+          userDob: userDob,
+          userRole: userRole,
+          artistVerified: artistVerified,
+        });
+        break;
+    }
+
+    // SAVES NEW USER OBJECT TO DATABASE
+    await createdUser.save();
+
+    res.status(201).json({ message: "Successfully created new User!" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// READING SPECIFIC INSTANCE OF USER ENTITY
-export const loginUser = async (req, res) => {
+// RETRIEVING ALL USER OBJECTS FROM DATABASE
+export const getAllUsers = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
 
-    const user = await User.findOne({ username });
+// RETRIEVING SPECIFIC USER OBJECT FROM DATABASE USING USERID
+export const getUserById = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETUSER
+    const { userId } = req.params;
+
+    // CHECKS IF EXISTING USERS IN DATABASE HAVE THE SAME USERID AS USER LOGGING IN
+    const user = await User.findOne({ userId: userId });
     if (!user) {
-      return res.status(400).json({ message: "User not found." });
+      return res.status(404).json({ message: "User not found!" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
+// UPDATING USER OBJECT FROM DATABASE
+export const updateUser = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION UPDATEUSER
+    const { userId } = req.params;
+    const { userName, userPassword, userEmail } = req.body;
+
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    const user = await User.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // UPDATES EACH USER OBJECT ATTRIBUTE RESPECTIVELY, IF PROVIDED
+    if (userName) user.userName = userName;
+    if (userEmail) user.userEmail = userEmail;
+    if (userPassword) {
+      user.userPassword = await bcrypt.hash(userPassword, 10);
+    }
+
+    // SAVES UPDATED USER OBJECT TO DATABASE
+    await user.save();
+
+    res.status(200).json({ message: "User profile updated successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
+// DELETING USER OBJECT FROM DATABASE
+export const deleteUser = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEUSER
+    const { userId } = req.params;
+
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    const user = await User.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    // DELETE USER OBJECT FROM DATABASE
+    await user.remove();
+
+    res.status(200).json({ message: "User account deleted successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
+// LOGIN VALIDATION OF USER OBJECT
+export const userLogin = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETUSER
+    const { userId, userPassword } = req.body;
+
+    // CHECKS IF EXISTING USERS IN DATABASE HAVE THE SAME USERID AS USER LOGGING IN
+    const user = await User.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    // CHECKS IF USERPASSWORD MATCHES USERPASSWORD ASSOCIATED WITH USERID
+    const isMatch = await bcrypt.compare(userPassword, user.userPassword);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials." });
+      return res.status(401).json({ message: "Invalid credentials!" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    // GENERATE SESSION TOKEN (JWT)
+    const sessionToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ message: "Login successful!", token });
+    res
+      .status(200)
+      .json({ message: "Login successful!", sessionToken: sessionToken });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error :(" });
-  }
-};
-
-// CREATING NEW INSTANCE OF USER ENTITY
-export const registerUser = async (req, res) => {
-  try {
-    const { username, password, email, dob, role } = req.body;
-
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Username already taken!" });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new User({
-      username,
-      password: hashedPassword,
-      email,
-      dob,
-      role,
-    });
-
-    await newUser.save();
-    res.status(201).json({ message: "You are now registered on Cultivate!" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error :(" });
-  }
-};
-
-// UPDATING SPECIFIC INSTANCE OF EXISTING USER ENTITY
-export const updateUserProfile = async (req, res) => {
-  try {
-    const { username } = req.params;
-    const { name, email, password } = req.body;
-
-    const user = await User.findOne({ username });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (password) {
-      user.password = await bcrypt.hash(password, 10);
-    }
-
-    await user.save();
-
-    res.status(200).json({ message: "Profile updated successfully!" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error :(" });
-  }
-};
-
-// DELETING SPECIFIC INSTANCE OF EXISTING USER ENTITY
-export const deleteUserAccount = async (req, res) => {
-  try {
-    const { username } = req.params;
-
-    const user = await User.findOne({ username });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    await user.remove();
-    res.status(200).json({ message: "Account deleted successfully." });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error :(" });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
