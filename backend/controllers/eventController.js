@@ -57,18 +57,16 @@ export const getEventById = async (req, res) => {
 };
 
 // READING SPECIFIC INSTANCE OF EVENT ENTITY BY EVENTNAME (PARTIAL / FULL)
-export const getEventByName = async (req, res) => {
+export const searchEvents = async (req, res) => {
   try {
-    console.log("iun");
-    const partialName = req.query.eventName || ""; // Get the partial name from query parameters
-    const events = await Event.find({
-      eventName: { $regex: partialName, $options: "i" },
-    }); // Case-insensitive search
-    if (events.length === 0)
-      return res.status(404).json({ message: "No matching events found!" });
-    res.status(200).json(events);
+    const searchQuery = req.query.q || '';
+    const events = await Event.find({ eventName: new RegExp(searchQuery, 'i') });
+    if (events.length === 0) {
+      return res.status(404).json({ message: "No Events Found" });
+    }
+    res.json(events);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message }); 
   }
 };
 

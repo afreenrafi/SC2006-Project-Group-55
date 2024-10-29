@@ -6,7 +6,7 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
-  getEventByName,
+  searchEvents,
 } from "../controllers/eventController.js";
 
 // INSTANTIATE ROUTER
@@ -23,7 +23,7 @@ router.post("/", createEvent); // POST /api/eventRoute/ - Create a new event
 // router.get("/readEvent/:id", getEventById); // GET /api/eventRoute/readEvent/:id - Get event by eventId
 // router.get("/searchEvent", getEventByName); // GET /api/eventRoute/searchEvent?PARAMETER= - Get event by PARAMETER (PARTIAL / FULL)
 router.get("/", getAllEvents); // GET /api/eventRoute/ - Get all events
-router.get("/search", getEventByName); // GET /api/eventRoute/search?parameter= - Get event by PARAMETER (PARTIAL / FULL)
+router.get("/search", searchEvents); // GET /api/eventRoute/search?parameter= - Get event by PARAMETER (PARTIAL / FULL)
 router.get("/:id", getEventById); // GET /api/eventRoute/:id - Get event by eventId
 
 // UPDATE
