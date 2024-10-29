@@ -3,99 +3,159 @@
 import Event from "../models/Event.js";
 import { v4 as uuidv4 } from "uuid";
 
-// CREATING NEW INSTANCE OF EVENT ENTITY
+// CREATING NEW EVENT OBJECT
 export const createEvent = async (req, res) => {
+  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEEVENT
   const {
     eventName,
     eventDescription,
+    eventGenre,
+    eventLocation,
+    eventType,
     eventStartDate,
     eventEndDate,
     eventOpen,
     eventClose,
     eventPrice,
     eventTicketQuantity,
+    userId,
   } = req.body;
 
   try {
+    // INSTANTIATING NEW EVENT OBJECT
     const newEvent = new Event({
-      eventName,
-      eventDescription,
-      eventStartDate,
-      eventEndDate,
-      eventOpen,
-      eventClose,
-      eventPrice,
-      eventTicketQuantity,
+      eventName: eventName,
+      eventDescription: eventDescription,
+      eventGenre: eventGenre,
+      eventLocation: eventLocation,
+      eventType: eventType,
+      eventStartDate: eventStartDate,
+      eventEndDate: eventEndDate,
+      eventOpen: eventOpen,
+      eventClose: eventClose,
+      eventPrice: eventPrice,
+      eventTicketQuantity: eventTicketQuantity,
+      userId: userId,
       eventId: uuidv4(), // Generate a unique ID for the event
     });
-    const savedEvent = await newEvent.save(); // Save the new event in the database
-    res.status(201).json(savedEvent);
+
+    // SAVE NEW EVENT OBJECT TO DATABASE
+    await newEvent.save();
+
+    res.status(201).json({ message: "Successfully created new Event!" });
   } catch (error) {
-    res.status(400).json({ message: error.message }); // Handle validation errors
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// READING ALL INSTANCES OF EVENT ENTITY
+// RETRIEVING ALL EVENT OBJECTS FROM DATABASE
 export const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find(); // Fetch all events from the database
-    res.status(200).json(events); // Send back the events in the response
+    const events = await Event.find();
+    res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// READING SPECIFIC INSTANCE OF EVENT ENTITY BY EVENTID
+// RETRIEVING SPECIFIC EVENT OBJECT FROM DATABASE USING EVENTID
 export const getEventById = async (req, res) => {
   try {
-    const event = await Event.findOne({ eventId: req.params.id }); // Find event by ID
-    if (!event) return res.status(404).json({ message: "Event not found!" });
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETEVENTBYID
+    const { eventId } = req.params;
+
+    // CHECKS IF EXISTING EVENTS IN DATABASE HAVE THE SAME EVENTID
+    const event = await Event.findOne({ eventId: eventId });
+    if (!event) {
+      return res.status(404).json({ message: "Event not found!" });
+    }
+
     res.status(200).json(event);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
 // READING SPECIFIC INSTANCE OF EVENT ENTITY BY EVENTNAME (PARTIAL / FULL)
+// export const searchEvents = async (req, res) => {
+//   try {
+//     const searchQuery = req.query.q || "";
+//     const events = await Event.find({
+//       eventName: new RegExp(searchQuery, "i"),
+//     });
+//     if (events.length === 0) {
+//       return res.status(404).json({ message: "No Events Found" });
+//     }
+//     res.json(events);
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal Server Error Occurred!" });
+//   }
+// };
+
+// RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING EVENTNAME
 export const searchEvents = async (req, res) => {
   try {
-    const searchQuery = req.query.q || '';
-    const events = await Event.find({ eventName: new RegExp(searchQuery, 'i') });
+    // EXTRACT SEARCH QUERY PARAMETER OR DEFAULT TO EMPTY STRING IF NONE PROVIDED
+    const searchQuery = req.query.q || "";
+
+    // EXTRACT PAGINATION PARAMETERS OR SET DEFAULT VALUES (LIMIT = 10, PAGE = 1)
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+
+    // SEARCH DATABASE FOR EVENTS WHERE EVENTNAME MATCHES SEARCH QUERY (CASE-INSENSITIVE)
+    const events = await Event.find({
+      eventName: new RegExp(searchQuery, "i"),
+    })
+      .limit(limit) // LIMIT RESULTS TO SPECIFIED NUMBER PER PAGE
+      .skip((page - 1) * limit); // SKIP RESULTS TO IMPLEMENT PAGINATION
+
+    // IF NO MATCHING EVENTS ARE FOUND, RETURN A 404 STATUS
     if (events.length === 0) {
-      return res.status(404).json({ message: "No Events Found" });
+      return res.status(404).json({ message: "No Events Found!" });
     }
-    res.json(events);
+
+    // RETURN MATCHING EVENTS ALONG WITH PAGINATION INFO
+    res.json({ events, page, limit });
   } catch (error) {
-    res.status(500).json({ message: error.message }); 
+    // HANDLE ANY ERRORS DURING THE SEARCH PROCESS
+    res.status(500).json({ message: "Internal Server Error!" });
   }
 };
 
-// UPDATING SPECIFIC INSTANCE OF EXISTING EVENT ENTITY
+// UPDATING EVENT OBJECT FROM DATABASE
 export const updateEvent = async (req, res) => {
   try {
-    const updatedEvent = await Event.findOneAndUpdate(
-      { eventId: req.params.id },
-      req.body,
-      { new: true }
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION UPDATEEVENT
+    const { eventId } = req.params;
+
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    const event = await Event.findOneAndUpdate(
+      { eventId: eventId },
+      { ...req.body },
+      { new: true, runValidators: true }
     );
-    if (!updatedEvent)
-      return res.status(404).json({ message: "Event not found!" });
-    res.status(200).json(updatedEvent);
+    if (!event) return res.status(404).json({ message: "Event not found!" });
+
+    res.status(200).json({ message: "Event updated successfully!", event });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
 // DELETING SPECIFIC INSTANCE OF EXISTING EVENT ENTITY
 export const deleteEvent = async (req, res) => {
   try {
-    const deletedEvent = await Event.findOneAndDelete({
-      eventId: req.params.id,
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEEVENT
+    const { eventId } = req.params;
+
+    // RETRIEVE CURRENT EVENT OBJECT FROM DATABASE
+    const event = await Event.findOneAndDelete({
+      eventId: eventId,
     });
-    if (!deletedEvent)
-      return res.status(404).json({ message: "Event not found!" });
+    if (!event) return res.status(404).json({ message: "Event not found!" });
+
     res.status(200).json({ message: "Event deleted successfully!" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
