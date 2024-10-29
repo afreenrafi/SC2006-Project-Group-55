@@ -1,17 +1,17 @@
 import { View, SafeAreaView, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import StyledText from "../../components/forms/StyledText";
+import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import StyledInput from "../../components/forms/StyledInput";
-import RoundBtn from "../../components/forms/RoundBtn";
+import StyledInput from "../../components/StyledInput";
+import RoundBtn from "../../components/RoundBtn";
 import Entypo from '@expo/vector-icons/Entypo';
-import SelectInput from "../../components/forms/SelectInput";
+import SelectInput from "../../components/SelectInput";
 
 
 const OrgValidation = ({ route }) => {
   const navigation = useNavigation();
 
-  const { email, role } = route.params;
+  const { email } = route.params;
 
   const [Username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState(""); 
@@ -101,9 +101,13 @@ const OrgValidation = ({ route }) => {
         console.log("Proceeding with:", Username, Role, Password);
         const result = await submitAccountDetails(email, Username, Role, Password);
         console.log("Account details submitted:", result);
-
-        //
-          navigation.navigate('tabs', { email: result.email, role: result.role });
+        if(Role == 'Organiser'){
+          navigation.navigate('startup/OrgValidation', { email: result.email, role: result.role });
+        }
+        else{
+          //to home page
+          // navigation.navigate('Home page', { email: result.email, role: result.role });
+        }
         
       }
 
@@ -128,30 +132,30 @@ const OrgValidation = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Organisation Validation" />
+        <StyledText size={30} textContent="Organisation Validation" fontFam="MontserratSemibold"/>
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
-          {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
+          {usernameError ? <StyledText size={16} textContent={usernameError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
           
           <SelectInput label={"Role"} data={Role} onPress={() => setModalVisible(true)}/>
 
           <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
-          {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
+          {pwdError ? <StyledText size={16} textContent={pwdError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 8 characters" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 8 characters" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
           </View>
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 special character" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 1 special character" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
           </View>
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 number" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 1 number" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
           </View>
 
           <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
-          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" /> : null}
+          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
           
         </View>
@@ -167,15 +171,15 @@ const OrgValidation = ({ route }) => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Gender" />
+              <StyledText size={24} textContent="Select Gender" fontFam="MontserratBold" />
               <View style={styles.modalOptions}>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
                   {/* <Text style={styles.modalText}>Male</Text> */}
-                  <StyledText size={20} textContent="General Public" underline="true"/>
+                  <StyledText size={20} textContent="General Public" fontFam="MontserratRegular" underline="true"/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
                   {/* <Text style={styles.modalText}>Female</Text> */}
-                  <StyledText size={20} textContent="Organiser" underline="true"/>
+                  <StyledText size={20} textContent="Organiser" fontFam="MontserratRegular" underline="true"/>
                 </TouchableOpacity>
               </View>
             </View>

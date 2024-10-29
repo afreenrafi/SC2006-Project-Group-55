@@ -1,153 +1,125 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { mockUpcomingEvents } from './mockData';  
 
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
-import { useNavigation } from '@react-navigation/native';
-
-const allEvents = [
-  ...mockUpcomingEvents,
-  ...mockPopularEvents,
-  ...mockNearbyEvents,
-];
-
-// remove duplicate events based on id
-const uniqueEvents = Array.from(new Map(allEvents.map(item => [item.id, item])).values());
-
-const TicketsScreen = () => {
-  const [displayEvents, setDisplayEvents] = useState(uniqueEvents);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const navigation = useNavigation();
-
-  const toEventPage = async (eventId) => {
-    navigation.navigate('events/EventsPage', { eventId: eventId })
-  }
-
-  const renderEvent = ({ item }) => (
-    <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.id)}>
-      <Text style={styles.eventName}>{item.name}</Text>
-      <View style={styles.imageContainer}>
-        <Image source={item.image} style={styles.eventImage} />
-      </View>
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventLocation}>{item.location}</Text>
-        <Text style={styles.eventDate}>{item.date}</Text>
-        <Text style={styles.eventTime}>{item.time}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const handleSearch = (text) => {
-    const filteredEvents = uniqueEvents.filter((event) =>
-      event.name.toLowerCase().includes(text.toLowerCase())
+const Ticket = () => {
+    return (
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Your Tickets</Text>
+  
+        {mockUpcomingEvents.map(ticket => (
+          <View key={ticket.id} style={styles.ticketCard}>
+            {/* Ticket Image */}
+            <Image source={ticket.image} style={styles.barcodeImage} />
+  
+            {/* Ticket Information */}
+            <View style={styles.ticketInfo}>
+              <Text style={styles.eventName}>{ticket.name}</Text>
+              <Text style={styles.eventLocation}>{ticket.location}</Text>
+              <Text style={styles.eventDate}>{ticket.date}</Text>
+            </View>
+  
+            {/* Action Buttons */}
+            <View style={styles.eventActionsContainer}>
+            <TouchableOpacity style={styles.shareButton}>
+              <FontAwesome name="share" size={12} color="#EE1C43" />
+              <Text style={styles.shareButtonText}> Share</Text> 
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.detailsButton}>
+              <FontAwesome name="info" size={12} color="#FFF" />
+              <Text style={styles.detailsButtonText}> Details</Text> 
+            </TouchableOpacity>
+          </View>
+        </View>
+        ))}
+      </ScrollView>
     );
-    setSearchQuery(text);
-    setDisplayEvents(filteredEvents);
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>All Events</Text>
-      <View style={styles.searchBar}>
-        <FontAwesome name="search" size={20} color="#ababab" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search"
-          placeholderTextColor="#ababab"
-          value={searchQuery}
-          onChangeText={handleSearch}
-        />
-      </View>
-      <FlatList
-        data={displayEvents}
-        renderItem={renderEvent}
-        keyExtractor={(item) => item.id}
-      />
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#FBF3F1',
-  },
-  title: {
-    paddingTop: '10%',
-    fontSize: 24,
-    fontWeight: '600',
-    marginVertical: 20,
-    textAlign: 'center',
-  },
-  searchBar: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 7,
-  },
-  searchInput: {
-    flex: 1,
-  },
-  eventCard: {
-    marginBottom: 10,
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  imageContainer: {
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 3,
-  },
-  eventImage: {
-    width: "95%",
-    alignSelf: "center",
-    height: 150,
-    borderRadius: 10,
-  },
-  eventName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  eventDetails: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-    paddingTop: 10,
-  },
-  eventLocation: {
-    fontSize: 14,
-    color: "#555",
-  },
-  eventDate: {
-    fontSize: 14,
-    color: "#555",
-  },
-  eventTime: {
-    fontSize: 14,
-    color: "#555",
-  },
-});
-
-export default TicketsScreen;
+    container: {
+      flex: 1,
+      backgroundColor: '#F9F3EC',
+      padding: 20,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#333',
+      textAlign: 'center',
+      marginBottom: 20,
+      paddingTop: '15%',
+    },
+    ticketCard: {
+      backgroundColor: '#FFFFFF',
+      borderRadius: 15,
+      padding: 20,
+      marginBottom: 20,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 5,
+      elevation: 3,
+    },
+    barcodeImage: {
+      width: '100%',
+      height: 120,
+      borderRadius: 10,
+      marginBottom: 20,
+    },
+    ticketInfo: {
+      marginBottom: 10,
+    },
+    eventName: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#333',
+    },
+    eventLocation: {
+      fontSize: 14,
+      color: '#666',
+      marginTop: 5,
+    },
+    eventDate: {
+        fontSize: 10,
+        color: '#888',
+        marginTop: 5,
+    },
+    eventActionsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    shareButton: {
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#FFF',
+        borderColor: '#FF93B3',
+        borderWidth: 1,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+        marginRight: 5,
+      },
+      shareButtonText: {
+        color: '#EE1C43',
+        fontWeight: '600',
+        fontSize: 12,
+        marginLeft: 3,
+      },
+      detailsButton: {
+        flexDirection: 'row', 
+        alignItems: 'center',
+        backgroundColor: '#EE1C43',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+      },
+      detailsButtonText: {
+        color: '#FFF',
+        fontWeight: '600',
+        fontSize: 12,
+        marginLeft: 3,
+      },
+  });
+  
+  export default Ticket;

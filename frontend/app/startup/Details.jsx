@@ -1,11 +1,11 @@
 import { View, SafeAreaView, TouchableOpacity, StyleSheet, Modal, Text, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import StyledText from "../../components/forms/StyledText";
+import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import StyledInput from "../../components/forms/StyledInput";
-import RoundBtn from "../../components/forms/RoundBtn";
-import SelectInput from "../../components/forms/SelectInput";
-import SelectModal from "../../components/forms/SelectModal";
+import StyledInput from "../../components/StyledInput";
+import RoundBtn from "../../components/RoundBtn";
+import SelectInput from "../../components/SelectInput";
+// import GenderPicker from "../../components/GenderPicker";
 
 const Details = ({ route }) => {
   const navigation = useNavigation();
@@ -77,7 +77,7 @@ const Details = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Your Details" />
+        <StyledText size={30} textContent="Your Details" fontFam="MontserratSemibold"/>
 
         <View style={styles.inputs}>
           <StyledInput label={"Last Name"} data={editedLastName} onChangeText={setLastName}/>
@@ -85,23 +85,36 @@ const Details = ({ route }) => {
           <SelectInput label={"Gender"} data={editedGender} onPress={() => setModalVisible(true)}/>
           <StyledInput label={"Age"} data={editedAge} onChangeText={handleAgeChange} type="numeric"/>
           <StyledInput label={"Email"} data={editedEmail} onChangeText={handleEmailChange}/>
-          {emailError ? <StyledText size={16} textContent={emailError} fontColor="#CA3550" /> : null}
+          {emailError ? <StyledText size={16} textContent={emailError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
 
         {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
         </View>
         <View style={styles.btnContainer}>
-          <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
+          <RoundBtn onPress={handleNext}/>
         </View>
 
-        <SelectModal 
-        modalTitle="Select Gender" 
-        modalVisible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-        oneOptPress={() => handleGenderSelect("Male")} 
-        twoOptPress={() => handleGenderSelect("Female")} 
-        optOne="Male"
-        optTwo="Female"
-        />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}  // Close the modal on request
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalView}>
+              <StyledText size={24} textContent="Select Gender" fontFam="MontserratBold" />
+              <View style={styles.modalOptions}>
+                <TouchableOpacity style={styles.modalItem} onPress={() => handleGenderSelect("Male")}>
+                  {/* <Text style={styles.modalText}>Male</Text> */}
+                  <StyledText size={20} textContent="Male" fontFam="MontserratRegular" underline="true"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalItem} onPress={() => handleGenderSelect("Female")}>
+                  {/* <Text style={styles.modalText}>Female</Text> */}
+                  <StyledText size={20} textContent="Female" fontFam="MontserratRegular" underline="true"/>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -124,41 +137,37 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: "5%",
   },
-  // modalOverlay: {
-  //   flex: 1,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  //   backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
-  // },
-  // modalView: {
-  //   width: 300,
-  //   backgroundColor: "white",
-  //   borderRadius: 20,
-  //   padding: 20,
-  //   alignItems: "center",
-  //   shadowColor: "#000",
-  //   shadowOffset: { width: 0, height: 2 },
-  //   shadowOpacity: 0.25,
-  //   shadowRadius: 4,
-  //   elevation: 5,
-  // },
-  // modalOptions: {
-  //   alignItems: "center",
-  //   paddingVertical: 30,
-  //   gap: 10
-  // },
-  // modalItem: {
-  //   paddingVertical: 10,
-  //   width: "100%",
-  //   alignItems: "center",
-  //   backgroundColor: "#CA3550",
-  //   borderRadius: 20,
-  //   padding: 20,
-  // },
-  // modalText: {
-  //   fontSize: 18,
-  //   color: "#333",
-  // },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
+  },
+  modalView: {
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalOptions: {
+    alignItems: "center",
+    paddingVertical: 30,
+  },
+  modalItem: {
+    paddingVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    color: "#333",
+  },
 
 });
 

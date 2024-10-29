@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
-// import * as Font from 'expo-font';
+import * as Font from 'expo-font';
 
-const StyledText = ({ size = 20, textContent = "text", alignment="center", fontColor="#000", underline="false", wrap="wrap", fweight="normal"}) => {
+const StyledText = ({ size = 20, textContent = "text", alignment="center", fontFam="MontserratBold", fontColor="#000", underline="false", wrap="wrap"}) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  // useEffect(() => {
-  //   Font.loadAsync({
-  //     'CrimsonProRegular': require('../assets/fonts/CrimsonPro-Regular.ttf'),
-  //     'MontserratBold': require('../assets/fonts/Montserrat-Bold.ttf'),
-  //     'MontserratSemibold': require('../assets/fonts/Montserrat-SemiBold.ttf'),
-  //     'MontserratRegular': require('../assets/fonts/Montserrat-Regular.ttf'),
-  //   }).then(() => setFontsLoaded(true));
-  // }, []);
+  useEffect(() => {
+    Font.loadAsync({
+      'CrimsonProRegular': require('../assets/fonts/CrimsonPro-Regular.ttf'),
+      'MontserratBold': require('../assets/fonts/Montserrat-Bold.ttf'),
+      'MontserratSemibold': require('../assets/fonts/Montserrat-SemiBold.ttf'),
+      'MontserratRegular': require('../assets/fonts/Montserrat-Regular.ttf'),
+    }).then(() => setFontsLoaded(true));
+  }, []);
 
-  // if (!fontsLoaded) {
-  //   return null; // Ensure the fonts are loaded before rendering
-  // }
+  if (!fontsLoaded) {
+    return null; // Ensure the fonts are loaded before rendering
+  }
 
   return (
     <View style={styles.container}>
@@ -24,10 +24,10 @@ const StyledText = ({ size = 20, textContent = "text", alignment="center", fontC
         styles.text, 
         { fontSize: size, 
         textAlign: alignment, 
+        fontFamily: fontFam, 
         color: fontColor, 
         textDecorationLine: underline === "true" ? 'underline' : 'none',
-        wrap: wrap,
-        fontWeight: fweight,
+        wrap: wrap
         }]}>
         {textContent}
       </Text>

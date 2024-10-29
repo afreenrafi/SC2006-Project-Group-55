@@ -1,19 +1,15 @@
-import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, Platform } from "react-native";
+import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState, useEffect } from "react";
-import StyledText from "../../components/forms/StyledText";
+import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import PageHeader from "../../components/events/PageHeader";
-import OrgDisplay from "../../components/OrgDisplay";
-import SingleFaq from "../../components/SingleFaq";
-import EventHeader from "../../components/events/EventHeader";
-import RoundBtn from "../../components/forms/RoundBtn";
-
+import StyledInput from "../../components/StyledInput";
+import RoundBtn from "../../components/RoundBtn";
+import Ionicons from '@expo/vector-icons/Ionicons';
+import SelectInput from "../../components/SelectInput";
+import { Entypo } from "@expo/vector-icons";
 
 
 const EventsPage = ({ route }) => {
-  const { email, role } = route.params;
-  const { eventId } = route.params;
-
   const navigation = useNavigation();
 
   const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
@@ -23,7 +19,7 @@ const EventsPage = ({ route }) => {
   useEffect(() => {
     const getEventDetails = async () => {
       try {
-        const details = await fetchEventDetails(eventId);  // Fetch event details
+        const details = await fetchEventDetails();  // Fetch event details
         setEventDetails(details);                  // Set the fetched details to state
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
@@ -39,12 +35,10 @@ const EventsPage = ({ route }) => {
 
 
   // Fetch event details
-  const fetchEventDetails = async (eventId) => {
-    console.log("eventId is " + eventId)
+  const fetchEventDetails = async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
-          eventId: 1,
           eventOrganiser: "National Heritage Board",
           eventOrgPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbydUmQ-cFz6feUWRPjQxwoge_MhmhFu2REw&s",
           eventName: "Singapore Night Festival",
@@ -87,13 +81,13 @@ const EventsPage = ({ route }) => {
 
 
   const handleNext = async () => {
-    try {
-      // const result = await submitUserDetails();  // Simulate sending data
-      // console.log("User details submitted:", result);
-      navigation.navigate('events/BuyTickets', { email: email, role: role });  // Navigate to new page with email
-    } catch (error) {
-      console.error("Failed to submit details:", error);
-    }
+    // try {
+    //   const result = await submitUserDetails();  // Simulate sending data
+    //   console.log("User details submitted:", result);
+    //   navigation.navigate('NextPage', { email: result.email });  // Navigate to new page with email
+    // } catch (error) {
+    //   console.error("Failed to submit details:", error);
+    // }
   }
 
   if (loading) {
@@ -107,104 +101,178 @@ const EventsPage = ({ route }) => {
 
 
   return (
-    <View style={{ flex:1 }}>
-      <SafeAreaView style={styles.bgColour}>
-        <PageHeader title={"Event Page"} onPress={()=>navigation.goBack()}/>
-      </SafeAreaView>
-    
-      <ScrollView style={styles.scrollCont} bounces={false} alwaysBounceVertical={false} nestedScrollEnabled={true} 
-      contentContainerStyle={{ flexGlow: 1, paddingBottom: 50 }} >
-        <View style={{ flex:1 }}>
-          <SafeAreaView style={[styles.container, {flex: 1}]} >
-            {/* <PageHeader title={"Event Page"} onPress={()=>navigation.goBack()}/> */}
-            <OrgDisplay 
-              eventPic={eventDetails.eventPic} 
-              eventOrgPic={eventDetails.eventOrgPic} 
-              eventOrg={eventDetails.eventOrganiser} 
-            />
-            <View style={styles.eventCont}>
-                <View style={styles.overlap}>
-                  <EventHeader 
-                  eventStart={eventDetails.eventStartDate} 
-                  eventEnd={eventDetails.eventEndDate} 
-                  eventType={eventDetails.eventType} 
-                  eventMode={eventDetails.eventMode} 
-                  eventName={eventDetails.eventName}
-                  />
-                    <View style={styles.eventDesc}>
-                      <StyledText size={16} textContent={eventDetails.eventDescription} alignment="left" fontColor="#8B8B8B"/>
+    <ScrollView style={styles.scrollCont}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+            <Ionicons name="chevron-back" size={24} color="black" style={styles.backBtn}/>
+            <StyledText style={styles.pageTitle} size={30} textContent="Event Page" fontFam="MontserratSemibold"/>
+        </View>
+        <View style={styles.heroBanner}>
+            <Image style={styles.eventBg} source={{uri: eventDetails.eventPic}}/>
+            <View style={styles.orgView}>
+                <Image style={styles.orgLogo} source={{uri: eventDetails.eventOrgPic}}/>
+                <View style={styles.orgNames}>
+                    <StyledText style={styles.pageTitle} size={22} textContent={eventDetails.eventOrganiser} fontFam="MontserratSemibold" fontColor="#fff"/>
+                    <StyledText style={styles.pageTitle} size={20} textContent="Organiser" fontFam="MontserratRegular" fontColor="#fff"/>
+                </View>
+            </View>
+        </View>
+        <View style={styles.eventCont}>
+            <View style={styles.overlap}>
+                <View style={styles.detailList}>
+                    <View style={styles.eventInfo}>
+                        <StyledText size={20} textContent={eventDetails.eventStartDate + " - " + eventDetails.eventEndDate} fontFam="CrimsonProRegular" fontColor="#CA3550"/>
+                        <Entypo name="dot-single" size={20} color="#CA3550" />
+                        <StyledText size={20} textContent={eventDetails.eventType} fontFam="CrimsonProRegular" fontColor="#CA3550"/>
+                        <Entypo name="dot-single" size={20} color="#CA3550" />
+                        <StyledText size={20} textContent={eventDetails.eventMode} fontFam="CrimsonProRegular" fontColor="#CA3550"/>
                     </View>
-                    <View style={styles.artistList}>
-                        <StyledText size={16} textContent="Artists" alignment="left" />
-                        <View style={styles.artistPics}>
-                          {eventDetails.eventArtist.map((artist)=>{
-                            return <Image key={artist.artistName} style={styles.artistPic} source={{uri: artist.artistPic}}/>
-                            })
-                          }
+                    <StyledText size={32} textContent={eventDetails.eventName} fontFam="CrimsonProRegular" />
+                    <StyledText size={16} textContent={eventDetails.eventDescription} fontFam="MontserratRegular" alignment="left" fontColor="#8B8B8B"/>
+                </View>
+                <View style={styles.artistList}>
+                    <StyledText size={25} textContent="Artists" fontFam="CrimsonProRegular" alignment="left" />
+                    <View style={styles.artistPics}>
+                        <Image style={styles.artistPic} source={{uri: eventDetails.eventArtist[0].artistPic}}/>
+                        <Image style={styles.artistPic} source={{uri: eventDetails.eventArtist[1].artistPic}}/>
+                        <Image style={styles.artistPic} source={{uri: eventDetails.eventArtist[2].artistPic}}/>
+                    </View>
+                    <StyledText size={16} textContent={eventDetails.eventArtist[0].artistName + " & more..."} fontFam="MontserratRegular" alignment="left" fontColor="#8B8B8B"/>
+                    
+                </View>
+                <View style={styles.tabOptions}>
+                    <TouchableOpacity>
+                    <StyledText size={16} textContent="FAQs" fontFam="MontserratRegular" alignment="left" fontColor="#000000"/>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                    <StyledText size={16} textContent="Posts" fontFam="MontserratRegular" alignment="left" fontColor="#8B8B8B"/>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.faqs}>
+                    <StyledText size={24} textContent="Frequently Asked Questions" fontFam="CrimsonProRegular" />
+                    <View style={styles.singleFaq}>
+                        <View style={styles.qns}>
+                            <View style={styles.Qlogo}>
+                                <StyledText size={20} textContent="Q" fontFam="CrimsonProRegular" />
+                            </View>
+                            <View style={styles.Qtext}>
+                                <StyledText size={14} textContent={eventDetails.eventFaq[0].question} fontFam="MontserratRegular" />
+                            </View>
                         </View>
-                        <StyledText size={16} textContent={eventDetails.eventArtist[0].artistName + " & more..."} alignment="left" fontColor="#8B8B8B"/>
-                        
+                        <View style={styles.ans}>
+                            <Image style={styles.faqPic} source={{uri: eventDetails.eventOrgPic}}/>
+                            <View style={styles.Atext}>
+                                <View style={styles.orgDetails}>
+                                    <StyledText size={14} textContent={eventDetails.eventOrganiser} fontFam="MontserratSemibold" />
+                                    <StyledText size={14} textContent="Organiser" fontFam="MontserratSemibold" fontColor="#8B8B8B"/>
+                                </View>
+                                <View style={styles.comment}>
+                                    <StyledText size={14} textContent={eventDetails.eventFaq[0].answer} fontFam="MontserratRegular" alignment="left"/>
+                                </View>
+                            </View>
+                        </View>
                     </View>
-                    <View style={styles.tabOptions}>
-                        <TouchableOpacity>
-                        <StyledText size={16} textContent="FAQs" alignment="left" fontColor="#000000"/>
-                        </TouchableOpacity>
-                        {/* <TouchableOpacity>
-                        <StyledText size={16} textContent="Posts" alignment="left" fontColor="#8B8B8B"/>
-                        </TouchableOpacity> */}
-                    </View>
-                    <View style={styles.faqs}>
-                        <StyledText size={20} textContent="Frequently Asked Questions" />
-                        {eventDetails.eventFaq.map((faq)=>{
-                          return <SingleFaq key={faq.question} 
-                          eventQns={faq.question}
-                          eventOrgPic={eventDetails.eventOrgPic}
-                          eventOrg={eventDetails.eventOrganiser}
-                          eventAns={faq.answer} />
-                        })
-                        }
-                        
+                    <View style={styles.singleFaq}>
+                        <View style={styles.qns}>
+                            <View style={styles.Qlogo}>
+                                <StyledText size={20} textContent="Q" fontFam="CrimsonProRegular" />
+                            </View>
+                            <View style={styles.Qtext}>
+                                <StyledText size={14} textContent={eventDetails.eventFaq[0].question} fontFam="MontserratRegular" />
+                            </View>
+                        </View>
+                        <View style={styles.ans}>
+                            <Image style={styles.faqPic} source={{uri: eventDetails.eventOrgPic}}/>
+                            <View style={styles.Atext}>
+                                <View style={styles.orgDetails}>
+                                    <StyledText size={14} textContent={eventDetails.eventOrganiser} fontFam="MontserratSemibold" />
+                                    <StyledText size={14} textContent="Organiser" fontFam="MontserratSemibold" fontColor="#8B8B8B"/>
+                                </View>
+                                <View style={styles.comment}>
+                                    <StyledText size={14} textContent={eventDetails.eventFaq[0].answer} fontFam="MontserratRegular" alignment="left"/>
+                                </View>
+                            </View>
+                        </View>
                     </View>
                 </View>
             </View>
-          </SafeAreaView>
         </View>
-      </ScrollView>
+        
 
-      <View style={[styles.bottomButtonContainer, styles.iosShadow, styles.androidShadow]}>
-        <View style={styles.bottomText}>
-          <StyledText size={12} textContent="book ticket or rsvp now" alignment="left"/>
-        </View>
-        <View style={styles.bottomBtn}>
-          <RoundBtn onPress={handleNext} text="Buy Tickets" icon="ticket-alt"/>
-        </View>
-      </View>
-
-    </View>
+      </SafeAreaView>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollCont: {
-    backgroundColor: "#FBF3F1",
-    // flexGrow: 1,
-    // paddingBottom: 350
-  },
+
   container: {
     flex: 1,
     backgroundColor: "#FBF3F1",
     alignItems: 'center',
     justifyContent: 'flex-start',
-    // paddingBottom: 1000
-    // height: 2000
   },
-  bgColour: {
+  scrollCont: {
     backgroundColor: "#FBF3F1",
+    flex: 1,
+    paddingBottom: 300
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  header: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 30,
+    backgroundColor: "#fff",
+  },
+  backBtn: {
+    position: "absolute",
+    left: 30,
+  },
+  heroBanner: {
+    width: "100%",
+    height: 350,
+    position: "relative"
+  },
+  eventBg: {
+    height: "100%",
+  },
+  orgView: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    alignContent: "center",
+    padding: 30,
+    backgroundColor: "#000000",
+    opacity: 0.8,
+    position: "absolute",
+    bottom: 0,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    gap: 20,
+    paddingBottom: 70,
+  },
+  orgLogo: {
+    height: 60,
+    width: 60,
+    borderRadius: 10,
+    padding: 0,
+    margin: 0,
+    opacity: 1,
+  },
+  orgNames: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    justifyContent: "center",
+    position: "relative",
+    opacity: 1,
   },
   eventCont: {
     position: "relative",
@@ -219,8 +287,11 @@ const styles = StyleSheet.create({
     top: -30,
     borderRadius: 25,
   },
-  eventDesc: {
-    paddingTop: 10
+  eventInfo: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
   },
   artistList: {
     flexDirection: "row",
@@ -251,42 +322,107 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
-  faqs: {
-    paddingVertical: 10
+  singleFaq: {
+    width: "100%",
+    gap: 10,
+    paddingVertical: 20,
   },
-  bottomButtonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    display: "flex",
+  qns: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: 20,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+    gap: 20
+    
   },
-  iosShadow: {
-    shadowColor: '#000000',
-    shadowOffset: { width: -2, height: -4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+  Qlogo: {
+    backgroundColor: "#fff",
+    height: 45,
+    width: 45,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 100,
   },
-  androidShadow: {
-    elevation: 10,
-    shadowColor: '#000000',
+  ans:{
+    // width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    gap: 20,
+    maxWidth: "100%",
+    position: "relative",
   },
-  bottomText:{
-    width:"20%"
+  Atext: {
+    flex: 1
   },
-  bottomBtn: {
-    width: "70%"
-  }
+  orgDetails:{
+    flexDirection: "row",
+    gap: 30,
+    flex: 1
+  },
+  faqPic: {
+    height: 45,
+    width: 45,
+    borderRadius: 50,
+    padding: 0,
+    margin: 0,
+    opacity: 1,
+    position: "relative",
+  },
+  comment: {
+    position: "relative",
+    // width: "100%",
+  },
 
 
 
   
+
+
+
+  inputs: {
+    width: "100%",
+    paddingVertical: 40,
+    paddingHorizontal: "5%",
+  },
+  btnContainer:{
+    width: "100%",
+    paddingHorizontal: "5%",
+  },
+  bullets: {
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
+  },
+  modalView: {
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalOptions: {
+    alignItems: "center",
+    paddingVertical: 30,
+  },
+  modalItem: {
+    paddingVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    color: "#333",
+  },
 
 });
 

@@ -6,6 +6,15 @@ const StyledInput = ({ label, data, onChangeText, type="string", pwd="false", ed
   // const [text, onChangeText] = React.useState({data});
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
+  useEffect(() => {
+    Font.loadAsync({
+      'CrimsonProRegular': require('../assets/fonts/CrimsonPro-Regular.ttf'),
+    }).then(() => setFontsLoaded(true));
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Prevent rendering until fonts are loaded
+  }
 
   return (
     <View style={styles.container}>
@@ -18,7 +27,6 @@ const StyledInput = ({ label, data, onChangeText, type="string", pwd="false", ed
         keyboardType={type}
         secureTextEntry={pwd}
         editable={edit}
-        autoCapitalize='none'
       />
     </View>
   );
@@ -41,6 +49,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   text: {
+    fontFamily: "CrimsonProRegular",
     fontSize: 26,
     marginBottom: 5
   }

@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, TextInput, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import StyledText from "../../components/forms/StyledText";
-import SingpassBtn from "../../components/forms/SingpassBtn";
+import StyledText from "../../components/StyledText";
+import SingpassBtn from "../../components/SingpassBtn";
 import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {
@@ -12,7 +12,6 @@ const Login = () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
-          userExist: false,
           lastName: "Doe",
           firstName: "John",
           gender: "Male",
@@ -27,13 +26,8 @@ const Login = () => {
     try{
       const userSingpass = await fetchSingpass();
       console.log("User Details fetched:", userSingpass);
-      if(userSingpass.userExist == false){
-        navigation.navigate('startup/Details', {...userSingpass});  // Navigate to 'Details' page
-      }
-      else{
-        navigation.navigate('tabs', {...userSingpass});
-      }
-      
+
+      navigation.navigate('startup/Details', {...userSingpass});  // Navigate to 'Details' page
     } catch (error) {
       console.error("Failed to fetch user singpass details:", error);
     }
@@ -44,10 +38,10 @@ const Login = () => {
     <View style={styles.container}>
       {/* <StyledText size={30} textContent="Registration/Login" fontFam="MontserratBold"/> */}
       <Image style={styles.logo} source={require('../../assets/logo/cultivatelogo.png')}/>
-      <StyledText size={40} textContent="Cultivate" />
-      <StyledText size={26} textContent="Cultivate Connections," />
-      <StyledText size={26} textContent="Celebrate Culture." />
-      <SingpassBtn onPress={handleSingpassLogin}/>
+      <StyledText size={40} textContent="Cultivate" fontFam="CrimsonProRegular"/>
+      <StyledText size={26} textContent="Cultivate Connections," fontFam="CrimsonProRegular"/>
+      <StyledText size={26} textContent="Celebrate Culture." fontFam="CrimsonProRegular"/>
+      <SingpassBtn onPress={handleSingpassLogin} />
       {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
 
     </View>

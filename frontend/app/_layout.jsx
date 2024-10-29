@@ -1,7 +1,7 @@
 import React from 'react';
-import { AppProvider } from './context/AppContext';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Tabs from './tabs/_layout'; // Adjust the path if necessary
+import PostWithComments from './utils/PostWithComments'; // Adjust the path if necessary
 import Login from './auth/Login'; // Adjust the path if necessary
 //startup pages
 import Details from './startup/Details';
@@ -9,15 +9,14 @@ import Setup from './startup/Setup';
 import OrgValidation from './startup/OrgValidation';
 //event pages
 import EventsPage from './events/EventsPage';
-import BuyTickets from './events/BuyTickets';
-import OrderDetails from './events/OrderDetails';
-import BookingComplete from './events/BookingComplete';
+
+import SearchItem from './utils/SearchItem'; // Adjust the path if necessary
+import ImagePickerComponent from './utils/ImagePickerComponent'; // Adjust the path if necessary
 
 const Stack = createNativeStackNavigator();
 
 const MainLayout = () => {
   return (
-    <AppProvider>
     <Stack.Navigator initialRouteName="auth">
       <Stack.Screen
         name="auth"
@@ -49,8 +48,6 @@ const MainLayout = () => {
           title: 'Organisation Validation'
          }}
       />
-
-
       <Stack.Screen
         name="events/EventsPage"
         component={EventsPage}
@@ -58,39 +55,29 @@ const MainLayout = () => {
           title: 'Event Page'
          }}
       />
-      <Stack.Screen
-        name="events/BuyTickets"
-        component={BuyTickets}
-        options={{ headerShown: false,
-          title: 'Buy Tickets'
-         }}
-      />
-      <Stack.Screen
-        name="events/OrderDetails"
-        component={OrderDetails}
-        options={{ headerShown: false,
-          title: 'Order Details'
-         }}
-      />
-      <Stack.Screen
-        name="events/BookingComplete"
-        component={BookingComplete}
-        options={{ headerShown: false,
-          title: 'Booking Complete'
-         }}
-      />
-
-
-      
-
 
       <Stack.Screen
         name="tabs"
         component={Tabs}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="utils/PostWithComments"
+        component={PostWithComments}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="utils/SearchItem"
+        component={SearchItem}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="utils/ImagePickerComponent" 
+        component={ImagePickerComponent} 
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
-    </AppProvider>
   );
 };
 

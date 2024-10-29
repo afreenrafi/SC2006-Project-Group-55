@@ -1,12 +1,11 @@
 import { View, SafeAreaView, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import StyledText from "../../components/forms/StyledText";
+import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import StyledInput from "../../components/forms/StyledInput";
-import RoundBtn from "../../components/forms/RoundBtn";
+import StyledInput from "../../components/StyledInput";
+import RoundBtn from "../../components/RoundBtn";
 import Entypo from '@expo/vector-icons/Entypo';
-import SelectInput from "../../components/forms/SelectInput";
-import SelectModal from "../../components/forms/SelectModal";
+import SelectInput from "../../components/SelectInput";
 
 
 const Setup = ({ route }) => {
@@ -106,10 +105,8 @@ const Setup = ({ route }) => {
           navigation.navigate('startup/OrgValidation', { email: result.email, role: result.role });
         }
         else{
-          //to tabs
+          //to home page
           navigation.navigate('tabs', { email: result.email, role: result.role });
-          //for testing
-          // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
         }
         
       }
@@ -135,67 +132,59 @@ const Setup = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Account Setup" />
+        <StyledText size={30} textContent="Account Setup" fontFam="MontserratSemibold"/>
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
-          {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
+          {usernameError ? <StyledText size={16} textContent={usernameError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
           
           <SelectInput label={"Role"} data={Role} onPress={() => setModalVisible(true)}/>
 
           <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
-          {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
+          {pwdError ? <StyledText size={16} textContent={pwdError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 8 characters" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 8 characters" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
           </View>
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 special character" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 1 special character" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
           </View>
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 number" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 1 number" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
           </View>
 
           <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
-          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" /> : null}
+          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
           
         </View>
         <View style={styles.btnContainer}>
-          <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
+          <RoundBtn onPress={handleNext}/>
         </View>
 
-        <SelectModal 
-        modalTitle="Select Role" 
-        modalVisible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-        oneOptPress={() => handleRoleSelect("General Public")} 
-        twoOptPress={() => handleRoleSelect("Organiser")} 
-        optOne="General Public"
-        optTwo="Organiser"
-        />
-
-        {/* <Modal
-          animationType="none"
+        <Modal
+          animationType="slide"
           transparent={true}
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}  // Close the modal on request
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Role" />
+              <StyledText size={24} textContent="Select Gender" fontFam="MontserratBold" />
               <View style={styles.modalOptions}>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
-                  <StyledText size={20} textContent="General Public" fontColor="#FFF"/>
+                  {/* <Text style={styles.modalText}>Male</Text> */}
+                  <StyledText size={20} textContent="General Public" fontFam="MontserratRegular" underline="true"/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
-                  <StyledText size={20} textContent="Organiser" fontColor="#FFF"/>
+                  {/* <Text style={styles.modalText}>Female</Text> */}
+                  <StyledText size={20} textContent="Organiser" fontFam="MontserratRegular" underline="true"/>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
-        </Modal> */}
+        </Modal>
 
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -221,6 +210,37 @@ const styles = StyleSheet.create({
   bullets: {
     display: 'flex',
     flexDirection: 'row'
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
+  },
+  modalView: {
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalOptions: {
+    alignItems: "center",
+    paddingVertical: 30,
+  },
+  modalItem: {
+    paddingVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    color: "#333",
   },
 
 });

@@ -1,15 +1,17 @@
-import React, { useState, useContext } from 'react';
-import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView} from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, StyleSheet, FlatList, Alert, TouchableOpacity, Text, Pressable, ScrollView} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { AppContext } from '../context/AppContext';
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
+import SearchBar from '../../components/SearchBar'; 
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
+import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
 const Homepage = ({ navigation }) => {
-  const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
+  const [savedEvents, setSavedEvents] = useState(mockSavedEvents); // Bookmark to Save Events
+  const [filteredEvents, setFilteredEvents] = useState([]); // For search results
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.type === selectedFilter);
@@ -19,32 +21,45 @@ const Homepage = ({ navigation }) => {
     ...mockUpcomingEvents,
     ...mockPopularEvents,
     ...mockNearbyEvents,
+    ...mockSavedEvents,
   ];
 
-  const toEventPage = async (eventId) => {
-    navigation.navigate('events/EventsPage', { eventId: eventId })
-  }
+  const toggleBookmark = (event) => {
+    setSavedEvents((prevSavedEvents) => {
+      if (prevSavedEvents.some((e) => e.id === event.id)) {
+        return prevSavedEvents.filter((e) => e.id !== event.id); // Remove if already saved
+      } else {
+        return [...prevSavedEvents, event]; // Add new event
+      }
+    });
+  };
 
   const renderEventCard = ({ item }) => {
     const isBookmarked = savedEvents.some((e) => e.id === item.id);
     return (
-      <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.id)}>
+      <View style={styles.eventCard}>
         <Image source={item.image} style={styles.eventImage} />
         <Text style={styles.eventType}>{item.type}</Text>
         <View style={styles.eventDetailsContainer}>
           <Text style={styles.eventName}>{item.name}</Text>
-          <Text style={styles.eventLocation}>{item.location}</Text>
+          <View style={styles.eventDateLocation}>
+            <Icon name="location-on" size={16} color="#888" />
+            <Text style={styles.eventLocation}>{item.location}</Text>
+          </View>
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
-        <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.bookmarkButton}>
-          <FontAwesome name={isBookmarked ? "bookmark" : "bookmark-o"} size={20} color={isBookmarked ? "#EE1C43" : "#FFF"} />
+        <TouchableOpacity
+          style={styles.bookmarkButton}
+          onPress={() => toggleBookmark(item)}
+        >          
+        <FontAwesome 
+          name={isBookmarked ? "bookmark" : "bookmark-o"} 
+          size={20} 
+          color={isBookmarked ? "#EE1C43" : "#FFF"} 
+        />
         </TouchableOpacity>
-      </TouchableOpacity>
+      </View>
     );
-  };
-
-  const handleDetailsPress = (event) => {
-    navigation.navigate('TicketDetails', { event });
   };
 
   const renderUpcomingEvent = () => {
@@ -82,10 +97,7 @@ const Homepage = ({ navigation }) => {
               <FontAwesome name="share" size={12} color="#EE1C43" />
               <Text style={styles.shareButtonText}> Share</Text> 
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.detailsButton}
-              onPress={() => handleDetailsPress(event)} // Pass the exact event data
-            >
+            <TouchableOpacity style={styles.detailsButton}>
               <FontAwesome name="info" size={12} color="#FFF" />
               <Text style={styles.detailsButtonText}> Details</Text> 
             </TouchableOpacity>
@@ -93,18 +105,30 @@ const Homepage = ({ navigation }) => {
         </View>
     );
   };
+  
+  const handleSearchPress = (searchQuery) => {
+    const lowerQuery = searchQuery.toLowerCase();
+    const results = allEvents.filter(
+      (event) =>
+        event.name.toLowerCase().includes(lowerQuery) ||
+        event.type.toLowerCase().includes(lowerQuery) ||
+        event.location.toLowerCase().includes(lowerQuery)
+    );
+    const uniqueResults = [...new Map(results.map(event => [event.id, event])).values()]; // Ensuring unique results by ID
+    setFilteredEvents(uniqueResults);
+  };
 
   return (
     <ScrollView style={styles.container}>
       {/* Header with location and icons */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
+        <Pressable onPress={() => navigation.openDrawer()}>
           <FontAwesome name="bars" size={24} color="black" />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.location}>📍 Boon Lay, Jurong</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        <Pressable onPress={() => navigation.navigate('Notifications')}>
           <FontAwesome name="bell" size={24} color="black" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {/* Title */}
@@ -135,39 +159,63 @@ const Homepage = ({ navigation }) => {
       ))}
 </ScrollView>
 
-      {/* Upcoming Events */}
+      {/* Search Bar */}
+      <View style={styles.searchBarContainer}>
+        <SearchBar onSearchPress={handleSearchPress} />
+      </View>
+
+       {/* Upcoming Events */}
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Upcoming Events</Text>
         {renderUpcomingEvent()}
       </View>
 
-      {/* Popular Events Section */}
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Most Popular</Text>
-          </View>
+      {/* Display Search Results */}
+      {filteredEvents.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Search Results</Text>
           <FlatList 
             horizontal
-            data={filteredPopularEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
-      </View>
-
-      {/* Nearby Events Section */}
-      <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nearby</Text>
-          </View>
-          <FlatList 
-            horizontal
-            data={filteredNearbyEvents}
+            data={filteredEvents}
             renderItem={renderEventCard}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.flatListContainer}
           />
         </View>
+      )}
+
+      {/* Hide Popular and Nearby if search results exist */}
+      {filteredEvents.length === 0 && (
+        <>
+          {/* Popular Events Section */}
+          <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Most Popular</Text>
+              </View>
+              <FlatList 
+                horizontal
+                data={filteredPopularEvents}
+                renderItem={renderEventCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.flatListContainer}
+              />
+          </View>
+
+          {/* Nearby Events Section */}
+          <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Nearby</Text>
+              </View>
+              <FlatList 
+                horizontal
+                data={filteredNearbyEvents}
+                renderItem={renderEventCard}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.flatListContainer}
+              />
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 };
@@ -215,19 +263,23 @@ const styles = StyleSheet.create({
     marginRight: 5,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#CA3550',
+    borderColor: '#FF93B3',
   },
   activeFilterButton: {
-    backgroundColor: '#CA3550', 
-    borderColor: '#CA3550',
+    backgroundColor: '#EE1C43', 
+    borderColor: '#EE1C43',
   },
   activeFilterText: {
     color: '#FFFFFF',
     fontWeight: '600',
   },
   inactiveFilterText: {
-    color: '#CA3550', 
+    color: '#EE1C43', 
     fontWeight: '500',
+  },
+  searchBarContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
   },
   section: {
     paddingHorizontal: 20,
@@ -236,8 +288,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 7,
-    marginTop: 7,
+    marginBottom: 10,
   },
   flatListContainer: {
     paddingVertical: 5,
@@ -264,9 +315,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
-    backgroundColor: '#CA3550',
+    backgroundColor: '#EE1C43',
     color: '#fff',
     padding: 5,
+    borderRadius: 10,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -296,7 +348,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 100,
     right: 10,
-    backgroundColor: '#BBB',
+    backgroundColor: '#CCC',
     padding: 5,
     borderRadius: 5,
     fontSize: 12,
@@ -305,7 +357,8 @@ const styles = StyleSheet.create({
   upcomingEventCard: {
     width: '100%',
     height: 175,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
+    marginBottom: 0,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 10,
     borderTopLeftRadius: 10,
@@ -362,7 +415,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EEE', // Similar color to blend
     borderTopWidth: 0, // Removing top border to "merge"
-    
   },
   activeDateButton: {
     backgroundColor: '#FFFFFF',
@@ -376,14 +428,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end', 
     alignItems: 'center',
-    marginTop: -5,
+    marginTop: 10, 
     paddingHorizontal: 10, // Ensure proper alignment with the card width
   },
   shareButton: {
     flexDirection: 'row', 
     alignItems: 'center', 
     backgroundColor: '#FFF',
-    borderColor: '#CA3550',
+    borderColor: '#FF93B3',
     borderWidth: 1,
     paddingVertical: 5,
     paddingHorizontal: 12, // Padding to adjust button size
@@ -391,7 +443,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },  
   shareButtonText: {
-    color: '#CA3550',
+    color: '#EE1C43',
     fontWeight: '600',
     fontSize: 12,
     marginLeft: 3,
@@ -399,7 +451,7 @@ const styles = StyleSheet.create({
   detailsButton: {
     flexDirection: 'row', 
     alignItems: 'center',
-    backgroundColor: '#CA3550',
+    backgroundColor: '#EE1C43',
     paddingVertical: 5,
     paddingHorizontal: 12, // Padding to adjust button size
     borderRadius: 20,

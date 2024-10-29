@@ -1,8 +1,6 @@
 import React from 'react';
-import { AppProvider } from './context/AppContext';
 import { NavigationContainer } from '@react-navigation/native';
 import MainLayout from './_layout'; // Adjust the path if necessary
-import { StripeProvider } from '@stripe/stripe-react-native'; // Import StripeProvider
 
 const linking = {
   prefixes: ['cultivate://'], // Custom scheme you defined in app.json
@@ -19,13 +17,9 @@ const App = () => {
   
 
   return (
-    <StripeProvider publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
-    <AppProvider>
-      <NavigationContainer linking={linking}>
-        <MainLayout />
-      </NavigationContainer>
-    </AppProvider> 
-    </StripeProvider>
+    <NavigationContainer linking={linking}>
+      <MainLayout />
+    </NavigationContainer>
   );
 };
 

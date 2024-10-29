@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
+import * as Font from 'expo-font';
 
-const RoundBtn = ({ alignment = "center", onPress, text, icon, disabled=false }) => {
- 
+const RoundBtn = ({ alignment = "center", onPress }) => {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+      'MontserratBold': require('../assets/fonts/Montserrat-Bold.ttf'),
+    }).then(() => setFontsLoaded(true));
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Ensure the fonts are loaded before rendering
+  }
 
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled} 
-    style={[styles.container, styles.iosShadow, styles.androidShadow, 
-    {justifyContent: alignment, backgroundColor: disabled ? "#5C5C5C" : "#CA3550"}]}>
-      <FontAwesome5 name={icon}  size={24} color="#ffffff"/>
+    <TouchableOpacity onPress={onPress} style={[styles.container, styles.iosShadow, styles.androidShadow, {justifyContent: alignment}]}>
+      <FontAwesome5 name="arrow-circle-right" size={24} color="#ffffff"/>
       <Text style={[styles.text]}>
-        {text}
-        {/* name="arrow-circle-right" */}
+        Next
       </Text>
       {/* <Image style={styles.logo} source={require('../assets/logo/singpass_logo.png')} /> */}
     </TouchableOpacity>
@@ -24,7 +33,7 @@ const styles = StyleSheet.create({
     // marginTop: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#CA3550',
+    backgroundColor: '#CA3550',
     borderRadius: 50,
     paddingHorizontal: 30,
     height: 50,
@@ -42,6 +51,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000000',
   },
   text: {
+    fontFamily: 'MontserratBold', // Ensure the correct font is applied
     color: "#ffffff",
     fontSize: 24,
     textAlign: "center"
