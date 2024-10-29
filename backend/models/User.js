@@ -46,13 +46,12 @@ function validateUserEmail(value) {
 function validateUserDob(value) {
   const errors = [];
   const todayDate = new Date();
-  const valueDob = new Date(value.trim());
 
-  const ageDifference = todayDate.getFullYear() - valueDob.getFullYear();
+  const ageDifference = todayDate.getFullYear() - value.getFullYear();
   const hasBirthdayPassedThisYear =
-    todayDate.getMonth() > valueDob.getMonth() ||
-    (todayDate.getMonth() === valueDob.getMonth() &&
-      todayDate.getDate() >= valueDob.getDate());
+    todayDate.getMonth() > value.getMonth() ||
+    (todayDate.getMonth() === value.getMonth() &&
+      todayDate.getDate() >= value.getDate());
 
   const actualAge = hasBirthdayPassedThisYear
     ? ageDifference
@@ -149,15 +148,16 @@ const UserSchema = new mongoose.Schema(
 const OrganiserSchema = new mongoose.Schema({
   organiserEventPermitId: {
     type: String,
-    required: true,
+    default: null,
   },
 });
 
 // ADDITIONAL SCHEMA FOR ARTISTS
 const ArtistSchema = new mongoose.Schema({
-  artistVerified: {
-    type: Boolean,
-    required: true,
+  artistVerifiedBy: {
+    type: String,
+    ref: "User",
+    default: null,
   },
 });
 

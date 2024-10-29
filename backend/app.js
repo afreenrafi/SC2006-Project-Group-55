@@ -10,8 +10,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 // IMPORT NECESSARY ROUTES
-import authRoutes from "./routes/authRoute.js";
-import userRoutes from "./routes/userRoute.js";
+import authRoute from "./routes/authRoute.js";
+import userRoute from "./routes/userRoute.js";
 import eventRoute from "./routes/eventRoute.js";
 import faqRoute from "./routes/faqRoute.js";
 import bookingRoute from "./routes/bookingRoute.js";
@@ -49,8 +49,8 @@ app.use(cors());
 // API ROUTES FOR USER MANAGEMENT AND AUTHENTICATION
 
 // HANDLE USER ROUTES (CRUD)
-app.use("/api/authRoute", authRoutes);
-app.use("/api/userRoute", userRoutes);
+app.use("/api/authRoute", authRoute);
+app.use("/api/userRoute", userRoute);
 
 // HANDLE EVENT ROUTES (CRUD)
 app.use("/api/eventRoute", eventRoute);
