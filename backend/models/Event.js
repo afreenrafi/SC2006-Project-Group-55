@@ -13,6 +13,24 @@ function validateEventNameDescription(value) {
   return errors;
 }
 
+// EVENTLOCATION
+function validateEventLocation(value) {
+  const errors = [];
+  if (value.trim().length === 0) {
+    errors.push("Cannot consist of only whitespaces!");
+  }
+  return errors;
+}
+
+// EVENTTYPE
+function validateEventType(value) {
+  const errors = [];
+  if (value.trim().length === 0) {
+    errors.push("Cannot consist of only whitespaces!");
+  }
+  return errors;
+}
+
 // EVENTSTARTDATE
 function validateEventStartDate(eventStartDate) {
   const errors = [];
@@ -101,6 +119,38 @@ const EventSchema = new mongoose.Schema({
       },
     },
   },
+  eventLocation: {
+    type: String,
+    required: true,
+    min: 1,
+    max: 500,
+    validate: {
+      validator: function (value) {
+        const errors = validateEventLocation(value);
+        return errors.length === 0;
+      },
+      message: function (props) {
+        const errors = validateEventLocation(props.value);
+        return errors.join("\n");
+      },
+    },
+  },
+  eventType: {
+    type: String,
+    required: true,
+    min: 1,
+    max: 500,
+    validate: {
+      validator: function (value) {
+        const errors = validateEventType(value);
+        return errors.length === 0;
+      },
+      message: function (props) {
+        const errors = validateEventType(props.value);
+        return errors.join("\n");
+      },
+    },
+  },
   eventStartDate: {
     type: Date,
     required: true,
@@ -166,6 +216,10 @@ const EventSchema = new mongoose.Schema({
         return errors.join("\n");
       },
     },
+  },
+  eventTicketQuantityBooked: {
+    type: Number,
+    default: 0,
   },
 });
 
