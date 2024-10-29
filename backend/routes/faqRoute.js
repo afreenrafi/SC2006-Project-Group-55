@@ -4,10 +4,11 @@ import {
   createFaqItemQuestionAndFaq,
   createFaqItemAnswer,
   getAllFaqItems,
+  getAllFaqs,
   getFaqItemById,
+  getFaqById,
   updateFaqItem,
   deleteFaqItem,
-  deleteFaqItemsAndFaq,
 } from "../controllers/faqController.js";
 
 // INSTANTIATE ROUTER
@@ -15,23 +16,20 @@ const router = express.Router();
 
 // DEFINE ROUTES FOR BOTH FAQITEM ENTITY AND FAQ ENTITY
 // CREATE
-router.post("/faqitemfaq", createFaqItemQuestionAndFaq); // POST /api/faqRoute/faqitemfaq - Create a question faqitem and faq
-
-// DEFINE ROUTES FOR FAQITEM ENTITY
-// CREATE
-router.post("/faqitem", createFaqItemAnswer); // POST /api/faqRoute/faqitem - Add an answer faqitem to an existing faq
+router.post("/faqitemfaq", createFaqItemQuestionAndFaq);
+router.post("/faqitem", createFaqItemAnswer);
 
 // READ
-router.get("/faqitem", getAllFaqItems); // GET /api/faqRoute/faqitem - Get all faqitems
-router.get("/faqitem/:id", getFaqItemById); // GET /api/faqRoute/:id - Get faqitem by faqItemId
+router.get("/faqitem", getAllFaqItems);
+router.get("/faq", getAllFaqs);
+router.get("/faqitem/:faqItemId", getFaqItemById);
+router.get("/faq/:faqId", getFaqById);
 
 // UPDATE
-router.put("/faqitem/:id", updateFaqItem); // PUT /api/faqRoute/faqitem/:id - Update faqitem by faqItemId
+router.put("/faqitem/:faqItemId", updateFaqItem);
 
 // DELETE
-router.delete("/faqitem/:id", deleteFaqItem); // DELETE /api/faqRoute/faqitem/:id - Delete faqitem by faqItemId
+router.delete("/faqitem/:faqItemId", deleteFaqItem);
 
-// DEFINE ROUTES FOR FAQ ENTITY
-// DELETE
-// router.delete("/faq/:id", deleteFaqItemsAndFaq); // DELETE /api/faqRoute/:fagId - Delete faq and associated faqitems
+
 export default router;

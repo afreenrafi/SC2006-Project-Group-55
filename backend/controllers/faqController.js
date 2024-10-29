@@ -3,170 +3,223 @@
 import Event from "../models/Event.js";
 import Faq from "../models/Faq.js";
 import FaqItem from "../models/FaqItem.js";
-import { v4 as uuidv4 } from "uuid";
 
-// CREATING NEW INSTANCE OF FAQITEM (QUESTION) ENTITY and FAQ ENTITY (WHEN SUBMITTING A QUESTION)
+// CREATING NEW FAQITEM AND FAQ OBJECT (FOR QUESTION)
 export const createFaqItemQuestionAndFaq = async (req, res) => {
-  const { faqItemContent, eventId, userId } = req.body;
+  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEFAQITEMANDFAQ
+  const { eventId, faqItemContent, faqItemType, userId } = req.body;
 
   try {
-    // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
+    // CHECKS IF EXISTING EVENTS IN DATABASE HAVE THE SAME EVENTID
     const event = await Event.findOne({ eventId: eventId });
     if (!event) {
       return res.status(404).json({ message: "Event not found!" });
     }
 
-    // 1. CREATING NEW INSTANCE OF FAQITEM (QUESTION) ENTITY
+    // 1. INSTANTIATING NEW FAQITEM OBJECT (FOR QUESTION)
     const newFaqItemQuestion = new FaqItem({
-      faqItemContent,
-      // userId,
-      faqItemDate: Date.now(),
-      faqItemType: "Question",
-      faqItemId: uuidv4(), // Generate a unique ID for the faqitem
+      faqItemContent: faqItemContent,
+      faqItemType: faqItemType,
+      userId: userId,
     });
-    const savedFaqItemQuestion = await newFaqItemQuestion.save(); // Save the new faqitem in the database
 
-    // 2. CREATING NEW INSTANCE OF FAQ ENTITY WITH FAQITEM INSTANCE REFERENCE AND LINK IT TO EVENT ENTITY INSTANCE
+    // SAVE NEW FAQITEM OBJECT TO DATABASE
+    const savedFaqItemQuestion = await newFaqItemQuestion.save();
+
+    // 2. INSTANTIATING NEW FAQ OBJECT
     const newFaq = new Faq({
       faqQuestion: savedFaqItemQuestion.faqItemId,
-      faqAnswer: null,
-      eventId,
-      faqId: uuidv4(), // Generate a unique ID for the faq
+      eventId: eventId,
     });
-    const savedFaq = await newFaq.save(); // Save the new faq in the database
 
-    res.status(201).json({ faqItem: savedFaqItemQuestion, faq: savedFaq });
+    // SAVE NEW FAQ OBJECT TO DATABASE
+    await newFaq.save();
+
+    res
+      .status(201)
+      .json({ message: "Successfully created new FAQItem and FAQ!" });
   } catch (error) {
-    res.status(400).json({ message: error.message }); // Handle validation errors
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// CREATING NEW INSTANCE OF FAQITEM (ANSWER) ENTITY TO ADD TO EXISTING FAQ (SUBMITTING AN ANSWER)
+// CREATING NEW FAQITEM AND FAQ OBJECT (FOR ANSWER)
 export const createFaqItemAnswer = async (req, res) => {
-  const { faqItemContent, faqId, userId } = req.body;
+  const { faqId, faqItemContent, faqItemType, userId } = req.body;
 
   try {
-    // CHECKING IF FAQID EXISTS IN FAQ COLLECTION
+    // CHECKS IF EXISTING FAQS IN DATABASE HAVE THE SAME FAQID
     const faq = await Faq.findOne({ faqId: faqId });
     if (!faq) return res.status(404).json({ message: "Faq not found!" });
 
-    // 1. CREATING NEW INSTANCE OF FAQITEM ENTITY FOR ANSWER
+    // 1. INSTANTIATING NEW faq OBJECT (FOR ANSWER)
     const newFaqItemAnswer = new FaqItem({
-      faqItemContent,
-      // userId,
-      faqItemDate: Date.now(),
-      faqItemType: "Answer",
-      faqItemId: uuidv4(), // Generate a unique ID for the faqitem
+      faqItemContent: faqItemContent,
+      faqItemType: faqItemType,
+      userId: userId,
     });
+
+    // SAVE NEW FAQITEM OBJECT TO DATABASE
     const savedFaqItemAnswer = await newFaqItemAnswer.save();
 
-    // 2. UPDATING RESPECTIVE FAQ ENTITY INSTANCE WITH FAQITEMID
+    // 2. UPDATE FAQ OBJECT'S FAQANSWER ATTRIBUTE WITH FAQITEMID
     faq.faqAnswer = savedFaqItemAnswer.faqItemId;
+
+    // SAVE UPDATED FAQ OBJECT TO DATABASE
     const updateFaq = await faq.save();
 
     if (!updateFaq) return res.status(404).json({ message: "Faq not found!" });
-    res.status(200).json({ faq: updateFaq, answer: savedFaqItemAnswer });
+    res.status(200).json({
+      message: "Successfully created FAQItem object and updated FAQ!",
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// READING ALL INSTANCES OF FAQ ENTITY
+// RETRIEVING ALL FAQITEMS OBJECTS FROM DATABASE
 export const getAllFaqItems = async (req, res) => {
   try {
     const faqItems = await FaqItem.find();
     res.status(200).json(faqItems);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+// RETRIEVING ALL FAQ OBJECTS FROM DATABASE
+export const getAllFaqs = async (req, res) => {
+  try {
+    const faqs = await Faq.find();
+    res.status(200).json(faqs);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// READING SPECIFIC INSTANCE OF FAQITEM ENTITY
+// RETRIEVING SPECIFIC FAQITEM OBJECT FROM DATABASE USING FAQITEMID
 export const getFaqItemById = async (req, res) => {
   try {
-    const faqItem = await FaqItem.findOne({ faqItemId: req.params.id });
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETFAQITEMBYID
+    const { faqItemId } = req.params;
+
+    // CHECKS IF EXISTING FAQITEMS IN DATABASE HAVE THE SAME FAQITEMID
+    const faqItem = await FaqItem.findOne({ faqItemId: faqItemId });
     if (!faqItem)
       return res.status(404).json({ message: "FaqItem not found!" });
+
     res.status(200).json(faqItem);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
+// RETRIEVING SPECIFIC FAQ OBJECT FROM DATABASE USING FAQID
+export const getFaqById = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETFAQBYID
+    const { faqId } = req.params;
+
+    // CHECKS IF EXISTING FAQS IN DATABASE HAVE THE SAME FAQITEMID
+    const faq = await Faq.findOne({ faqId: faqId });
+    if (!faq) return res.status(404).json({ message: "Faq not found!" });
+
+    res.status(200).json(faq);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
 // UPDATING SPECIFIC EXISTENCE OF EXISTING FAQITEM ENTITY
 export const updateFaqItem = async (req, res) => {
   try {
-    const updatedFaqItem = await FaqItem.findOneAndUpdate(
-      { faqItemId: req.params.id },
-      req.body,
-      { new: true }
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION UPDATEEVENT
+    const { faqItemId } = req.params;
+
+    // RETRIEVE CURRENT FAQITEM OBJECT FROM DATABASE
+    const faqItem = await FaqItem.findOneAndUpdate(
+      { faqItemId: faqItemId },
+      { ...req.body },
+      { new: true, runValidators: true }
     );
-    if (!updatedFaqItem)
+    if (!faqItem) {
       return res.status(404).json({ message: "FaqItem not found!" });
-    res.status(200).json(updatedFaqItem);
+    }
+
+    res.status(200).json({ message: "FaqItem updated successfully!", faqItem });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// DELETING SPECIFIC INSTANCE OF EXISTING FAQITEM ENTITY, IF REQUIRED, UPDATE / DELETE CORRESPONDING FAQ ENITTY INSTANCE
+// DELETING SPECIFIC INSTANCE OF EXISTING FAQITEM OBJECT IF REQUIRED, UPDATE / DELETE CORRESPONDING FAQ ENITTY INSTANCE
 export const deleteFaqItem = async (req, res) => {
   try {
-    // CHECKING IF FAQITEMID EXISTS IN FAQITEM COLLECTION
-    const deletedFaqItem = await FaqItem.findOne({ faqItemId: req.params.id });
-    if (!deletedFaqItem)
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEFAQITEM
+    const { faqItemId } = req.params;
+
+    // RETRIEVE CURRENT FAQITEM OBJECT FROM DATABASE
+    const faqItem = await FaqItem.findOne({ faqItemId: faqItemId });
+    if (!faqItem)
       return res.status(404).json({ message: "FaqItem not found!" });
 
     // IF FAQITEMTYPE IS "QUESTION", DELETE CORRESPONDING FAQ, INCLUDING ALL CORRESPONDING FAQITEMS
-    if (deletedFaqItem.faqItemType === "Question") {
+    if (faqItem.faqItemType === "Question") {
       await deleteFaqItemsAndFaq(
-        { params: { id: deletedFaqItem.faqItemId } },
+        { params: { faqItemId: faqItem.faqItemId } },
         res
       );
       return;
     } else {
       //  IF FAQITEMTYPE IS "ANSWER", DELETE FAQITEM ONLY, UPDATE CORRESPONDING FAQ ENTITY INSTANCE
-      const correspondingFaq = await Faq.findOne({
-        faqAnswer: deletedFaqItem.faqItemId,
+      // RETRIEVE CURRENT FAQITEM OBJECT FROM DATABASE AND SET FAQANSWER TO NULL
+      const faq = await Faq.findOne({
+        faqAnswer: faqItem.faqItemId,
       });
-      if (correspondingFaq) {
-        correspondingFaq.faqAnswer = null;
-        await correspondingFaq.save();
+      if (faq) {
+        faq.faqAnswer = null;
+
+        // SAVE UPDATED FAQ OBJECT TO DATABASE
+        await faq.save();
       }
 
       // DELETE FAQITEM (ANSWER) ENTITY INSTANCE
-      await deletedFaqItem.deleteOne();
+      await faqItem.deleteOne();
       res
         .status(200)
-        .json({ message: "FaqItem deleted and Faq answer set to null!" });
+        .json({
+          message: "Successfully deleted FaqItem and set Faq answer to null!",
+        });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
-// DELETING SPECIFIC INSTANCE OF EXISTING FAQ ENTITY, ALONG WITH ALL OF ITS RESPECTIVE FAQITEM ENTITY INSTANCES, USING FAQITEMID (QUESTION)
+// DELETING SPECIFIC INSTANCE OF EXISTING FAQ OBJECT
 export const deleteFaqItemsAndFaq = async (req, res) => {
   try {
-    // 1. FINDING SPECIFIC FAQ ENTITY INSTANCE USING FAQITEMID (QUESTION)
-    const deletedFaq = await Faq.findOne({ faqQuestion: req.params.id });
-    if (!deletedFaq) return res.status(404).json({ message: "FAQ not found!" });
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEFAQITEM
+    const { faqItemId } = req.params;
 
-    // 2. DELETING ASSOCIATED FAQITEM ENTITY INSTANCES FOR QUESTION AND ANSWER
-    if (deletedFaq.faqQuestion != null) {
-      await FaqItem.findOneAndDelete({ faqItemId: deletedFaq.faqQuestion });
+    // 1. RETRIEVE CURRENT FAQ OBJECT FROM DATABASE USING FAQITEMID (QUESTION)
+    const faq = await Faq.findOne({ faqQuestion: faqItemId });
+    if (!faq) return res.status(404).json({ message: "FAQ not found!" });
+
+    // 2. DELETE ASSOCIATED FAQITEM OBJECTS FOR QUESTION AND ANSWER
+    if (faq.faqQuestion) {
+      await FaqItem.findOneAndDelete({ faqItemId: faq.faqQuestion });
     }
-    if (deletedFaq.faqAnswer) {
-      await FaqItem.findOneAndDelete({ faqItemId: deletedFaq.faqAnswer });
+    if (faq.faqAnswer) {
+      await FaqItem.findOneAndDelete({ faqItemId: faq.faqAnswer });
     }
 
-    // 3. DELETE FAQ ENTITY INSTANCE ITSELF
-    await deletedFaq.deleteOne();
+    // 3. DELETE FAQ OBJECT ITSELF
+    await faq.deleteOne();
 
     res
       .status(200)
-      .json({ message: "FAQ and associated FAQItems deleted successfully!" });
+      .json({ message: "Successfully deleted FAQ and associated FAQItems!" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };

@@ -36,7 +36,6 @@ export const createEvent = async (req, res) => {
       eventPrice: eventPrice,
       eventTicketQuantity: eventTicketQuantity,
       userId: userId,
-      eventId: uuidv4(), // Generate a unique ID for the event
     });
 
     // SAVE NEW EVENT OBJECT TO DATABASE
@@ -75,22 +74,6 @@ export const getEventById = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
-
-// READING SPECIFIC INSTANCE OF EVENT ENTITY BY EVENTNAME (PARTIAL / FULL)
-// export const searchEvents = async (req, res) => {
-//   try {
-//     const searchQuery = req.query.q || "";
-//     const events = await Event.find({
-//       eventName: new RegExp(searchQuery, "i"),
-//     });
-//     if (events.length === 0) {
-//       return res.status(404).json({ message: "No Events Found" });
-//     }
-//     res.json(events);
-//   } catch (error) {
-//     res.status(500).json({ message: "Internal Server Error Occurred!" });
-//   }
-// };
 
 // RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING EVENTNAME
 export const searchEvents = async (req, res) => {
@@ -134,7 +117,9 @@ export const updateEvent = async (req, res) => {
       { ...req.body },
       { new: true, runValidators: true }
     );
-    if (!event) return res.status(404).json({ message: "Event not found!" });
+    if (!event) {
+      return res.status(404).json({ message: "Event not found!" });
+    }
 
     res.status(200).json({ message: "Event updated successfully!", event });
   } catch (error) {
@@ -142,7 +127,7 @@ export const updateEvent = async (req, res) => {
   }
 };
 
-// DELETING SPECIFIC INSTANCE OF EXISTING EVENT ENTITY
+// DELETING SPECIFIC EVENT OBJECT
 export const deleteEvent = async (req, res) => {
   try {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEEVENT

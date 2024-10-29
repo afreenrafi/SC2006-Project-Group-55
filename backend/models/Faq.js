@@ -8,31 +8,23 @@ const FaqSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    default: uuidv4,
   },
   faqQuestion: {
     type: String,
-    ref: "FaqItem",
     required: true,
+    ref: "FaqItem",
   },
   faqAnswer: {
     type: String,
     ref: "FaqItem",
-    required: false,
+    default: null,
   },
   eventId: {
     type: String,
-    ref: "Event",
     required: true,
+    ref: "Event",
   },
-});
-
-// MIDDLEWARE TO AUTO-GENERATE UNIQUE FAQID BEFORE SAVING
-FaqSchema.pre("save", function (next) {
-  // AUTO-GENERATE UNIQUE FAQID
-  if (!this.faqId) {
-    this.faqId = uuidv4();
-  }
-  next();
 });
 
 // INSTANCE OF EVENT ENTITY

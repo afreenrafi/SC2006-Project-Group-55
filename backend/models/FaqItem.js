@@ -19,12 +19,13 @@ const FaqItemSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    default: uuidv4,
   },
   faqItemContent: {
     type: String,
     required: true,
-    min: 1,
-    max: 500,
+    minLength: 1,
+    maxLength: 500,
     validate: {
       validator: function (value) {
         const errors = validateFaqContent(value);
@@ -36,25 +37,21 @@ const FaqItemSchema = new mongoose.Schema({
       },
     },
   },
-  faqItemType: { type: String, enum: ["Question", "Answer"], required: true },
+  faqItemType: {
+    type: String,
+    required: true,
+    enum: ["Question", "Answer"],
+  },
   faqItemDate: {
     type: Date,
     required: true,
+    default: Date.now,
   },
-});
-
-// MIDDLEWARE TO AUTO-GENERATE UNIQUE FAQITEMID AND FAQITEMDATE BEFORE SAVING
-FaqItemSchema.pre("save", function (next) {
-  // AUTO-GENERATE UNIQUE FAQITEMID
-  if (!this.faqItemId) {
-    this.faqItemId = uuidv4();
+  userId:{
+    type:String,
+    required:true,
+    ref: "User"
   }
-
-  // AUTO-GENERATE FAQITEMDATE
-  if (!this.faqItemDate) {
-    this.faqItemDate = Date.now();
-  }
-  next();
 });
 
 // INSTANCE OF EVENT ENTITY
