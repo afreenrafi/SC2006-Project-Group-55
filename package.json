@@ -1,39 +1,5 @@
 {
-  "name": "sc2006-project-group-55",
-  "version": "1.0.0",
-  "description": "dnasjdnsajnsudfn",
-  "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"  
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongod": "^2.0.0",
-    "mongoose": "^8.7.1",
-    "mongosh": "^2.3.2",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "@stripe/react-stripe-js": "^2.8.1",  
-    "@stripe/stripe-js": "^4.8.0",
-    "axios": "^1.7.7",
-    "mapbox-gl": "^3.7.0",  
-    "moment": "^2.30.1",
-    "mongodb": "^6.9.0",  
-    "nodemailer": "^6.9.15",  
-    "nodemon": "^3.1.7",  
-    "react-map-gl": "^7.1.7",
-    "stripe": "^17.2.0",
-    "uuid": "^10.0.0"
+    "mongosh": "^2.3.2"
   }
 }
