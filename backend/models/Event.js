@@ -90,8 +90,8 @@ const EventSchema = new mongoose.Schema({
   eventName: {
     type: String,
     required: true,
-    min: 1,
-    max: 100,
+    minLength: 1,
+    maxLength: 100,
     validate: {
       validator: function (value) {
         const errors = validateEventNameDescription(value);
@@ -106,8 +106,8 @@ const EventSchema = new mongoose.Schema({
   eventDescription: {
     type: String,
     required: true,
-    min: 1,
-    max: 500,
+    minLength: 1,
+    maxLength: 500,
     validate: {
       validator: function (value) {
         const errors = validateEventNameDescription(value);
@@ -119,11 +119,16 @@ const EventSchema = new mongoose.Schema({
       },
     },
   },
+  eventGenre:{
+    type: String,
+    required:true,
+    enum: ["All", "Museums", "Exhibitions", "Performances", "Festivals"],
+  },
   eventLocation: {
     type: String,
     required: true,
-    min: 1,
-    max: 500,
+    minLength: 1,
+    maxLength: 500,
     validate: {
       validator: function (value) {
         const errors = validateEventLocation(value);
@@ -138,8 +143,8 @@ const EventSchema = new mongoose.Schema({
   eventType: {
     type: String,
     required: true,
-    min: 1,
-    max: 500,
+    minLength: 1,
+    maxLength: 500,
     validate: {
       validator: function (value) {
         const errors = validateEventType(value);
@@ -221,14 +226,12 @@ const EventSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-});
+  userId: {
+    type: String,
+    required: true,
+    ref: "User",
 
-// MIDDLEWARE TO AUTO-GENERATE UNIQUE EVENTID BEFORE SAVING
-EventSchema.pre("save", function (next) {
-  if (!this.eventId) {
-    this.eventId = uuidv4();
-  }
-  next();
+  },
 });
 
 // INSTANCE OF EVENT ENTITY

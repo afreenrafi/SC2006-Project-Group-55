@@ -4,7 +4,7 @@ import { User, Organiser, Artist } from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-// CREATING NEW INSTANCE OF USER ENTITY
+// CREATING NEW USER OBJECT
 export const createUser = async (req, res) => {
   try {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEUSER
@@ -71,14 +71,12 @@ export const createUser = async (req, res) => {
         break;
     }
 
-    // SAVES NEW USER OBJECT TO DATABASE
-    console.log("HERE!6");
+    // SAVE NEW USER OBJECT TO DATABASE
     await createdUser.save();
-    console.log("HERE!7");
 
     res.status(201).json({ message: "Successfully created new User!" });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error Occurred!", error: error.message });
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
@@ -95,7 +93,7 @@ export const getAllUsers = async (req, res) => {
 // RETRIEVING SPECIFIC USER OBJECT FROM DATABASE USING USERID
 export const getUserById = async (req, res) => {
   try {
-    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETUSER
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETUSERBYID
     const { userId } = req.params;
 
     // CHECKS IF EXISTING USERS IN DATABASE HAVE THE SAME USERID AS USER LOGGING IN
