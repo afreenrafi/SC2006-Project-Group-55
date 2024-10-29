@@ -22,15 +22,6 @@ function validateEventLocation(value) {
   return errors;
 }
 
-// EVENTTYPE
-function validateEventType(value) {
-  const errors = [];
-  if (value.trim().length === 0) {
-    errors.push("Cannot consist of only whitespaces!");
-  }
-  return errors;
-}
-
 // EVENTSTARTDATE
 function validateEventStartDate(eventStartDate) {
   const errors = [];
@@ -86,6 +77,7 @@ const EventSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    default: uuidv4,
   },
   eventName: {
     type: String,
@@ -143,18 +135,7 @@ const EventSchema = new mongoose.Schema({
   eventType: {
     type: String,
     required: true,
-    minLength: 1,
-    maxLength: 500,
-    validate: {
-      validator: function (value) {
-        const errors = validateEventType(value);
-        return errors.length === 0;
-      },
-      message: function (props) {
-        const errors = validateEventType(props.value);
-        return errors.join("\n");
-      },
-    },
+    enum: ["Free", "Chargeable"],
   },
   eventStartDate: {
     type: Date,
@@ -230,7 +211,6 @@ const EventSchema = new mongoose.Schema({
     type: String,
     required: true,
     ref: "User",
-
   },
 });
 

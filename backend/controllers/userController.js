@@ -129,7 +129,7 @@ export const updateUser = async (req, res) => {
       user.userPassword = await bcrypt.hash(userPassword, 10);
     }
 
-    // SAVES UPDATED USER OBJECT TO DATABASE
+    // SAVE UPDATED USER OBJECT TO DATABASE
     await user.save();
 
     res.status(200).json({ message: "User profile updated successfully!" });
