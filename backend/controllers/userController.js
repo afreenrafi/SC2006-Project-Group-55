@@ -72,11 +72,13 @@ export const createUser = async (req, res) => {
     }
 
     // SAVES NEW USER OBJECT TO DATABASE
+    console.log("HERE!6");
     await createdUser.save();
+    console.log("HERE!7");
 
     res.status(201).json({ message: "Successfully created new User!" });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error Occurred!" });
+    res.status(500).json({ message: "Internal Server Error Occurred!", error: error.message });
   }
 };
 
