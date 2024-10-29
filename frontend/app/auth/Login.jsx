@@ -38,9 +38,9 @@ const Login = () => {
     <View style={styles.container}>
       {/* <StyledText size={30} textContent="Registration/Login" fontFam="MontserratBold"/> */}
       <Image style={styles.logo} source={require('../../assets/logo/cultivatelogo.png')}/>
-      <StyledText size={40} textContent="Cultivate" fontFam="CrimsonProRegular"/>
-      <StyledText size={26} textContent="Cultivate Connections," fontFam="CrimsonProRegular"/>
-      <StyledText size={26} textContent="Celebrate Culture." fontFam="CrimsonProRegular"/>
+      <StyledText size={40} textContent="Cultivate" />
+      <StyledText size={26} textContent="Cultivate Connections," />
+      <StyledText size={26} textContent="Celebrate Culture." />
       <SingpassBtn onPress={handleSingpassLogin} />
       {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
 

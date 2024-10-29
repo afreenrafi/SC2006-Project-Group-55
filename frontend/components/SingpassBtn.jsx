@@ -5,16 +5,6 @@ import * as Font from 'expo-font';
 const SingpassBtn = ({ size = 20, alignment = "center", onPress }) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  useEffect(() => {
-    Font.loadAsync({
-      'MontserratBold': require('../assets/fonts/Montserrat-Bold.ttf'),
-    }).then(() => setFontsLoaded(true));
-  }, []);
-
-  if (!fontsLoaded) {
-    return null; // Ensure the fonts are loaded before rendering
-  }
-
   return (
     <TouchableOpacity onPress={onPress} style={[styles.container, styles.iosShadow, styles.androidShadow]}>
       <Text style={[styles.text, { fontSize: size, textAlign: alignment }]}>
@@ -44,9 +34,6 @@ const styles = StyleSheet.create({
   androidShadow: {
     elevation: 10,
     shadowColor: '#000000',
-  },
-  text: {
-    fontFamily: 'MontserratBold', // Ensure the correct font is applied
   },
   logo: {
     height: 50,

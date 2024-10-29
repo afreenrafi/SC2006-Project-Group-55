@@ -132,30 +132,30 @@ const OrgValidation = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Organisation Validation" fontFam="MontserratSemibold"/>
+        <StyledText size={30} textContent="Organisation Validation" />
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
-          {usernameError ? <StyledText size={16} textContent={usernameError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
+          {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
           
           <SelectInput label={"Role"} data={Role} onPress={() => setModalVisible(true)}/>
 
           <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
-          {pwdError ? <StyledText size={16} textContent={pwdError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
+          {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 8 characters" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 8 characters" fontColor="#8B8B8B"/>
           </View>
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 special character" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 1 special character" fontColor="#8B8B8B"/>
           </View>
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 number" fontFam="MontserratRegular" fontColor="#8B8B8B"/>
+            <StyledText size={18} textContent="must include at least 1 number" fontColor="#8B8B8B"/>
           </View>
 
           <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
-          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
+          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" /> : null}
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
           
         </View>
@@ -171,15 +171,15 @@ const OrgValidation = ({ route }) => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Gender" fontFam="MontserratBold" />
+              <StyledText size={24} textContent="Select Gender" />
               <View style={styles.modalOptions}>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
                   {/* <Text style={styles.modalText}>Male</Text> */}
-                  <StyledText size={20} textContent="General Public" fontFam="MontserratRegular" underline="true"/>
+                  <StyledText size={20} textContent="General Public" underline="true"/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
                   {/* <Text style={styles.modalText}>Female</Text> */}
-                  <StyledText size={20} textContent="Organiser" fontFam="MontserratRegular" underline="true"/>
+                  <StyledText size={20} textContent="Organiser" underline="true"/>
                 </TouchableOpacity>
               </View>
             </View>

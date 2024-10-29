@@ -77,7 +77,7 @@ const Details = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Your Details" fontFam="MontserratSemibold"/>
+        <StyledText size={30} textContent="Your Details" />
 
         <View style={styles.inputs}>
           <StyledInput label={"Last Name"} data={editedLastName} onChangeText={setLastName}/>
@@ -85,7 +85,7 @@ const Details = ({ route }) => {
           <SelectInput label={"Gender"} data={editedGender} onPress={() => setModalVisible(true)}/>
           <StyledInput label={"Age"} data={editedAge} onChangeText={handleAgeChange} type="numeric"/>
           <StyledInput label={"Email"} data={editedEmail} onChangeText={handleEmailChange}/>
-          {emailError ? <StyledText size={16} textContent={emailError} fontFam="MontserratSemibold" fontColor="#CA3550" /> : null}
+          {emailError ? <StyledText size={16} textContent={emailError} fontColor="#CA3550" /> : null}
 
         {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
         </View>
@@ -101,15 +101,15 @@ const Details = ({ route }) => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Gender" fontFam="MontserratBold" />
+              <StyledText size={24} textContent="Select Gender" />
               <View style={styles.modalOptions}>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleGenderSelect("Male")}>
                   {/* <Text style={styles.modalText}>Male</Text> */}
-                  <StyledText size={20} textContent="Male" fontFam="MontserratRegular" underline="true"/>
+                  <StyledText size={20} textContent="Male" underline="true"/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleGenderSelect("Female")}>
                   {/* <Text style={styles.modalText}>Female</Text> */}
-                  <StyledText size={20} textContent="Female" fontFam="MontserratRegular" underline="true"/>
+                  <StyledText size={20} textContent="Female" underline="true"/>
                 </TouchableOpacity>
               </View>
             </View>
