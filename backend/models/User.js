@@ -140,6 +140,16 @@ const UserSchema = new mongoose.Schema(
       enum: ["Public", "Organiser", "Artist"],
       default: "Public",
     },
+    userStripeId: {
+      type: String,
+      default: null,
+    },
+    userPaymentMethods: [
+      {
+        type: String,
+        default: null,
+      },
+    ],
   },
   userOptions
 );
