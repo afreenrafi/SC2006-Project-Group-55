@@ -3,7 +3,6 @@
 import { User } from "../models/User.js";
 import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
-import { v4 as uuidv4 } from "uuid";
 
 // SUPPORTING FUNCTIONS RELATED TO BOOKING ENTITY
 const sendConfirmationEmail = async (
@@ -34,11 +33,18 @@ const sendConfirmationEmail = async (
   }
 };
 
-// CREATING NEW INSTANCE OF BOOKING ENTITY (FREE)
+// CREATING NEW BOOKING OBJECT (FREE)
 export const createFreeBooking = async (req, res) => {
-  const { eventId, bookingQuantity, bookingName, bookingEmail } = req.body;
+  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEFREEBOOKING
+  const { eventId, bookingQuantity, userId } = req.body;
 
   try {
+    // CHECKING IF USERID EXISTS IN USER COLLECTION
+    const user = await User.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
     // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
     const event = await Event.findOne({ eventId: eventId });
     if (!event) {
@@ -54,51 +60,51 @@ export const createFreeBooking = async (req, res) => {
         .status(400)
         .json({ message: "Selected Event does not enough tickets available!" });
     }
-
+    // INSTANTIATING NEW BOOKING OBJECT
     const newBooking = new Booking({
-      bookingName,
-      bookingEmail,
-      bookingQuantity,
-      eventId,
+      bookingName: user.userName,
+      bookingEmail: user.userEmail,
+      bookingQuantity: bookingQuantity,
+      eventId: eventId,
+      userId: userId,
     });
 
-    const savedBooking = await newBooking.save();
+    // SAVE NEW BOOKING OBJECT TO DATABASE
+    await newBooking.save();
 
+    // UPDATE EVENT OBJECT'S EVENTTICKETQUANTITYBOOKED ATTRIBUTE
     event.eventTicketQuantityBooked += bookingQuantity;
-    const updatedEvent = await event.save();
+    await event.save();
 
     // SENDING CONFIRMATION EMAIL
-    const confirmedBooking = await sendConfirmationEmail(
-      bookingName,
-      bookingEmail,
+    await sendConfirmationEmail(
+      newBooking.bookingName,
+      newBooking.bookingEmail,
       bookingQuantity,
       event.eventName
     );
 
-    res.status(201).json({
-      booking: savedBooking,
-      event: updatedEvent,
-      confirmedBooking: confirmedBooking,
-    });
+    res.status(201).json({ message: "Successfully booked tickets!" });
   } catch (error) {
-    res.status(400).json({ message: error.message }); // Handle validation errors
+    res.status(400).json({ message: error.message });
   }
 };
 
-// CREATING NEW INSTANCE OF BOOKING ENTITY (CHARGEABLE)
+// // CREATING NEW BOOKING OBJECT (CHARGEABLE)
 export const createChargeableBooking = async (req, res) => {
-  const {
-    eventId,
-    bookingQuantity,
-    bookingName,
-    bookingEmail,
-    paymentMethodId,
-    saveCard,
-  } = req.body;
+  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATECHARGEABLEBOOKING
+  const { eventId, bookingQuantity, paymentMethodId, saveCard, userId } =
+    req.body;
 
   const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
   try {
+    // CHECKING IF USERID EXISTS IN USER COLLECTION
+    const user = await User.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
     // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
     const event = await Event.findOne({ eventId: eventId });
     if (!event) {
@@ -115,16 +121,15 @@ export const createChargeableBooking = async (req, res) => {
         .json({ message: "Selected Event does not enough tickets available!" });
     }
 
-    // RETRIEVING USER ENTITY USING BOOKINGEMAIL
-    const user = await User.findOne({ email: bookingEmail });
-
-    // CREATE STRIPE CUSTOMER FOR USER ENTITY, IF USER ENTITY DOES NOT HAVE STRIPE CUSTOMER ID
-    if (!user.stripeCustomerId) {
+    // CREATE USERSTRIPEID FOR USER OBJECT, IF USER OBJECT DOES NOT HAVE USERSTRIPEID
+    if (!user.userStripeId) {
       const stripeCustomer = await stripeInstance.customers.create({
-        email: bookingEmail,
-        name: bookingName,
+        email: user.userEmail,
+        name: user.userName,
       });
-      user.stripeCustomerId = stripeCustomer.id;
+      user.userStripeId = stripeCustomer.id;
+
+      // SAVE UPDATED USER OBJECT INTO DATABASE
       await user.save();
     }
 
@@ -138,18 +143,20 @@ export const createChargeableBooking = async (req, res) => {
       confirm: true,
     });
 
-    // SAVE BOOKING INFORMATION
+    // INSTANTIATE NEW BOOKING OBJECT
     const newBooking = new Booking({
-      userName,
-      userEmail,
-      event: eventId,
-      quantity,
+      bookingName: user.userName,
+      bookingEmail: user.userEmail,
+      eventId: eventId,
+      bookingQuantity: bookingQuantity,
       paymentId: paymentIntent.id, // Store the Stripe payment intent ID
     });
+
+    // SAVE NEW BOOKING OBJECT TO DATABASE
     const savedBooking = await newBooking.save();
 
-    // UPDATE EVENTTICKETBOOKED IN EVENT ENTITY INSTANCE
-    event.bookedTickets += quantity;
+    // UPDATE EVENT OBJECT'S EVENTTICKETQUANTITYBOOKED ATTRIBUTE
+    event.bookedTickets += bookingQuantity;
     const savedEvent = await event.save();
 
     // SAVE CARD FOR FUTURE USE, SHOULD USER OPTED FOR IT
@@ -158,28 +165,27 @@ export const createChargeableBooking = async (req, res) => {
       const paymentMethod = await stripeInstance.paymentMethods.attach(
         paymentMethodId,
         {
-          customer: user.stripeCustomerId,
+          customer: user.userStripeId,
         }
       );
-      user.paymentMethods.push(paymentMethod.id);
+      user.userPaymentMethods.push(paymentMethod.id);
+
+      // SAVE UPDATED USER OBJECT
       savedCard = await user.save();
     }
 
     // SENDING CONFIRMATION EMAIL
     const confirmedBooking = await sendConfirmationEmail(
-      bookingName,
-      bookingEmail,
-      bookingQuantity,
+      savedBooking.bookingName,
+      savedBooking.bookingEmail,
+      savedBooking.bookingQuantity,
       event.eventName
     );
 
     res.status(201).json({
-      booking: savedBooking,
-      event: savedEvent,
-      card: savedCard,
-      confirmedBooking: confirmedBooking,
+      message: "Successfully booked tickets!",
     });
   } catch (error) {
-    res.status(400).json({ message: error.message }); // Handle validation errors
+    res.status(400).json({ message: error.message });
   }
 };

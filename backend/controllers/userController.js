@@ -122,7 +122,7 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // UPDATES EACH USER OBJECT ATTRIBUTE RESPECTIVELY, IF PROVIDED
+    // UPDATE EACH USER OBJECT ATTRIBUTE RESPECTIVELY, IF PROVIDED
     if (userName) user.userName = userName;
     if (userEmail) user.userEmail = userEmail;
     if (userPassword) {

@@ -1,16 +1,18 @@
 //models/Booking.js
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 const BookingSchema = new mongoose.Schema({
   bookingId: {
     type: String,
     required: true,
     unique: true,
+    default: uuidv4,
   },
   bookingName: {
     type: String,
     required: true,
-  }, // New field for user's name
+  },
   bookingEmail: {
     type: String,
     required: true,
@@ -21,21 +23,19 @@ const BookingSchema = new mongoose.Schema({
   },
   bookingDate: {
     type: Date,
+    required: true,
     default: Date.now,
   },
   eventId: {
     type: String,
-    ref: "Event",
     required: true,
+    ref: "Event",
   },
-});
-
-// MIDDLEWARE TO AUTO-GENERATE UNIQUE BOOKINGID BEFORE SAVING
-BookingSchema.pre("save", function (next) {
-  if (!this.bookingId) {
-    this.bookingId = uuidv4();
-  }
-  next();
+  userId: {
+    type: String,
+    required: true,
+    ref: "User",
+  },
 });
 
 const Booking = mongoose.model("Booking", BookingSchema);
