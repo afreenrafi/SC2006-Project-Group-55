@@ -105,8 +105,10 @@ const Setup = ({ route }) => {
           navigation.navigate('startup/OrgValidation', { email: result.email, role: result.role });
         }
         else{
-          //to home page
-          navigation.navigate('tabs', { email: result.email, role: result.role });
+          //to tabs
+          // navigation.navigate('tabs', { email: result.email, role: result.role });
+          //for testing
+          navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
         }
         
       }
@@ -160,7 +162,7 @@ const Setup = ({ route }) => {
           
         </View>
         <View style={styles.btnContainer}>
-          <RoundBtn onPress={handleNext}/>
+          <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
         </View>
 
         <Modal

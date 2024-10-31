@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 
-const RoundBtn = ({ alignment = "center", onPress }) => {
+const RoundBtn = ({ alignment = "center", onPress, text, icon, disabled=false }) => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
@@ -18,10 +18,13 @@ const RoundBtn = ({ alignment = "center", onPress }) => {
   }
 
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.container, styles.iosShadow, styles.androidShadow, {justifyContent: alignment}]}>
-      <FontAwesome5 name="arrow-circle-right" size={24} color="#ffffff"/>
+    <TouchableOpacity onPress={onPress} disabled={disabled} 
+    style={[styles.container, styles.iosShadow, styles.androidShadow, 
+    {justifyContent: alignment, backgroundColor: disabled ? "#5C5C5C" : "#CA3550"}]}>
+      <FontAwesome5 name={icon}  size={24} color="#ffffff"/>
       <Text style={[styles.text]}>
-        Next
+        {text}
+        {/* name="arrow-circle-right" */}
       </Text>
       {/* <Image style={styles.logo} source={require('../assets/logo/singpass_logo.png')} /> */}
     </TouchableOpacity>
@@ -33,7 +36,7 @@ const styles = StyleSheet.create({
     // marginTop: 30,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#CA3550',
+    // backgroundColor: '#CA3550',
     borderRadius: 50,
     paddingHorizontal: 30,
     height: 50,
@@ -51,7 +54,6 @@ const styles = StyleSheet.create({
     shadowColor: '#000000',
   },
   text: {
-    fontFamily: 'MontserratBold', // Ensure the correct font is applied
     color: "#ffffff",
     fontSize: 24,
     textAlign: "center"

@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import StyledInput from "../../components/StyledInput";
 import RoundBtn from "../../components/RoundBtn";
 import SelectInput from "../../components/SelectInput";
-// import GenderPicker from "../../components/GenderPicker";
 
 const Details = ({ route }) => {
   const navigation = useNavigation();
@@ -90,7 +89,7 @@ const Details = ({ route }) => {
         {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
         </View>
         <View style={styles.btnContainer}>
-          <RoundBtn onPress={handleNext}/>
+          <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
         </View>
 
         <Modal

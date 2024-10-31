@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
    
   },
   text: {
-    fontFamily: "CrimsonProRegular",
     fontSize: 26,
     marginBottom: 5
   }
