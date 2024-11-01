@@ -107,10 +107,10 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
     shadowOffset: { width: 0, height: 5 },
-    elevation: 5,
+    elevation: 3,
   },
   eventImage: {
     width: "95%",
