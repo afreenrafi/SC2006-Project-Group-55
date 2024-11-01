@@ -105,30 +105,18 @@ const Homepage = ({ navigation }) => {
         </View>
     );
   };
-  
-  const handleSearchPress = (searchQuery) => {
-    const lowerQuery = searchQuery.toLowerCase();
-    const results = allEvents.filter(
-      (event) =>
-        event.name.toLowerCase().includes(lowerQuery) ||
-        event.type.toLowerCase().includes(lowerQuery) ||
-        event.location.toLowerCase().includes(lowerQuery)
-    );
-    const uniqueResults = [...new Map(results.map(event => [event.id, event])).values()]; // Ensuring unique results by ID
-    setFilteredEvents(uniqueResults);
-  };
 
   return (
     <ScrollView style={styles.container}>
       {/* Header with location and icons */}
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.openDrawer()}>
+        <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
           <FontAwesome name="bars" size={24} color="black" />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={styles.location}>📍 Boon Lay, Jurong</Text>
-        <Pressable onPress={() => navigation.navigate('Notifications')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <FontAwesome name="bell" size={24} color="black" />
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       {/* Title */}
@@ -159,63 +147,39 @@ const Homepage = ({ navigation }) => {
       ))}
 </ScrollView>
 
-      {/* Search Bar */}
-      <View style={styles.searchBarContainer}>
-        <SearchBar onSearchPress={handleSearchPress} />
-      </View>
-
-       {/* Upcoming Events */}
+      {/* Upcoming Events */}
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Upcoming Events</Text>
         {renderUpcomingEvent()}
       </View>
 
-      {/* Display Search Results */}
-      {filteredEvents.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Search Results</Text>
+      {/* Popular Events Section */}
+      <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Most Popular</Text>
+          </View>
           <FlatList 
             horizontal
-            data={filteredEvents}
+            data={filteredPopularEvents}
+            renderItem={renderEventCard}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.flatListContainer}
+          />
+      </View>
+
+      {/* Nearby Events Section */}
+      <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Nearby</Text>
+          </View>
+          <FlatList 
+            horizontal
+            data={filteredNearbyEvents}
             renderItem={renderEventCard}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.flatListContainer}
           />
         </View>
-      )}
-
-      {/* Hide Popular and Nearby if search results exist */}
-      {filteredEvents.length === 0 && (
-        <>
-          {/* Popular Events Section */}
-          <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Most Popular</Text>
-              </View>
-              <FlatList 
-                horizontal
-                data={filteredPopularEvents}
-                renderItem={renderEventCard}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.flatListContainer}
-              />
-          </View>
-
-          {/* Nearby Events Section */}
-          <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Nearby</Text>
-              </View>
-              <FlatList 
-                horizontal
-                data={filteredNearbyEvents}
-                renderItem={renderEventCard}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.flatListContainer}
-              />
-          </View>
-        </>
-      )}
     </ScrollView>
   );
 };
@@ -277,10 +241,6 @@ const styles = StyleSheet.create({
     color: '#EE1C43', 
     fontWeight: '500',
   },
-  searchBarContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-  },
   section: {
     paddingHorizontal: 20,
     marginVertical: 5,
@@ -288,7 +248,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 10,
+    marginBottom: 7,
+    marginTop: 7,
   },
   flatListContainer: {
     paddingVertical: 5,
@@ -357,8 +318,7 @@ const styles = StyleSheet.create({
   upcomingEventCard: {
     width: '100%',
     height: 175,
-    backgroundColor: '#fff',
-    marginBottom: 0,
+    backgroundColor: '#FFF',
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 10,
     borderTopLeftRadius: 10,
@@ -428,7 +388,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end', 
     alignItems: 'center',
-    marginTop: 10, 
+    marginTop: -5,
     paddingHorizontal: 10, // Ensure proper alignment with the card width
   },
   shareButton: {

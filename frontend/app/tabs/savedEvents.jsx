@@ -35,10 +35,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    paddingTop: '17%',
+    paddingTop: '15%',
     fontSize: 24,
     fontWeight: '600',
     marginVertical: 20,
+    textAlign: 'center',
   },
   noEventsContainer: {
     alignItems: 'center',
