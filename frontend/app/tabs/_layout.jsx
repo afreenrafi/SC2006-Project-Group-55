@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Homepage from './homepage';
 import Profile from './profile';
 import Ticket from './ticket';
+import TicketDetails from './ticketDetails'; 
 import SavedEventsPage from './savedEvents'
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 
@@ -57,7 +58,18 @@ const Tabs = () => {
         <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} />
         <Tab.Screen options={{ headerShown: false }} name="SavedEventsPage" component={SavedEventsPage} />
         <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} />
-      </Tab.Navigator>
+
+        {/* Add TicketDetails directly to the Tabs but hide tab bar when active */}
+      <Tab.Screen 
+        name="TicketDetails" 
+        component={TicketDetails} 
+        options={{
+          headerShown: false,
+          tabBarButton: () => null, // Hide the tab bar button for TicketDetails
+          tabBarStyle: { display: 'none' }, // Hide the tab bar on TicketDetails
+        }}
+      />
+    </Tab.Navigator>
   );
 };
 
