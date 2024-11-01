@@ -6,6 +6,7 @@ import StyledInput from "../../components/StyledInput";
 import RoundBtn from "../../components/RoundBtn";
 import Entypo from '@expo/vector-icons/Entypo';
 import SelectInput from "../../components/SelectInput";
+import SelectModal from "../../components/SelectModal";
 
 
 const Setup = ({ route }) => {
@@ -165,28 +166,36 @@ const Setup = ({ route }) => {
           <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
         </View>
 
-        <Modal
-          animationType="slide"
+        <SelectModal 
+        modalTitle="Select Role" 
+        modalVisible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        oneOptPress={() => handleRoleSelect("General Public")} 
+        twoOptPress={() => handleRoleSelect("Organiser")} 
+        optOne="General Public"
+        optTwo="Organiser"
+        />
+
+        {/* <Modal
+          animationType="none"
           transparent={true}
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}  // Close the modal on request
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Gender" />
+              <StyledText size={24} textContent="Select Role" />
               <View style={styles.modalOptions}>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
-                  {/* <Text style={styles.modalText}>Male</Text> */}
-                  <StyledText size={20} textContent="General Public" underline="true"/>
+                  <StyledText size={20} textContent="General Public" fontColor="#FFF"/>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
-                  {/* <Text style={styles.modalText}>Female</Text> */}
-                  <StyledText size={20} textContent="Organiser" underline="true"/>
+                  <StyledText size={20} textContent="Organiser" fontColor="#FFF"/>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
-        </Modal>
+        </Modal> */}
 
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -212,37 +221,6 @@ const styles = StyleSheet.create({
   bullets: {
     display: 'flex',
     flexDirection: 'row'
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
-  },
-  modalView: {
-    width: 300,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalOptions: {
-    alignItems: "center",
-    paddingVertical: 30,
-  },
-  modalItem: {
-    paddingVertical: 10,
-    width: "100%",
-    alignItems: "center",
-  },
-  modalText: {
-    fontSize: 18,
-    color: "#333",
   },
 
 });

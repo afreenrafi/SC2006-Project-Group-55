@@ -7,6 +7,8 @@ import OrgDisplay from "../../components/OrgDisplay";
 import EventHeader from "../../components/EventHeader";
 import RoundBtn from "../../components/RoundBtn";
 import SingleDate from "../../components/SingleDate";
+import { FontAwesome5 } from "@expo/vector-icons";
+import StyledInput from "../../components/StyledInput";
 
 
 
@@ -18,6 +20,18 @@ const BuyTickets = ({ route }) => {
   const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [loading, setLoading] = useState(true);            // State to manage loading status
   const [selectedDate, setSelectedDate] = useState(null); 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [adultQty, setAdultQty] = useState(0);
+  const [inputQty, setInputQty] = useState(0);
+
+  const handleInputChange = (text) => {
+    // Ensure the input is a valid number and within the allowed range
+    const numericQty = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    if (numericQty === '' || (parseInt(numericQty) >= 0 && parseInt(numericQty) <= 120)) {
+        setInputQty(numericQty);
+    }
+  };
+
 
   // Fetch event details when component mounts
   useEffect(() => {
@@ -59,6 +73,7 @@ const BuyTickets = ({ route }) => {
           eventEndDate: "Sep 7",
           eventType: "Festival",
           eventMode: "Standing",
+          eventLocation: "Bras Basah, Bugis",
           eventDates: [
             {
                 day: "01",
@@ -87,6 +102,18 @@ const BuyTickets = ({ route }) => {
             {
                 day: "07",
                 month: 'SEP'
+            },
+          ],
+          ticketOptions: [
+            {
+                ticketType: "Adult Ticket",
+                ticketPrice: "FREE",
+                ticketSlots: 20,
+            },
+            {
+                ticketType: "Child Ticket",
+                ticketPrice: "FREE",
+                ticketSlots: 20,
             },
           ]
           
@@ -168,7 +195,37 @@ const BuyTickets = ({ route }) => {
                     </View>
                     <View style={styles.tixChoose}>
                         <StyledText size={20} textContent="Choose the ticket" />
+
+
+                        <View style={styles.selectCont}>
+                            <Image style={styles.selectBg} source={{uri: eventDetails.eventPic}}/>
+                            <View style={styles.selectView}>
+                                <View style={styles.selectDetails}>
+                                    <StyledText size={20} textContent={eventDetails.ticketOptions[0].ticketType} fontColor="#fff"/>
+                                    <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.ticketOptions[0].ticketPrice} fontColor="#fff" fweight="bold"/>
+                                </View>
+                                <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff"/>
+                                <View style={styles.selectQty}>
+                                    <StyledText style={styles.pageTitle} size={12} textContent={eventDetails.ticketOptions[0].ticketSlots + " slots left"} fontColor="#fff"/>
+                                </View>
+                                <View style={styles.selectNum}>
+                                    <TouchableOpacity>
+                                        <FontAwesome5 name="minus" size={26} color="#ffffff"/>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                        <StyledText style={styles.pageTitle} size={26} textContent={adultQty} fontColor="#fff" fweight="bold"/>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity>
+                                        <FontAwesome5 name="plus" size={26} color="#ffffff"/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
                         
+
+
+
+
                     </View>
                     
                   </View>
@@ -183,9 +240,33 @@ const BuyTickets = ({ route }) => {
           <StyledText size={12} textContent="book ticket or rsvp now" alignment="left"/>
         </View>
         <View style={styles.bottomBtn}>
-          <RoundBtn text="Checkout" icon="cart-plus"/>
+          <RoundBtn text="Checkout" icon="shopping-cart"/>
         </View>
       </View>
+      
+      <Modal
+            animationType="none"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}  // Close the modal on request
+        >
+            <View style={styles.modalOverlay}>
+            <View style={styles.modalView}>
+                <StyledText size={24} textContent="Type Quantity" />
+                <View style={styles.modalOptions}>
+                    <StyledInput data={String(inputQty)} onChangeText={handleInputChange} type="numeric"/>
+
+                {/* <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
+                    <StyledText size={20} textContent="General Public" fontColor="#FFF"/>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
+                    <StyledText size={20} textContent="Organiser" fontColor="#FFF"/>
+                </TouchableOpacity> */}
+                </View>
+                <RoundBtn text="done" onPress={() => setModalVisible(false)}/>
+            </View>
+            </View>
+        </Modal>
 
     </View>
   );
@@ -304,9 +385,95 @@ const styles = StyleSheet.create({
     maxHeight: 230,
   },
   tixChoose: {
-    width: '75%',
-
+    width: '80%',
   },
+
+  selectCont: {
+    width: "100%",
+    height: 180,
+    position: "relative",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginVertical: 10
+  },
+  selectBg: {
+    height: "100%",
+  },
+  selectView: {
+    width: "100%",
+    position: "absolute",
+    backgroundColor: "#5F525D",
+    bottom: 0,
+    borderRadius: 10,
+    // height: '50%',
+    padding: 10
+    // display: "flex",
+    // flexDirection: "row",
+    // alignContent: "center",
+    // padding: 30,
+    // paddingBottom: 70,
+  },
+  selectDetails: {
+    display: "flex",
+    flexDirection: "row",
+    alignContent: "center",
+    justifyContent: 'space-between'
+  },
+  selectQty: {
+    display: "flex",
+    flexDirection: "row",
+    alignContent: "center",
+    justifyContent: 'space-between',
+    paddingTop: 10,
+  },
+  selectNum: {
+    display: "flex",
+    flexDirection: "row",
+    alignContent: "center",
+    gap: 20,
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
+    },
+    modalView: {
+        width: 300,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalOptions: {
+        alignItems: "center",
+        paddingVertical: 10,
+        gap: 10,
+        width: '25%'
+    },
+    modalItem: {
+        paddingVertical: 10,
+        width: "100%",
+        alignItems: "center",
+        backgroundColor: "#CA3550",
+        borderRadius: 20,
+        padding: 20,
+    },
+    modalText: {
+        fontSize: 18,
+        color: "#333",
+    },
+  
+  
   
 
 

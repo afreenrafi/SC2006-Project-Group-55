@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import StyledInput from "../../components/StyledInput";
 import RoundBtn from "../../components/RoundBtn";
 import SelectInput from "../../components/SelectInput";
+import SelectModal from "../../components/SelectModal";
 
 const Details = ({ route }) => {
   const navigation = useNavigation();
@@ -92,28 +93,15 @@ const Details = ({ route }) => {
           <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
         </View>
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}  // Close the modal on request
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Gender" />
-              <View style={styles.modalOptions}>
-                <TouchableOpacity style={styles.modalItem} onPress={() => handleGenderSelect("Male")}>
-                  {/* <Text style={styles.modalText}>Male</Text> */}
-                  <StyledText size={20} textContent="Male" underline="true"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalItem} onPress={() => handleGenderSelect("Female")}>
-                  {/* <Text style={styles.modalText}>Female</Text> */}
-                  <StyledText size={20} textContent="Female" underline="true"/>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        <SelectModal 
+        modalTitle="Select Gender" 
+        modalVisible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+        oneOptPress={() => handleGenderSelect("Male")} 
+        twoOptPress={() => handleGenderSelect("Female")} 
+        optOne="Male"
+        optTwo="Female"
+        />
 
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -136,37 +124,41 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: "5%",
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
-  },
-  modalView: {
-    width: 300,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalOptions: {
-    alignItems: "center",
-    paddingVertical: 30,
-  },
-  modalItem: {
-    paddingVertical: 10,
-    width: "100%",
-    alignItems: "center",
-  },
-  modalText: {
-    fontSize: 18,
-    color: "#333",
-  },
+  // modalOverlay: {
+  //   flex: 1,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
+  // },
+  // modalView: {
+  //   width: 300,
+  //   backgroundColor: "white",
+  //   borderRadius: 20,
+  //   padding: 20,
+  //   alignItems: "center",
+  //   shadowColor: "#000",
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.25,
+  //   shadowRadius: 4,
+  //   elevation: 5,
+  // },
+  // modalOptions: {
+  //   alignItems: "center",
+  //   paddingVertical: 30,
+  //   gap: 10
+  // },
+  // modalItem: {
+  //   paddingVertical: 10,
+  //   width: "100%",
+  //   alignItems: "center",
+  //   backgroundColor: "#CA3550",
+  //   borderRadius: 20,
+  //   padding: 20,
+  // },
+  // modalText: {
+  //   fontSize: 18,
+  //   color: "#333",
+  // },
 
 });
 

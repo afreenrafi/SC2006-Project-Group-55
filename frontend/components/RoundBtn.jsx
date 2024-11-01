@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
-import * as Font from 'expo-font';
 
 const RoundBtn = ({ alignment = "center", onPress, text, icon, disabled=false }) => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-
-  useEffect(() => {
-    Font.loadAsync({
-      'MontserratBold': require('../assets/fonts/Montserrat-Bold.ttf'),
-    }).then(() => setFontsLoaded(true));
-  }, []);
-
-  if (!fontsLoaded) {
-    return null; // Ensure the fonts are loaded before rendering
-  }
+ 
 
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled} 

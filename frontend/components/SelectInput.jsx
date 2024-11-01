@@ -1,25 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
-import * as Font from 'expo-font';
 
 
 const StyledInput = ({ label, data, onPress }) => {
-  // const [text, onChangeText] = React.useState({data});
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-
-  useEffect(() => {
-    Font.loadAsync({
-      'CrimsonProRegular': require('../assets/fonts/CrimsonPro-Regular.ttf'),
-    }).then(() => setFontsLoaded(true));
-  }, []);
-
-  if (!fontsLoaded) {
-    return null; // Prevent rendering until fonts are loaded
-  }
+ 
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{label}</Text>
+      {label && <Text style={styles.text}>{label}</Text>}
       <TouchableOpacity style={styles.inputCont} onPress={onPress}>
         <Text 
             style={styles.input}
