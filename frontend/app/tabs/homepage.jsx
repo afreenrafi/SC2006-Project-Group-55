@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Image, StyleSheet, FlatList, Alert, TouchableOpacity, Text, Pressable, ScrollView} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import Icon from 'react-native-vector-icons/MaterialIcons'; 
+import { AppContext } from '../context/AppContext';
 import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
 const Homepage = ({ navigation }) => {
+  const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
-  const [savedEvents, setSavedEvents] = useState(mockSavedEvents); // Bookmark to Save Events
-  const [filteredEvents, setFilteredEvents] = useState([]); // For search results
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.type === selectedFilter);
@@ -20,18 +19,7 @@ const Homepage = ({ navigation }) => {
     ...mockUpcomingEvents,
     ...mockPopularEvents,
     ...mockNearbyEvents,
-    ...mockSavedEvents,
   ];
-
-  const toggleBookmark = (event) => {
-    setSavedEvents((prevSavedEvents) => {
-      if (prevSavedEvents.some((e) => e.id === event.id)) {
-        return prevSavedEvents.filter((e) => e.id !== event.id); // Remove if already saved
-      } else {
-        return [...prevSavedEvents, event]; // Add new event
-      }
-    });
-  };
 
   const renderEventCard = ({ item }) => {
     const isBookmarked = savedEvents.some((e) => e.id === item.id);
@@ -41,21 +29,11 @@ const Homepage = ({ navigation }) => {
         <Text style={styles.eventType}>{item.type}</Text>
         <View style={styles.eventDetailsContainer}>
           <Text style={styles.eventName}>{item.name}</Text>
-          <View style={styles.eventDateLocation}>
-            <Icon name="location-on" size={16} color="#888" />
-            <Text style={styles.eventLocation}>{item.location}</Text>
-          </View>
+          <Text style={styles.eventLocation}>{item.location}</Text>
           <Text style={styles.eventDate}>{item.date}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.bookmarkButton}
-          onPress={() => toggleBookmark(item)}
-        >          
-        <FontAwesome 
-          name={isBookmarked ? "bookmark" : "bookmark-o"} 
-          size={20} 
-          color={isBookmarked ? "#EE1C43" : "#FFF"} 
-        />
+        <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.bookmarkButton}>
+          <FontAwesome name={isBookmarked ? "bookmark" : "bookmark-o"} size={20} color={isBookmarked ? "#EE1C43" : "#FFF"} />
         </TouchableOpacity>
       </View>
     );
