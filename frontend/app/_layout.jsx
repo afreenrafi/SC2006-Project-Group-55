@@ -11,8 +11,6 @@ import EventsPage from './events/EventsPage';
 import BuyTickets from './events/BuyTickets';
 import OrderDetails from './events/OrderDetails';
 
-import SearchItem from './utils/SearchItem'; // Adjust the path if necessary
-
 const Stack = createNativeStackNavigator();
 
 const MainLayout = () => {
@@ -79,11 +77,6 @@ const MainLayout = () => {
       <Stack.Screen
         name="tabs"
         component={Tabs}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="utils/SearchItem"
-        component={SearchItem}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
