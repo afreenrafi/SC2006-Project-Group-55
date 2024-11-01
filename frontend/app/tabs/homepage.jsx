@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, FlatList, Alert, TouchableOpacity, Text, Pressable, ScrollView} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import SearchBar from '../../components/SearchBar'; 
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
 
@@ -62,6 +61,10 @@ const Homepage = ({ navigation }) => {
     );
   };
 
+  const handleDetailsPress = (event) => {
+    navigation.navigate('TicketDetails', { event });
+  };
+
   const renderUpcomingEvent = () => {
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
     return (
@@ -97,7 +100,10 @@ const Homepage = ({ navigation }) => {
               <FontAwesome name="share" size={12} color="#EE1C43" />
               <Text style={styles.shareButtonText}> Share</Text> 
             </TouchableOpacity>
-            <TouchableOpacity style={styles.detailsButton}>
+            <TouchableOpacity
+              style={styles.detailsButton}
+              onPress={() => handleDetailsPress(event)} // Pass the exact event data
+            >
               <FontAwesome name="info" size={12} color="#FFF" />
               <Text style={styles.detailsButtonText}> Details</Text> 
             </TouchableOpacity>
