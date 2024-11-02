@@ -9,6 +9,7 @@ import RoundBtn from "../../components/RoundBtn";
 import SingleDate from "../../components/SingleDate";
 import { FontAwesome5 } from "@expo/vector-icons";
 import StyledInput from "../../components/StyledInput";
+import TicketSelector from "../../components/TicketSelector";
 
 
 
@@ -21,19 +22,70 @@ const BuyTickets = ({ route }) => {
   const [loading, setLoading] = useState(true);            // State to manage loading status
   const [selectedDate, setSelectedDate] = useState(null); 
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
   const [adultQty, setAdultQty] = useState(0);
+  const [childQty, setChildQty] = useState(0);
+
   const [inputQty, setInputQty] = useState(0);
 
-  const handleInputChange = (text) => {
-    // Ensure the input is a valid number and within the allowed range
-    const numericQty = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    if (numericQty === '' || (parseInt(numericQty) >= 0 && parseInt(numericQty) <= 120)) {
-        setInputQty(numericQty);
-    }
+  const handleAdultQtyChange = (qty) => {
+    setAdultQty(qty);
   };
 
+  const handleChildQtyChange = (qty) => {
+    setChildQty(qty);
+  };
 
-  // Fetch event details when component mounts
+  const handleInputChange = (text) => {
+    if (!eventDetails) return; // Exit if eventDetails is not yet loaded
+  
+    const maxSlots = selectedTicketType === 'Adult' 
+      ? eventDetails.ticketOptions[0].ticketSlots 
+      : eventDetails.ticketOptions[1].ticketSlots;
+  
+    // Ensure the input is a valid number and within the allowed range
+    const numericQty = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+  
+    if (numericQty === '' || (parseInt(numericQty) >= 0 && parseInt(numericQty) <= maxSlots)) {
+      setInputQty(numericQty);
+    } else if (parseInt(numericQty) > maxSlots) {
+      setInputQty(maxSlots.toString()); // Set to max slots if input exceeds the limit
+    }
+  };
+  
+
+  const openModalForTicketType = (type) => {
+    setSelectedTicketType(type);
+    setInputQty(type === 'Adult' ? adultQty : childQty); // Set initial quantity based on ticket type
+    setModalVisible(true);
+  };
+
+  const handleModalDone = () => {
+    if (selectedTicketType === 'Adult') {
+      setAdultQty(parseInt(inputQty) || 0); // Update adultQty
+    } else if (selectedTicketType === 'Child') {
+      setChildQty(parseInt(inputQty) || 0); // Update childQty
+    }
+    setModalVisible(false); // Close the modal
+  };
+
+  // const minusTicketCount = (type) => {
+  //   if (type === 'Adult' && adultQty > 0) {
+  //     setAdultQty((prev) => prev - 1); // Update adultQty
+  //   } else if (type === 'Child' && childQty > 0) {
+  //     setChildQty((prev) => prev - 1); // Update childQty
+  //   }
+  // }
+  // const plusTicketCount = (type, max) => {
+    
+  //   if (type === 'Adult' && adultQty < max) {
+  //     setAdultQty((prev) => prev + 1); // Update adultQty
+  //   } else if (type === 'Child' && childQty < max) {
+  //     setChildQty((prev) => prev + 1); // Update childQty
+  //   }
+  // }
+
+
   useEffect(() => {
     const getEventDetails = async () => {
       try {
@@ -55,6 +107,7 @@ const BuyTickets = ({ route }) => {
 
     getEventDetails();  // Call the function when component mounts
   }, []);
+    
 
 
 
@@ -106,12 +159,12 @@ const BuyTickets = ({ route }) => {
           ],
           ticketOptions: [
             {
-                ticketType: "Adult Ticket",
+                ticketType: "Adult",
                 ticketPrice: "FREE",
                 ticketSlots: 20,
             },
             {
-                ticketType: "Child Ticket",
+                ticketType: "Child",
                 ticketPrice: "FREE",
                 ticketSlots: 20,
             },
@@ -123,6 +176,7 @@ const BuyTickets = ({ route }) => {
   };
 
   const handleSelectDate = (date) => setSelectedDate(date);
+
 
 
   
@@ -195,13 +249,36 @@ const BuyTickets = ({ route }) => {
                     </View>
                     <View style={styles.tixChoose}>
                         <StyledText size={20} textContent="Choose the ticket" />
+                        {eventDetails && (
+                          <>
+                            <TicketSelector
+                              ticketType={eventDetails.ticketOptions[0].ticketType}
+                              ticketPrice={eventDetails.ticketOptions[0].ticketPrice}
+                              ticketSlots={eventDetails.ticketOptions[0].ticketSlots}
+                              eventLocation={eventDetails.eventLocation}
+                              imageUri={eventDetails.eventPic}
+                              quantity={adultQty}
+                              onQtyChange={handleAdultQtyChange} // Pass handler for adult ticket
+                              openModal={() => openModalForTicketType(eventDetails.ticketOptions[0].ticketType)}
+                            />
+                            <TicketSelector
+                              ticketType={eventDetails.ticketOptions[1].ticketType}
+                              ticketPrice={eventDetails.ticketOptions[1].ticketPrice}
+                              ticketSlots={eventDetails.ticketOptions[1].ticketSlots}
+                              eventLocation={eventDetails.eventLocation}
+                              imageUri={eventDetails.eventPic}
+                              quantity={childQty}
+                              onQtyChange={handleChildQtyChange} // Pass handler for child ticket
+                              openModal={() => openModalForTicketType(eventDetails.ticketOptions[1].ticketType)}
+                            />
+                          </>
+                        )}
 
-
-                        <View style={styles.selectCont}>
+                        {/* <View style={styles.selectCont}>
                             <Image style={styles.selectBg} source={{uri: eventDetails.eventPic}}/>
                             <View style={styles.selectView}>
                                 <View style={styles.selectDetails}>
-                                    <StyledText size={20} textContent={eventDetails.ticketOptions[0].ticketType} fontColor="#fff"/>
+                                    <StyledText size={20} textContent={eventDetails.ticketOptions[0].ticketType + " Ticket"} fontColor="#fff"/>
                                     <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.ticketOptions[0].ticketPrice} fontColor="#fff" fweight="bold"/>
                                 </View>
                                 <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff"/>
@@ -209,18 +286,44 @@ const BuyTickets = ({ route }) => {
                                     <StyledText style={styles.pageTitle} size={12} textContent={eventDetails.ticketOptions[0].ticketSlots + " slots left"} fontColor="#fff"/>
                                 </View>
                                 <View style={styles.selectNum}>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={() => minusTicketCount(eventDetails.ticketOptions[0].ticketType)}>
                                         <FontAwesome5 name="minus" size={26} color="#ffffff"/>
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => setModalVisible(true)}>
-                                        <StyledText style={styles.pageTitle} size={26} textContent={adultQty} fontColor="#fff" fweight="bold"/>
+                                    <TouchableOpacity style={styles.qtyCount} onPress={() => openModalForTicketType(eventDetails.ticketOptions[0].ticketType)}>
+                                        <StyledText style={styles.pageTitle} size={26} textContent={adultQty} fontColor="#fff" fweight="bold" alignment="center"/>
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={() => plusTicketCount(eventDetails.ticketOptions[0].ticketType, eventDetails.ticketOptions[0].ticketSlots)}>
                                         <FontAwesome5 name="plus" size={26} color="#ffffff"/>
                                     </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
+
+                        <View style={styles.selectCont}>
+                            <Image style={styles.selectBg} source={{uri: eventDetails.eventPic}}/>
+                            <View style={styles.selectView}>
+                                <View style={styles.selectDetails}>
+                                    <StyledText size={20} textContent={eventDetails.ticketOptions[1].ticketType + " Ticket"} fontColor="#fff"/>
+                                    <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.ticketOptions[1].ticketPrice} fontColor="#fff" fweight="bold"/>
+                                </View>
+                                <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff"/>
+                                <View style={styles.selectQty}>
+                                    <StyledText style={styles.pageTitle} size={12} textContent={eventDetails.ticketOptions[1].ticketSlots + " slots left"} fontColor="#fff"/>
+                                </View>
+                                <View style={styles.selectNum}>
+                                    <TouchableOpacity onPress={() => minusTicketCount(eventDetails.ticketOptions[1].ticketType)}>
+                                        <FontAwesome5 name="minus" size={26} color="#ffffff"/>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.qtyCount} onPress={() => openModalForTicketType(eventDetails.ticketOptions[1].ticketType)}>
+                                        <StyledText style={styles.pageTitle} size={26} textContent={childQty} fontColor="#fff" fweight="bold" alignment="center"/>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => plusTicketCount(eventDetails.ticketOptions[1].ticketType, eventDetails.ticketOptions[1].ticketSlots)}>
+                                        <FontAwesome5 name="plus" size={26} color="#ffffff"/>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View> */}
+                        
                         
 
 
@@ -263,7 +366,7 @@ const BuyTickets = ({ route }) => {
                     <StyledText size={20} textContent="Organiser" fontColor="#FFF"/>
                 </TouchableOpacity> */}
                 </View>
-                <RoundBtn text="done" onPress={() => setModalVisible(false)}/>
+                <RoundBtn text="done" onPress={handleModalDone}/>
             </View>
             </View>
         </Modal>
@@ -388,53 +491,52 @@ const styles = StyleSheet.create({
     width: '80%',
   },
 
-  selectCont: {
-    width: "100%",
-    height: 180,
-    position: "relative",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginVertical: 10
-  },
-  selectBg: {
-    height: "100%",
-  },
-  selectView: {
-    width: "100%",
-    position: "absolute",
-    backgroundColor: "#5F525D",
-    bottom: 0,
-    borderRadius: 10,
-    // height: '50%',
-    padding: 10
-    // display: "flex",
-    // flexDirection: "row",
-    // alignContent: "center",
-    // padding: 30,
-    // paddingBottom: 70,
-  },
-  selectDetails: {
-    display: "flex",
-    flexDirection: "row",
-    alignContent: "center",
-    justifyContent: 'space-between'
-  },
-  selectQty: {
-    display: "flex",
-    flexDirection: "row",
-    alignContent: "center",
-    justifyContent: 'space-between',
-    paddingTop: 10,
-  },
-  selectNum: {
-    display: "flex",
-    flexDirection: "row",
-    alignContent: "center",
-    gap: 20,
-    position: "absolute",
-    bottom: 10,
-    right: 10,
-  },
+  // selectCont: {
+  //   width: "100%",
+  //   height: 180,
+  //   position: "relative",
+  //   borderRadius: 10,
+  //   overflow: "hidden",
+  //   marginVertical: 10
+  // },
+  // selectBg: {
+  //   height: "100%",
+  // },
+  // selectView: {
+  //   width: "100%",
+  //   position: "absolute",
+  //   backgroundColor: "#5F525D",
+  //   bottom: 0,
+  //   borderRadius: 10,
+  //   padding: 10
+  // },
+  // selectDetails: {
+  //   display: "flex",
+  //   flexDirection: "row",
+  //   alignContent: "center",
+  //   justifyContent: 'space-between'
+  // },
+  // selectQty: {
+  //   display: "flex",
+  //   flexDirection: "row",
+  //   alignContent: "center",
+  //   justifyContent: 'space-between',
+  //   paddingTop: 10,
+  // },
+  // selectNum: {
+  //   display: "flex",
+  //   flexDirection: "row",
+  //   alignContent: "center",
+  //   gap: 20,
+  //   position: "absolute",
+  //   bottom: 10,
+  //   right: 10,
+  // },
+  // qtyCount: {
+  //   minWidth: 30,
+  //   alignItems: "center",
+  //   justifyContent: "center"
+  // },
 
   modalOverlay: {
     flex: 1,
