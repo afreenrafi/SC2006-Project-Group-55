@@ -1,4 +1,4 @@
-import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, Platform } from "react-native";
+import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import React, { useState, useEffect } from "react";
 import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
@@ -7,7 +7,6 @@ import OrgDisplay from "../../components/OrgDisplay";
 import EventHeader from "../../components/EventHeader";
 import RoundBtn from "../../components/RoundBtn";
 import SingleDate from "../../components/SingleDate";
-import { FontAwesome5 } from "@expo/vector-icons";
 import StyledInput from "../../components/StyledInput";
 import TicketSelector from "../../components/TicketSelector";
 
@@ -23,25 +22,40 @@ const BuyTickets = ({ route }) => {
   const [selectedDate, setSelectedDate] = useState(null); 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
-  const [adultQty, setAdultQty] = useState(0);
-  const [childQty, setChildQty] = useState(0);
-
+  // const [adultQty, setAdultQty] = useState(0);
+  // const [childQty, setChildQty] = useState(0);
+  const [quantities, setQuantities] = useState({}); // Object to store quantities for each ticket type
   const [inputQty, setInputQty] = useState(0);
+  const [totalQty, setTotalQty] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
 
-  const handleAdultQtyChange = (qty) => {
-    setAdultQty(qty);
+  const handleQtyChange = (ticketType, qty) => {
+    setQuantities(prev => {
+      const updatedQuantities = { ...prev, [ticketType]: qty };
+
+      // Update total quantity and total price
+      const updatedTotalQty = Object.values(updatedQuantities).reduce((acc, val) => acc + val, 0);
+      const updatedTotalPrice = eventDetails.ticketOptions.reduce((acc, option) => {
+        const quantity = updatedQuantities[option.ticketType] || 0;
+        return acc + quantity * option.ticketPrice;
+      }, 0);
+
+      setTotalQty(updatedTotalQty);
+      setTotalPrice(updatedTotalPrice.toFixed(2));
+
+      return updatedQuantities;
+    });
   };
 
-  const handleChildQtyChange = (qty) => {
-    setChildQty(qty);
-  };
 
   const handleInputChange = (text) => {
     if (!eventDetails) return; // Exit if eventDetails is not yet loaded
   
-    const maxSlots = selectedTicketType === 'Adult' 
-      ? eventDetails.ticketOptions[0].ticketSlots 
-      : eventDetails.ticketOptions[1].ticketSlots;
+    // const maxSlots = selectedTicketType === 'Adult' 
+    //   ? eventDetails.ticketOptions[0].ticketSlots 
+    //   : eventDetails.ticketOptions[1].ticketSlots;
+    const ticket = eventDetails.ticketOptions.find(option => option.ticketType === selectedTicketType);
+    const maxSlots = ticket ? ticket.ticketSlots : 0;
   
     // Ensure the input is a valid number and within the allowed range
     const numericQty = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
@@ -53,37 +67,21 @@ const BuyTickets = ({ route }) => {
     }
   };
   
-
   const openModalForTicketType = (type) => {
     setSelectedTicketType(type);
-    setInputQty(type === 'Adult' ? adultQty : childQty); // Set initial quantity based on ticket type
+    setInputQty(quantities[type] || 0);
     setModalVisible(true);
   };
 
   const handleModalDone = () => {
-    if (selectedTicketType === 'Adult') {
-      setAdultQty(parseInt(inputQty) || 0); // Update adultQty
-    } else if (selectedTicketType === 'Child') {
-      setChildQty(parseInt(inputQty) || 0); // Update childQty
-    }
+    const quantity = parseInt(inputQty) || 0;
+    
+    // Call handleQtyChange with the selected ticket type and the new quantity
+    handleQtyChange(selectedTicketType, quantity);
+    
     setModalVisible(false); // Close the modal
   };
-
-  // const minusTicketCount = (type) => {
-  //   if (type === 'Adult' && adultQty > 0) {
-  //     setAdultQty((prev) => prev - 1); // Update adultQty
-  //   } else if (type === 'Child' && childQty > 0) {
-  //     setChildQty((prev) => prev - 1); // Update childQty
-  //   }
-  // }
-  // const plusTicketCount = (type, max) => {
-    
-  //   if (type === 'Adult' && adultQty < max) {
-  //     setAdultQty((prev) => prev + 1); // Update adultQty
-  //   } else if (type === 'Child' && childQty < max) {
-  //     setChildQty((prev) => prev + 1); // Update childQty
-  //   }
-  // }
+  
 
 
   useEffect(() => {
@@ -91,6 +89,13 @@ const BuyTickets = ({ route }) => {
       try {
         const details = await fetchEventDetails();  // Fetch event details
         setEventDetails(details);                  // Set the fetched details to state
+
+        // Initialize quantities object for each ticket type
+        const initialQuantities = {};
+        details.ticketOptions.forEach(option => {
+          initialQuantities[option.ticketType] = 0;
+        });
+        setQuantities(initialQuantities);
 
         // Set the initial selected date to the first date in eventDates
         if (details.eventDates && details.eventDates.length > 0) {
@@ -160,12 +165,17 @@ const BuyTickets = ({ route }) => {
           ticketOptions: [
             {
                 ticketType: "Adult",
-                ticketPrice: "FREE",
+                ticketPrice: 11,
                 ticketSlots: 20,
             },
             {
                 ticketType: "Child",
-                ticketPrice: "FREE",
+                ticketPrice: 0,
+                ticketSlots: 20,
+            },
+            {
+                ticketType: "Elderly",
+                ticketPrice: 11,
                 ticketSlots: 20,
             },
           ]
@@ -176,21 +186,22 @@ const BuyTickets = ({ route }) => {
   };
 
   const handleSelectDate = (date) => setSelectedDate(date);
-
-
-
   
-
 
   const handleNext = async () => {
     try {
-      // const result = await submitUserDetails();  // Simulate sending data
-      // console.log("User details submitted:", result);
-      navigation.navigate('NextPage', { email: email, role: role });  // Navigate to new page with email
+      navigation.navigate('events/OrderDetails', { 
+        email: email, 
+        role: role, 
+        totalPrice: totalPrice, 
+        selectedDate: selectedDate,
+        quantities: quantities
+      });
     } catch (error) {
       console.error("Failed to submit details:", error);
     }
-  }
+  };
+  
 
   if (loading) {
     return (
@@ -249,86 +260,21 @@ const BuyTickets = ({ route }) => {
                     </View>
                     <View style={styles.tixChoose}>
                         <StyledText size={20} textContent="Choose the ticket" />
-                        {eventDetails && (
-                          <>
-                            <TicketSelector
-                              ticketType={eventDetails.ticketOptions[0].ticketType}
-                              ticketPrice={eventDetails.ticketOptions[0].ticketPrice}
-                              ticketSlots={eventDetails.ticketOptions[0].ticketSlots}
-                              eventLocation={eventDetails.eventLocation}
-                              imageUri={eventDetails.eventPic}
-                              quantity={adultQty}
-                              onQtyChange={handleAdultQtyChange} // Pass handler for adult ticket
-                              openModal={() => openModalForTicketType(eventDetails.ticketOptions[0].ticketType)}
-                            />
-                            <TicketSelector
-                              ticketType={eventDetails.ticketOptions[1].ticketType}
-                              ticketPrice={eventDetails.ticketOptions[1].ticketPrice}
-                              ticketSlots={eventDetails.ticketOptions[1].ticketSlots}
-                              eventLocation={eventDetails.eventLocation}
-                              imageUri={eventDetails.eventPic}
-                              quantity={childQty}
-                              onQtyChange={handleChildQtyChange} // Pass handler for child ticket
-                              openModal={() => openModalForTicketType(eventDetails.ticketOptions[1].ticketType)}
-                            />
-                          </>
-                        )}
+                        {eventDetails.ticketOptions.map((option) => (
+                          <TicketSelector
+                            key={option.ticketType}
+                            ticketType={option.ticketType}
+                            ticketPrice={option.ticketPrice}
+                            ticketSlots={option.ticketSlots}
+                            eventLocation={eventDetails.eventLocation}
+                            imageUri={eventDetails.eventPic}
+                            quantity={quantities[option.ticketType]}
+                            onQtyChange={(qty) => handleQtyChange(option.ticketType, qty)}
+                            openModal={() => openModalForTicketType(option.ticketType)}
+                          />
+                        ))}
 
-                        {/* <View style={styles.selectCont}>
-                            <Image style={styles.selectBg} source={{uri: eventDetails.eventPic}}/>
-                            <View style={styles.selectView}>
-                                <View style={styles.selectDetails}>
-                                    <StyledText size={20} textContent={eventDetails.ticketOptions[0].ticketType + " Ticket"} fontColor="#fff"/>
-                                    <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.ticketOptions[0].ticketPrice} fontColor="#fff" fweight="bold"/>
-                                </View>
-                                <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff"/>
-                                <View style={styles.selectQty}>
-                                    <StyledText style={styles.pageTitle} size={12} textContent={eventDetails.ticketOptions[0].ticketSlots + " slots left"} fontColor="#fff"/>
-                                </View>
-                                <View style={styles.selectNum}>
-                                    <TouchableOpacity onPress={() => minusTicketCount(eventDetails.ticketOptions[0].ticketType)}>
-                                        <FontAwesome5 name="minus" size={26} color="#ffffff"/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.qtyCount} onPress={() => openModalForTicketType(eventDetails.ticketOptions[0].ticketType)}>
-                                        <StyledText style={styles.pageTitle} size={26} textContent={adultQty} fontColor="#fff" fweight="bold" alignment="center"/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => plusTicketCount(eventDetails.ticketOptions[0].ticketType, eventDetails.ticketOptions[0].ticketSlots)}>
-                                        <FontAwesome5 name="plus" size={26} color="#ffffff"/>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={styles.selectCont}>
-                            <Image style={styles.selectBg} source={{uri: eventDetails.eventPic}}/>
-                            <View style={styles.selectView}>
-                                <View style={styles.selectDetails}>
-                                    <StyledText size={20} textContent={eventDetails.ticketOptions[1].ticketType + " Ticket"} fontColor="#fff"/>
-                                    <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.ticketOptions[1].ticketPrice} fontColor="#fff" fweight="bold"/>
-                                </View>
-                                <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff"/>
-                                <View style={styles.selectQty}>
-                                    <StyledText style={styles.pageTitle} size={12} textContent={eventDetails.ticketOptions[1].ticketSlots + " slots left"} fontColor="#fff"/>
-                                </View>
-                                <View style={styles.selectNum}>
-                                    <TouchableOpacity onPress={() => minusTicketCount(eventDetails.ticketOptions[1].ticketType)}>
-                                        <FontAwesome5 name="minus" size={26} color="#ffffff"/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.qtyCount} onPress={() => openModalForTicketType(eventDetails.ticketOptions[1].ticketType)}>
-                                        <StyledText style={styles.pageTitle} size={26} textContent={childQty} fontColor="#fff" fweight="bold" alignment="center"/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => plusTicketCount(eventDetails.ticketOptions[1].ticketType, eventDetails.ticketOptions[1].ticketSlots)}>
-                                        <FontAwesome5 name="plus" size={26} color="#ffffff"/>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View> */}
-                        
-                        
-
-
-
-
+                      
                     </View>
                     
                   </View>
@@ -340,10 +286,11 @@ const BuyTickets = ({ route }) => {
 
       <View style={[styles.bottomButtonContainer, styles.iosShadow, styles.androidShadow]}>
         <View style={styles.bottomText}>
-          <StyledText size={12} textContent="book ticket or rsvp now" alignment="left"/>
+          <StyledText size={20} textContent={(totalQty > 0) && `$ ${String(totalPrice)}` } alignment="left" fontColor="#CA3550" fweight="bold"/>
+          <StyledText size={12} textContent={(totalQty > 0) ? `you're going +${totalQty}` : "select ticket to continue"} alignment="left"/>
         </View>
         <View style={styles.bottomBtn}>
-          <RoundBtn text="Checkout" icon="shopping-cart"/>
+          <RoundBtn onPress={handleNext} text="Checkout" icon="shopping-cart" disabled={(totalQty > 0) ? false : true}/>
         </View>
       </View>
       
@@ -469,7 +416,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000000',
   },
   bottomText:{
-    width:"20%"
+    width:"30%"
   },
   bottomBtn: {
     width: "70%"

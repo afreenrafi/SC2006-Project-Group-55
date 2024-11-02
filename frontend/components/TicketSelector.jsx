@@ -22,7 +22,7 @@ const TicketSelector = ({ ticketType, ticketPrice, ticketSlots, eventLocation, i
       <View style={styles.selectView}>
         <View style={styles.selectDetails}>
           <StyledText size={20} textContent={`${ticketType} Ticket`} fontColor="#fff" />
-          <StyledText style={styles.pageTitle} size={14} textContent={ticketPrice} fontColor="#fff" fweight="bold" />
+          <StyledText style={styles.pageTitle} size={14} textContent={ticketPrice == 0 ? "FREE" : "$"+ticketPrice} fontColor="#fff" fweight="bold" />
         </View>
         <StyledText style={styles.pageTitle} size={14} textContent={eventLocation} fontColor="#fff" />
         <View style={styles.selectQty}>
@@ -45,7 +45,6 @@ const TicketSelector = ({ ticketType, ticketPrice, ticketSlots, eventLocation, i
 };
 
 const styles = StyleSheet.create({
-  // Same styles as before
   selectCont: {
     width: "100%",
     height: 180,
@@ -63,13 +62,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5F525D",
     bottom: 0,
     borderRadius: 10,
-    // height: '50%',
     padding: 10
-    // display: "flex",
-    // flexDirection: "row",
-    // alignContent: "center",
-    // padding: 30,
-    // paddingBottom: 70,
   },
   selectDetails: {
     display: "flex",
