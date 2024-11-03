@@ -107,7 +107,7 @@ export const createChargeableBooking = async (req, res) => {
 
     // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
     const event = await Event.findOne({ eventId: eventId });
-    if (!event) {
+    if (!event) {   
       return res.status(404).json({ message: "Event not found!" });
     }
 
