@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
+import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
 
 const allEvents = [
   ...mockUpcomingEvents,
   ...mockPopularEvents,
   ...mockNearbyEvents,
-  ...mockSavedEvents,
 ];
 
 // remove duplicate events based on id
