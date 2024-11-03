@@ -52,7 +52,7 @@ const TicketDetails = ({ route }) => {
           
           {/* Download Image Button */}
           <TouchableOpacity style={styles.downloadButton}>
-            <FontAwesome name="download" size={18} color="#EE1C43" />
+            <FontAwesome name="download" size={18} color="#CA3550" />
             <Text style={styles.downloadButtonText}>Download Image</Text>
           </TouchableOpacity>
 
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EE1C43',
+    backgroundColor: '#CA3550',
     paddingVertical: 10,
     borderRadius: 20,
     marginVertical: 10,
@@ -166,13 +166,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#EE1C43',
+    borderColor: '#CA3550',
     marginVertical: 5,
   },
   downloadButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#EE1C43',
+    color: '#CA3550',
     marginLeft: 8,
   },
   modalContainer: {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 20,
-    backgroundColor: '#EE1C43',
+    backgroundColor: '#CA3550',
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
