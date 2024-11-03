@@ -111,9 +111,9 @@ const EventSchema = new mongoose.Schema({
       },
     },
   },
-  eventGenre:{
+  eventGenre: {
     type: String,
-    required:true,
+    required: true,
     enum: ["All", "Museums", "Exhibitions", "Performances", "Festivals"],
   },
   eventLocation: {
@@ -207,6 +207,14 @@ const EventSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  eventArtist: [
+    {
+      type: String,
+      required: true,
+      ref: "User",
+      default: null,
+    },
+  ],
   userId: {
     type: String,
     required: true,

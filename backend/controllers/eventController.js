@@ -1,7 +1,30 @@
 // BUSINESS LOGIC FOR EVENT ENTITY (CRUD)
 // IMPORT NESCESSARY LIBRARIES
 import Event from "../models/Event.js";
-import { v4 as uuidv4 } from "uuid";
+import { User } from "../models/User.js";
+
+// SUPPORTING FUNCTIONS RELATED TO EVENT ENTITY
+const verifyEventArtist = async (req, res) => {
+  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION VERIFYEVENTARTIST
+  const { eventArtist, userId } = req.params;
+
+  try {
+    // LOOPING THROUGH EVERY ARTIST TAGGED IN EVENTARTIST
+    for (const artistId of eventArtist) {
+      const artist = await User.findOne({ userId: artistId });
+
+      // VERIFIES ARTIST IF THEIR ARTISTVERIFIEDBY IS NULL
+      if (artist && artist.artistVerifiedBy === null) {
+        artist.artistVerifiedBy = userId;
+        await artist.save();
+      }
+    }
+
+    return { message: "Successfully verified all Artists!" };
+  } catch (error) {
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
+  }
+};
 
 // CREATING NEW EVENT OBJECT
 export const createEvent = async (req, res) => {
@@ -18,6 +41,7 @@ export const createEvent = async (req, res) => {
     eventClose,
     eventPrice,
     eventTicketQuantity,
+    eventArtist,
     userId,
   } = req.body;
 
@@ -35,15 +59,19 @@ export const createEvent = async (req, res) => {
       eventClose: eventClose,
       eventPrice: eventPrice,
       eventTicketQuantity: eventTicketQuantity,
+      eventArtist: eventArtist,
       userId: userId,
     });
 
     // SAVE NEW EVENT OBJECT TO DATABASE
     await newEvent.save();
 
+    // VERIFIES ALL ARTISTS TAGGED IN THE EVENT OBJECT
+    const verifyEventArtistResult = await verifyEventArtist({ params: { eventArtist, userId } }, res);
+
     res.status(201).json({ message: "Successfully created new Event!" });
   } catch (error) {
-    res.status(400).json({ message: "Internal Server Error Occurred!" });
+    res.status(400).json({ message: error.message });
   }
 };
 
