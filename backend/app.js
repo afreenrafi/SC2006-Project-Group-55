@@ -66,6 +66,8 @@ app.use("/api/bookingRoute", bookingRoute);
 // DEFAULT PORT
 const PORT = process.env.PORT || 5000;
 
+console.log("MongoDB URI:", process.env.MONGO_URI); // Debugging line to ensure port is connected 
+
 // SET UP MONGODB CONNECTION
 mongoose
   .connect(process.env.MONGO_URI)
