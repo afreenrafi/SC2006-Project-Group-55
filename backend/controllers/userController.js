@@ -146,13 +146,10 @@ export const deleteUser = async (req, res) => {
     const { userId } = req.params;
 
     // RETRIEVE CURRENT USER OBJECT FROM DATABASE
-    const user = await User.findOne({ userId: userId });
+    const user = await User.findOneAndDelete({ userId: userId });
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
-
-    // DELETE USER OBJECT FROM DATABASE
-    await user.remove();
 
     res.status(200).json({ message: "User account deleted successfully!" });
   } catch (error) {
