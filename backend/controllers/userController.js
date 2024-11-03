@@ -145,7 +145,7 @@ export const deleteUser = async (req, res) => {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEUSER
     const { userId } = req.params;
 
-    // RETRIEVE & DELETE CURRENT USER OBJECT FROM DATABASE
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
     const user = await User.findOneAndDelete({ userId: userId });
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
