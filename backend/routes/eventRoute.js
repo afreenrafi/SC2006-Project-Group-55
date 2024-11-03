@@ -23,7 +23,6 @@ router.get("/search", searchEvents);
 router.get("/:eventId", getEventById); 
 
 // UPDATE
-
 router.put("/:eventId", updateEvent);
 
 // DELETE

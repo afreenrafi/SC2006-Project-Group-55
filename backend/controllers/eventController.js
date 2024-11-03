@@ -1,5 +1,5 @@
 // BUSINESS LOGIC FOR EVENT ENTITY (CRUD)
-// IMPORT NESCESSARY LIBRARIES
+// IMPORT NECESSARY LIBRARIES
 import Event from "../models/Event.js";
 import { User } from "../models/User.js";
 
@@ -29,6 +29,10 @@ const verifyEventArtist = async (req, res) => {
 // CREATING NEW EVENT OBJECT
 export const createEvent = async (req, res) => {
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEEVENT
+
+  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETEVENTBYID
+  const { userId } = req.params;
+
   const {
     eventName,
     eventDescription,
@@ -39,10 +43,7 @@ export const createEvent = async (req, res) => {
     eventEndDate,
     eventOpen,
     eventClose,
-    eventPrice,
-    eventTicketQuantity,
     eventArtist,
-    userId,
   } = req.body;
 
   try {
@@ -57,8 +58,6 @@ export const createEvent = async (req, res) => {
       eventEndDate: eventEndDate,
       eventOpen: eventOpen,
       eventClose: eventClose,
-      eventPrice: eventPrice,
-      eventTicketQuantity: eventTicketQuantity,
       eventArtist: eventArtist,
       userId: userId,
     });
@@ -67,11 +66,14 @@ export const createEvent = async (req, res) => {
     await newEvent.save();
 
     // VERIFIES ALL ARTISTS TAGGED IN THE EVENT OBJECT
-    const verifyEventArtistResult = await verifyEventArtist({ params: { eventArtist, userId } }, res);
+    const verifyEventArtistResult = await verifyEventArtist(
+      { params: { eventArtist, userId } },
+      res
+    );
 
     res.status(201).json({ message: "Successfully created new Event!" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
@@ -139,7 +141,7 @@ export const updateEvent = async (req, res) => {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION UPDATEEVENT
     const { eventId } = req.params;
 
-    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    // RETRIEVE AND UPDATE CURRENT EVENT OBJECT FROM DATABASE
     const event = await Event.findOneAndUpdate(
       { eventId: eventId },
       { ...req.body },
