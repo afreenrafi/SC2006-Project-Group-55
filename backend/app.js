@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 import authRoute from "./routes/authRoute.js";
 import userRoute from "./routes/userRoute.js";
 import eventRoute from "./routes/eventRoute.js";
-import eventTicketRoute from "../routes/eventTicketRoute.js";
+import eventTicketRoute from "./routes/eventTicketRoute.js";
 import faqRoute from "./routes/faqRoute.js";
 import bookingRoute from "./routes/bookingRoute.js";
 
