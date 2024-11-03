@@ -31,8 +31,6 @@ export const createEvent = async (req, res) => {
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEEVENT
 
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETEVENTBYID
-  const { userId } = req.params;
-
   const {
     eventName,
     eventDescription,
@@ -44,6 +42,7 @@ export const createEvent = async (req, res) => {
     eventOpen,
     eventClose,
     eventArtist,
+    userId
   } = req.body;
 
   try {
@@ -73,7 +72,7 @@ export const createEvent = async (req, res) => {
 
     res.status(201).json({ message: "Successfully created new Event!" });
   } catch (error) {
-    res.status(400).json({ message: "Internal Server Error Occurred!" });
+    res.status(400).json({ message: error.message });
   }
 };
 

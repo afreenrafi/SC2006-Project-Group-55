@@ -35,11 +35,11 @@ const EventTicketSchema = new mongoose.Schema({
     min: 1,
     validate: {
       validator: function (value) {
-        const errors = validateEventTicketSettingQuantity(value);
+        const errors = validateEventTicketQuantity(value);
         return errors.length === 0;
       },
       message: function (props) {
-        const errors = validateEventTicketSettingQuantity(props.value);
+        const errors = validateEventTicketQuantity(props.value);
         return errors.join("\n");
       },
     },

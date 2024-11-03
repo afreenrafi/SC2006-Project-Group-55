@@ -1,17 +1,20 @@
 // BUSINESS LOGIC FOR EVENTTICKETSETTING ENTITY (CRUD)
 // IMPORT NECESSARY LIBRARIES
 import EventTicket from "../models/EventTicket.js";
-import { Event } from "../models/Event.js";
+import Event from "../models/Event.js";
 
 // SUPPORTING FUNCTIONS RELATED TO EVENTTICKET ENTITY
 
 // CREATING NEW EVENTTICKET OBJECT
 export const createEventTicket = async (req, res) => {
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEEVENTTICKET
-  const { eventId } = req.params;
-  const { eventTicketType, eventTicketQuantity } = req.body;
+  const { eventTicketType, eventTicketQuantity, eventId } = req.body;
 
   try {
+    // CHECKS IF EXISTING EVENTS IN DATABASE HAVE THE SAME EVENTID
+    const event = await Event.findOne({ eventId: eventId });
+    if (!event) return res.status(404).json({ message: "Event not found!" });
+
     // INSTANTIATING NEW EVENTTICKET OBJECT
     const newEventTicket = new EventTicket({
       eventTicketType: eventTicketType,
@@ -21,6 +24,12 @@ export const createEventTicket = async (req, res) => {
 
     // SAVE NEW EVENTTICKET TO DATABASE
     await newEventTicket.save();
+
+    // UPDATE EVENTTICKET ATTRIBUTE OF EVENT OBJECT
+    event.eventTicket.push(newEventTicket.eventTicketId);
+
+    // SAVE UPDATED EVENT OBJECT TO DATABASE
+    await event.save();
 
     res
       .status(201)
