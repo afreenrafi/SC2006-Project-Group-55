@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { View, Image, StyleSheet, FlatList, Alert, TouchableOpacity, Text, Pressable, ScrollView} from 'react-native';
+import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents, mockSavedEvents } from './mockData';
+import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
@@ -211,18 +211,18 @@ const styles = StyleSheet.create({
     marginRight: 5,
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#FF93B3',
+    borderColor: '#CA3550',
   },
   activeFilterButton: {
-    backgroundColor: '#EE1C43', 
-    borderColor: '#EE1C43',
+    backgroundColor: '#CA3550', 
+    borderColor: '#CA3550',
   },
   activeFilterText: {
     color: '#FFFFFF',
     fontWeight: '600',
   },
   inactiveFilterText: {
-    color: '#EE1C43', 
+    color: '#CA3550', 
     fontWeight: '500',
   },
   section: {
@@ -260,10 +260,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
-    backgroundColor: '#EE1C43',
+    backgroundColor: '#CA3550',
     color: '#fff',
     padding: 5,
-    borderRadius: 10,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -293,7 +292,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 100,
     right: 10,
-    backgroundColor: '#CCC',
+    backgroundColor: '#BBB',
     padding: 5,
     borderRadius: 5,
     fontSize: 12,
@@ -379,7 +378,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     backgroundColor: '#FFF',
-    borderColor: '#FF93B3',
+    borderColor: '#CA3550',
     borderWidth: 1,
     paddingVertical: 5,
     paddingHorizontal: 12, // Padding to adjust button size
@@ -387,7 +386,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },  
   shareButtonText: {
-    color: '#EE1C43',
+    color: '#CA3550',
     fontWeight: '600',
     fontSize: 12,
     marginLeft: 3,
@@ -395,7 +394,7 @@ const styles = StyleSheet.create({
   detailsButton: {
     flexDirection: 'row', 
     alignItems: 'center',
-    backgroundColor: '#EE1C43',
+    backgroundColor: '#CA3550',
     paddingVertical: 5,
     paddingHorizontal: 12, // Padding to adjust button size
     borderRadius: 20,

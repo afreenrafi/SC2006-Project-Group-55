@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent', // default background color
   },
   focusedIconContainer: {
-    backgroundColor: '#EE1C43', // background color when focused
+    backgroundColor: '#CA3550', // background color when focused
   },
 });
 
