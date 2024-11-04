@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, FlatList, Image, TouchableOpacity } 
 import { FontAwesome } from '@expo/vector-icons';
 
 import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
+import { useNavigation } from '@react-navigation/native';
 
 const allEvents = [
   ...mockUpcomingEvents,
@@ -17,8 +18,14 @@ const TicketsScreen = () => {
   const [displayEvents, setDisplayEvents] = useState(uniqueEvents);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const navigation = useNavigation();
+
+  const toEventPage = async (eventId) => {
+    navigation.navigate('events/EventsPage', { eventId: eventId })
+  }
+
   const renderEvent = ({ item }) => (
-    <TouchableOpacity style={styles.eventCard}>
+    <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.id)}>
       <Text style={styles.eventName}>{item.name}</Text>
       <View style={styles.imageContainer}>
         <Image source={item.image} style={styles.eventImage} />
