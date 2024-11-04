@@ -13,7 +13,7 @@ export const createUser = async (req, res) => {
       userName,
       userPassword,
       userEmail,
-      userDob,
+      userAge,
       userRole,
       organiserEventPermitId,
       artistVerified,
@@ -41,7 +41,7 @@ export const createUser = async (req, res) => {
           userName: userName,
           userPassword: hashedPassword,
           userEmail: userEmail,
-          userDob: userDob,
+          userAge: userAge,
           userRole: userRole,
         });
         break;
@@ -52,7 +52,7 @@ export const createUser = async (req, res) => {
           userName: userName,
           userPassword: hashedPassword,
           userEmail: userEmail,
-          userDob: userDob,
+          userAge: userAge,
           userRole: userRole,
           organiserEventPermitId: organiserEventPermitId,
         });
@@ -64,7 +64,7 @@ export const createUser = async (req, res) => {
           userName: userName,
           userPassword: hashedPassword,
           userEmail: userEmail,
-          userDob: userDob,
+          userAge: userAge,
           userRole: userRole,
           artistVerified: artistVerified,
         });
