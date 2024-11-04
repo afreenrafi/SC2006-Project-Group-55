@@ -5,8 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import Homepage from './homepage';
 import Profile from './profile';
 import Ticket from './ticket';
-import SavedEventsPage from './savedEvents'
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import TicketDetails from './ticketDetails'; 
+import SavedEvents from './savedEvents'
+import { DefaultTheme } from '@react-navigation/native';
 
 const navTheme = {
   ...DefaultTheme,
@@ -30,7 +31,7 @@ const Tabs = () => {
               iconName = focused ? 'home-outline' : 'home';
             } else if (route.name === 'Ticket') {
               iconName = focused ? 'ticket-outline' : 'ticket';
-            } else if (route.name === 'SavedEventsPage') {
+            } else if (route.name === 'SavedEvents') {
               iconName = focused ? 'bookmark-outline' : 'bookmark';
             } else if (route.name === 'Profile') {
               iconName = focused ? 'person-outline' : 'person';
@@ -55,9 +56,20 @@ const Tabs = () => {
       >
         <Tab.Screen options={{ headerShown: false }} name="Homepage" component={Homepage} />
         <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} />
-        <Tab.Screen options={{ headerShown: false }} name="SavedEventsPage" component={SavedEventsPage} />
+        <Tab.Screen options={{ headerShown: false }} name="SavedEvents" component={SavedEvents} />
         <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} />
-      </Tab.Navigator>
+
+        {/* Add TicketDetails directly to the Tabs but hide tab bar when active */}
+      <Tab.Screen 
+        name="TicketDetails" 
+        component={TicketDetails} 
+        options={{
+          headerShown: false,
+          tabBarButton: () => null, // Hide the tab bar button for TicketDetails
+          tabBarStyle: { display: 'none' }, // Hide the tab bar on TicketDetails
+        }}
+      />
+    </Tab.Navigator>
   );
 };
 
@@ -71,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent', // default background color
   },
   focusedIconContainer: {
-    backgroundColor: '#EE1C43', // background color when focused
+    backgroundColor: '#CA3550', // background color when focused
   },
 });
 

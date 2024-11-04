@@ -1,32 +1,33 @@
 import React, {useContext} from 'react';
 import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
-import { mockSavedEvents } from './mockData'; 
+import { AppContext } from '../context/AppContext';
 
+const SavedEvents = () => {
+  const { savedEvents } = useContext(AppContext);
 
-const SavedEventsPage = () => {
-    return (
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>Saved Events</Text>
-        {mockSavedEvents.length === 0 ? (
-          <View style={styles.noEventsContainer}>
-            <Text style={styles.noEventsText}>No events saved yet.</Text>
-          </View>
-        ) : (
-          mockSavedEvents.map((event) => (
-            <View key={event.id} style={styles.savedEventCard}>
-              <Image source={event.image} style={styles.eventImage} />
-              <View style={styles.eventDetailsContainer}>
-                <Text style={styles.eventType}>{event.type}</Text>
-                <Text style={styles.eventName}>{event.name}</Text>
-                <Text style={styles.eventDate}>{event.date}</Text>
-                <Text style={styles.eventLocation}>{event.location}</Text>
-              </View>
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Saved Events</Text>
+      {savedEvents.length === 0 ? (
+        <View style={styles.noEventsContainer}>
+          <Text style={styles.noEventsText}>No events saved yet.</Text>
+        </View>
+      ) : (
+        savedEvents.map((event) => (
+          <View key={event.id} style={styles.savedEventCard}>
+            <Image source={event.image} style={styles.eventImage} />
+            <View style={styles.eventDetailsContainer}>
+              <Text style={styles.eventType}>{event.type}</Text>
+              <Text style={styles.eventName}>{event.name}</Text>
+              <Text style={styles.eventDate}>{event.date}</Text>
+              <Text style={styles.eventLocation}>{event.location}</Text>
             </View>
-          ))
-        )}
-      </ScrollView>
-    );
-  };
+          </View>
+        ))
+      )}
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -35,10 +36,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    paddingTop: '17%',
+    paddingTop: '15%',
     fontSize: 24,
     fontWeight: '600',
     marginVertical: 20,
+    textAlign: 'center',
   },
   noEventsContainer: {
     alignItems: 'center',
@@ -87,4 +89,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SavedEventsPage;
+export default SavedEvents;
