@@ -62,7 +62,7 @@ const Details = ({ route }) => {
       if(emailError==""){
         const userEmail = await submitUserDetails(editedEmail, editedFirstName, editedLastName, editedAge, editedGender);
         console.log("User details submitted:", userEmail);
-        navigation.navigate('startup/Setup', { email: userEmail.email });  // Navigate to new page with email
+        navigation.navigate('startup/Setup', { email: userEmail.email, age: editedAge, name: editedFirstName + " " + editedLastName });  // Navigate to new page with email
       }
     } catch (error) {
       console.error("Failed to submit details:", error);

@@ -12,12 +12,12 @@ import SelectModal from "../../components/forms/SelectModal";
 const Setup = ({ route }) => {
   const navigation = useNavigation();
 
-  const { email } = route.params;
+  const { email, age, name } = route.params;
 
   const [Username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState(""); 
 
-  const [Role, setRole] = useState('General Public');
+  const [Role, setRole] = useState('Public');
   const [modalVisible, setModalVisible] = useState(false);
 
   const [Password, setPassword] = useState('');
@@ -63,6 +63,92 @@ const Setup = ({ route }) => {
     }
   }
 
+  // const registerUser = async (email, age, name, username, role, password, eventPermitId) => {
+  //   const formData = new FormData();
+
+  //   formData.append('userId', username); // Assuming email as userId for simplicity
+  //   formData.append('userName', name);
+  //   formData.append('userPassword', password); // Placeholder, replace with actual password field if needed
+  //   formData.append('userEmail', email);
+  //   formData.append('userDob', age);
+  //   formData.append('userRole', role);
+
+  //   if (role === 'Organiser' && eventPermitId) {
+  //     formData.append('eventPermitId', {
+  //       uri: eventPermitId,
+  //       name: 'eventPermit.jpg', // Change file name as appropriate
+  //       type: 'image/jpeg', // Adjust based on file type
+  //     });
+  //   }
+
+  //   try {
+  //     const response = await fetch('http://localhost:5001/api/authRoute/register', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //       body: formData,
+  //     });
+
+  //     const message = await response.text();
+  //     if (response.ok) {
+  //       console.log("User registered successfully");
+  //       navigation.navigate('startup/Setup', { email: email });
+  //     } else {
+  //       console.error("Registration failed:", message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
+
+  const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
+    const formData = new FormData();
+  
+    formData.append('userId', username); // userId based on the username field
+    formData.append('userName', name);
+    formData.append('userPassword', password); // userPassword field
+    formData.append('userEmail', email);
+    formData.append('userAge', age); // Adjusted from userDob to userAge to match the backend code
+    formData.append('userRole', role);
+
+    console.log(age);
+
+    console.log(formData);
+  
+    // Append role-specific data if needed
+    if (role === 'Organiser' && eventPermitId) {
+      formData.append('organiserEventPermitId', {
+        uri: eventPermitId,
+        name: 'eventPermit.jpg', // File name can be adjusted as needed
+        type: 'image/jpeg', // Adjust based on file type
+      });
+    } else if (role === 'Artist') {
+      formData.append('artistVerified', artistVerified);
+    }
+  
+    try {
+      const response = await fetch('http://localhost:5001/api/authRoute/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      const message = await response.json(); // Parsing response as JSON for clarity
+      if (response.ok) {
+        console.log("User registered successfully:", message);
+        navigation.navigate('startup/Setup', { email: email });
+      } else {
+        console.error("Registration failed:", message.message || "Unknown error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  
+
 
   // Dummy API call that simulates submitting the user details
   const submitAccountDetails = async (email, username, role, password) => {
@@ -99,15 +185,16 @@ const Setup = ({ route }) => {
         setUsernameError('');  
         setPwdError('');
         setRePwdError('');
-        console.log("Proceeding with:", Username, Role, Password);
-        const result = await submitAccountDetails(email, Username, Role, Password);
-        console.log("Account details submitted:", result);
+        console.log("Proceeding with:", email, age, name, Username, Role, Password);
+        // const result = await submitAccountDetails(email, Username, Role, Password);
+        const result = await registerUser(email, age, name, Username, Role, Password);
+        // console.log("Account details submitted:", result);
         if(Role == 'Organiser'){
-          navigation.navigate('startup/OrgValidation', { email: result.email, role: result.role });
+          navigation.navigate('startup/OrgValidation', { email: email, role: Role });
         }
         else{
           //to tabs
-          navigation.navigate('tabs', { email: result.email, role: result.role });
+          navigation.navigate('tabs', { email: email, role: Role });
           //for testing
           // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
         }
@@ -170,9 +257,9 @@ const Setup = ({ route }) => {
         modalTitle="Select Role" 
         modalVisible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
-        oneOptPress={() => handleRoleSelect("General Public")} 
+        oneOptPress={() => handleRoleSelect("Public")} 
         twoOptPress={() => handleRoleSelect("Organiser")} 
-        optOne="General Public"
+        optOne="Public"
         optTwo="Organiser"
         />
 
