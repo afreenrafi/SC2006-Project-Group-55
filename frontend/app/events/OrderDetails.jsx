@@ -3,18 +3,19 @@ import React, { useState, useEffect } from "react";
 import StyledText from "../../components/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import PageHeader from "../../components/PageHeader";
-import OrgDisplay from "../../components/OrgDisplay";
-import EventHeader from "../../components/EventHeader";
+// import OrgDisplay from "../../components/OrgDisplay";
+// import EventHeader from "../../components/EventHeader";
 import RoundBtn from "../../components/RoundBtn";
-import SingleDate from "../../components/SingleDate";
-import StyledInput from "../../components/StyledInput";
-import TicketSelector from "../../components/TicketSelector";
+// import SingleDate from "../../components/SingleDate";
+// import StyledInput from "../../components/StyledInput";
+// import TicketSelector from "../../components/TicketSelector";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 
 
+
 const OrderDetails = ({ route }) => {
-  const { email, role, totalPrice, selectedDate, quantities } = route.params;
+  const { email, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
 
 
   const navigation = useNavigation();
@@ -123,6 +124,17 @@ const OrderDetails = ({ route }) => {
     });
   };
 
+  const onCheckout = async () => {
+    // 1. Create a payment intent
+   
+    // 2. Initialize the Payment sheet
+    
+    // 3. Present the Payment Sheet from Stripe
+    
+    // 4. If payment ok -> create the order
+    // onCreateOrder();
+  };
+
   const handleNext = async () => {
     try {
       navigation.navigate('events/OrderDetails', { 
@@ -173,8 +185,40 @@ const OrderDetails = ({ route }) => {
                         </View>
                     </View>
                 </View>
-
-                <StyledText size={26} textContent="Order Summary" alignment="left"/>
+                <View style={styles.summary}>
+                    <View style={styles.divTitle}>
+                        <StyledText size={26} textContent="Order Summary" alignment="left"/>
+                    </View>
+                    {eventDetails.ticketOptions.map((option) => {
+                        const qty = quantities[option.ticketType];
+                        if (qty > 0) {
+                            return (
+                            <View style={styles.priceItem} key={option.ticketType}>
+                                <StyledText size={20} textContent={`${qty} x ${option.ticketType} Ticket`} alignment="left" />
+                                <StyledText size={20} textContent={`$${(qty * option.ticketPrice).toFixed(2)}`} alignment="left" fweight="bold" />
+                            </View>
+                            );
+                        }
+                        return null;
+                    })}
+                    {/* <View style={styles.priceItem}>
+                        <StyledText size={20} textContent={"2" + "x Adult Ticket"} alignment="left"/>
+                        <StyledText size={20} textContent={"$" + "0.00"} alignment="left" fweight="bold"/>
+                    </View>
+                    <View style={styles.priceItem}>
+                        <StyledText size={20} textContent={"2" + "x Child Ticket"} alignment="left"/>
+                        <StyledText size={20} textContent={"$" + "0.00"} alignment="left" fweight="bold"/>
+                    </View>
+                    <View style={styles.priceItem}>
+                        <StyledText size={20} textContent={"2" + "x Elderly Ticket"} alignment="left"/>
+                        <StyledText size={20} textContent={"$" + "0.00"} alignment="left" fweight="bold"/>
+                    </View> */}
+                    <View style={styles.totalItem}>
+                        <StyledText size={20} textContent={"Total"} alignment="left"/>
+                        <StyledText size={20} textContent={"$" + String(totalPrice)} alignment="left" fweight="bold" fontColor="#CA3550"/>
+                    </View>
+                </View>
+                
 
             </View>  
           
@@ -186,11 +230,11 @@ const OrderDetails = ({ route }) => {
 
       <View style={[styles.bottomButtonContainer, styles.iosShadow, styles.androidShadow]}>
         <View style={styles.bottomText}>
-          <StyledText size={20} textContent={(totalQty > 0) && `$ ${String(totalPrice)}` } alignment="left" fontColor="#CA3550" fweight="bold"/>
-          <StyledText size={12} textContent={"total"} alignment="left"/>
+          <StyledText size={20} textContent={"$"+String(totalPrice)} alignment="left" fontColor="#CA3550" fweight="bold"/>
+          <StyledText size={12} textContent={`for ${String(totalQty)} items`} alignment="left"/>
         </View>
         <View style={styles.bottomBtn}>
-          <RoundBtn text="Checkout" icon="shopping-cart"/>
+          <RoundBtn text="Pay Now" icon="credit-card"/>
         </View>
       </View>
       
@@ -229,54 +273,54 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  eventCont: {
-    position: "relative",
-    width: "100%",
-    backgroundColor: "#FBF3F1",
-  },
-  overlap: {
-    // position: "absolute",
-    backgroundColor: "#FBF3F1",
-    padding: 30,
-    width: "100%",
-    top: -30,
-    borderRadius: 25,
-  },
-  eventDesc: {
-    paddingTop: 10
-  },
-  artistList: {
-    flexDirection: "row",
-    gap: 20,
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 20,
-  },
-  artistPics:{
-    flexDirection: "row",
-    position: "relative"
-  },
-  artistPic: {
-    height: 45,
-    width: 45,
-    borderRadius: 50,
-    padding: 0,
-    margin: 0,
-    opacity: 1,
-    position: "relative",
-    marginRight: -15,
-  },
-  tabOptions: {
-    flexDirection: "row",
-    gap: 30,
-    width: "100%",
-    borderBottomColor: "#D5D5D5",
-    borderBottomWidth: 1,
-    paddingVertical: 10,
-  },
-  faqs: {
-    paddingVertical: 10
-  },
+//   eventCont: {
+//     position: "relative",
+//     width: "100%",
+//     backgroundColor: "#FBF3F1",
+//   },
+//   overlap: {
+//     // position: "absolute",
+//     backgroundColor: "#FBF3F1",
+//     padding: 30,
+//     width: "100%",
+//     top: -30,
+//     borderRadius: 25,
+//   },
+//   eventDesc: {
+//     paddingTop: 10
+//   },
+//   artistList: {
+//     flexDirection: "row",
+//     gap: 20,
+//     alignItems: "center",
+//     justifyContent: "space-between",
+//     paddingVertical: 20,
+//   },
+//   artistPics:{
+//     flexDirection: "row",
+//     position: "relative"
+//   },
+//   artistPic: {
+//     height: 45,
+//     width: 45,
+//     borderRadius: 50,
+//     padding: 0,
+//     margin: 0,
+//     opacity: 1,
+//     position: "relative",
+//     marginRight: -15,
+//   },
+//   tabOptions: {
+//     flexDirection: "row",
+//     gap: 30,
+//     width: "100%",
+//     borderBottomColor: "#D5D5D5",
+//     borderBottomWidth: 1,
+//     paddingVertical: 10,
+//   },
+//   faqs: {
+//     paddingVertical: 10
+//   },
   bottomButtonContainer: {
     position: 'absolute',
     bottom: 0,
@@ -306,22 +350,22 @@ const styles = StyleSheet.create({
   bottomBtn: {
     width: "70%"
   },
-  ticketCont: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: "space-between",
-    width: '100%',
-    paddingVertical: 20,
-  },
-  datesCont: {
-    width: '20%',
-  },
-  datesScroll:{
-    maxHeight: 230,
-  },
-  tixChoose: {
-    width: '80%',
-  },
+//   ticketCont: {
+//     display: 'flex',
+//     flexDirection: 'row',
+//     justifyContent: "space-between",
+//     width: '100%',
+//     paddingVertical: 20,
+//   },
+//   datesCont: {
+//     width: '20%',
+//   },
+//   datesScroll:{
+//     maxHeight: 230,
+//   },
+//   tixChoose: {
+//     width: '80%',
+//   },
 
     selectCont: {
         width: "100%",
@@ -373,6 +417,25 @@ const styles = StyleSheet.create({
       sumTags: {
         flexDirection: "row",
         gap: 5
+      },
+      summary: {
+        paddingVertical: 5
+      },
+      divTitle: {
+        paddingVertical: 10
+      },
+      priceItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        paddingVertical: 10,
+      },
+      totalItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 15,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 30,
+        marginVertical: 10,
       }
   
   

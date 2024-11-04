@@ -107,9 +107,9 @@ const Setup = ({ route }) => {
         }
         else{
           //to tabs
-          // navigation.navigate('tabs', { email: result.email, role: result.role });
+          navigation.navigate('tabs', { email: result.email, role: result.role });
           //for testing
-          navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
+          // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
         }
         
       }

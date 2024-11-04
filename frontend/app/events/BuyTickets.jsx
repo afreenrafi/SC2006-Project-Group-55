@@ -194,6 +194,7 @@ const BuyTickets = ({ route }) => {
         email: email, 
         role: role, 
         totalPrice: totalPrice, 
+        totalQty: totalQty,
         selectedDate: selectedDate,
         quantities: quantities
       });
