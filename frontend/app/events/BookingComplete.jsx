@@ -1,73 +1,99 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import PageHeader from '../../components/events/PageHeader';
+import StyledText from '../../components/StyledText';
+import RoundBtn from '../../components/forms/RoundBtn';
 
 const BookingComplete = ({ route }) => {
     const navigation = useNavigation();
-    const { eventDetails, selectedDate } = route.params;
+    const { email, role, eventDetails, selectedDate } = route.params;
     const [isQrModalVisible, setQrModalVisible] = useState(false);
 
-    return (
-      <View style={styles.container}>
-        <PageHeader title={"Booking Complete"} onPress={()=>navigation.goBack()}/>
-        {/* Ticket Image and Title */}
-        <View style={styles.ticketContainer}>
-          <Image source={eventDetails.eventPic && { uri: eventDetails.eventPic }} style={styles.ticketImage} />
-          <Text style={styles.ticketTitle}>{eventDetails.eventName}</Text>
-  
-          {/* Ticket Info */}
-          <View style={styles.ticketInfoContainer}>
-            <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoText}>{selectedDate}</Text>
-            </View>
-            <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Time</Text>
-              <Text style={styles.infoText}>{eventDetails.eventTime}</Text>
-            </View>
-            <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Venue</Text>
-              <Text style={styles.infoText}>{eventDetails.eventLocation}</Text>
-            </View>
-          </View>
-  
-          {/* Show QR Code Button */}
-          <TouchableOpacity style={styles.qrButton} onPress={() => setQrModalVisible(true)}>
-            <FontAwesome name="qrcode" size={18} color="#FFF" />
-            <Text style={styles.qrButtonText}>Show QR Code</Text>
-          </TouchableOpacity>
-          
-          {/* Download Image Button */}
-          <TouchableOpacity style={styles.downloadButton}>
-            <FontAwesome name="download" size={18} color="#CA3550" />
-            <Text style={styles.downloadButtonText}>Download Image</Text>
-          </TouchableOpacity>
+    const handleNext = async () => {
+        try {
+            navigation.navigate('tabs', { 
+            email: email, 
+            role: role, 
+            // eventDetails: eventDetails,
+            // selectedDate: selectedDate
+            });
+        } catch (error) {
+            console.error("Failed to submit details:", error);
+        }
+    };
 
-          {/* QR Code Modal */}
-          <Modal
-            visible={isQrModalVisible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={() => setQrModalVisible(false)}
-          >
-            <View style={styles.modalContainer}>
-              <View style={styles.qrCodeModal}>
-                <Text style={styles.modalTitle}>Your QR Code</Text>
-                <QRCode
-                  value={eventDetails.qrCodeValue ? String(eventDetails.qrCodeValue) : 'Event QR Code'}
-                  size={250}
-                />
-                <TouchableOpacity style={styles.closeButton} onPress={() => setQrModalVisible(false)}>
-                  <Text style={styles.closeButtonText}>Close</Text>
+    return (
+        <SafeAreaView style={{ flex:1, backgroundColor: "#FBF3F1" }}>
+            <PageHeader title={"Booking Complete"} onPress={()=>navigation.goBack()}/>
+            <View style={styles.container}>
+                {/* Ticket Image and Title */}
+                <View style={styles.ticketContainer}>
+                <Image source={eventDetails.eventPic && { uri: eventDetails.eventPic }} style={styles.ticketImage} />
+                <Text style={styles.ticketTitle}>{eventDetails.eventName}</Text>
+        
+                {/* Ticket Info */}
+                <View style={styles.ticketInfoContainer}>
+                    <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>Date</Text>
+                    <Text style={styles.infoText}>{selectedDate}</Text>
+                    </View>
+                    <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>Time</Text>
+                    <Text style={styles.infoText}>{eventDetails.eventTime}</Text>
+                    </View>
+                    <View style={styles.infoColumn}>
+                    <Text style={styles.infoLabel}>Venue</Text>
+                    <Text style={styles.infoText}>{eventDetails.eventLocation}</Text>
+                    </View>
+                </View>
+        
+                {/* Show QR Code Button */}
+                <TouchableOpacity style={styles.qrButton} onPress={() => setQrModalVisible(true)}>
+                    <FontAwesome name="qrcode" size={18} color="#FFF" />
+                    <Text style={styles.qrButtonText}>Show QR Code</Text>
                 </TouchableOpacity>
-              </View>
+                
+                {/* Download Image Button */}
+                {/* <TouchableOpacity style={styles.downloadButton}>
+                    <FontAwesome name="download" size={18} color="#CA3550" />
+                    <Text style={styles.downloadButtonText}>Download Image</Text>
+                </TouchableOpacity> */}
+
+                {/* QR Code Modal */}
+                <Modal
+                    visible={isQrModalVisible}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setQrModalVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                    <View style={styles.qrCodeModal}>
+                        <Text style={styles.modalTitle}>Your QR Code</Text>
+                        <QRCode
+                        value={eventDetails.qrCodeValue ? String(eventDetails.qrCodeValue) : 'Event QR Code'}
+                        size={250}
+                        />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setQrModalVisible(false)}>
+                        <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                    </View>
+                </Modal>
+                </View>
+
+                
+
+
             </View>
-          </Modal>
-        </View>
-      </View>
+            <View style={[styles.bottomButtonContainer, styles.iosShadow, styles.androidShadow]}>
+                <View style={styles.bottomBtn}>
+                    <RoundBtn onPress={handleNext} text="Back to Home" icon="home"/>
+                </View>
+            </View>
+      </SafeAreaView>
     );
 };
 
@@ -75,8 +101,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FBF3F1',
-    padding: 16,
-    marginTop: "10%",
+    paddingHorizontal: 16,
+    // marginTop: "10%",
   },
   backButton: {
     position: 'absolute',
@@ -195,6 +221,32 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  bottomButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+  },
+  iosShadow: {
+    shadowColor: '#000000',
+    shadowOffset: { width: -2, height: -4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  androidShadow: {
+    elevation: 10,
+    shadowColor: '#000000',
+  },
+  bottomBtn: {
+    width: "100%"
   },
 });
 
