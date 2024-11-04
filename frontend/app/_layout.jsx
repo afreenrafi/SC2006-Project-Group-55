@@ -11,6 +11,7 @@ import OrgValidation from './startup/OrgValidation';
 import EventsPage from './events/EventsPage';
 import BuyTickets from './events/BuyTickets';
 import OrderDetails from './events/OrderDetails';
+import BookingComplete from './events/BookingComplete';
 
 const Stack = createNativeStackNavigator();
 
@@ -68,7 +69,14 @@ const MainLayout = () => {
         name="events/OrderDetails"
         component={OrderDetails}
         options={{ headerShown: false,
-          title: 'OrderDetails'
+          title: 'Order Details'
+         }}
+      />
+      <Stack.Screen
+        name="events/BookingComplete"
+        component={BookingComplete}
+        options={{ headerShown: false,
+          title: 'Booking Complete'
          }}
       />
 

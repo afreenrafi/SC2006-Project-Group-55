@@ -137,9 +137,11 @@ const OrderDetails = ({ route }) => {
 
   const handleNext = async () => {
     try {
-      navigation.navigate('events/OrderDetails', { 
+      navigation.navigate('events/BookingComplete', { 
         email: email, 
         role: role, 
+        eventDetails: eventDetails,
+        selectedDate: selectedDate
       });
     } catch (error) {
       console.error("Failed to submit details:", error);
@@ -234,7 +236,7 @@ const OrderDetails = ({ route }) => {
           <StyledText size={12} textContent={`for ${String(totalQty)} items`} alignment="left"/>
         </View>
         <View style={styles.bottomBtn}>
-          <RoundBtn text="Pay Now" icon="credit-card"/>
+          <RoundBtn onPress={handleNext} text="Pay Now" icon="credit-card"/>
         </View>
       </View>
       
