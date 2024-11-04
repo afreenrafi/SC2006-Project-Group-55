@@ -1,14 +1,14 @@
 import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
 import React, { useState, useEffect } from "react";
-import StyledText from "../../components/StyledText";
+import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import PageHeader from "../../components/PageHeader";
+import PageHeader from "../../components/events/PageHeader";
 import OrgDisplay from "../../components/OrgDisplay";
-import EventHeader from "../../components/EventHeader";
-import RoundBtn from "../../components/RoundBtn";
+import EventHeader from "../../components/events/EventHeader";
+import RoundBtn from "../../components/forms/RoundBtn";
 import SingleDate from "../../components/SingleDate";
-import StyledInput from "../../components/StyledInput";
-import TicketSelector from "../../components/TicketSelector";
+import StyledInput from "../../components/forms/StyledInput";
+import TicketSelector from "../../components/events/TicketSelector";
 
 
 

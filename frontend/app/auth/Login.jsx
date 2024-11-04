@@ -1,7 +1,7 @@
 import { View, Text, Image, StyleSheet, TextInput, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import StyledText from "../../components/StyledText";
-import SingpassBtn from "../../components/SingpassBtn";
+import StyledText from "../../components/forms/StyledText";
+import SingpassBtn from "../../components/forms/SingpassBtn";
 import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {

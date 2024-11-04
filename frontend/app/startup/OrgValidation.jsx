@@ -1,11 +1,11 @@
 import { View, SafeAreaView, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import StyledText from "../../components/StyledText";
+import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import StyledInput from "../../components/StyledInput";
-import RoundBtn from "../../components/RoundBtn";
+import StyledInput from "../../components/forms/StyledInput";
+import RoundBtn from "../../components/forms/RoundBtn";
 import Entypo from '@expo/vector-icons/Entypo';
-import SelectInput from "../../components/SelectInput";
+import SelectInput from "../../components/forms/SelectInput";
 
 
 const OrgValidation = ({ route }) => {
