@@ -5,8 +5,10 @@ import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
 import nodemailer from 'nodemailer';
 import { createRequire } from 'module';
+//import stripe from "stripe";
 
 const require = createRequire(import.meta.url);
+//const stripeInstance = stripe(process.env.STRIPE_SECRET_KEY);
 
 // SUPPORTING FUNCTIONS RELATED TO BOOKING ENTITY
 const sendConfirmationEmail = async (
@@ -127,7 +129,7 @@ export const createChargeableBooking = async (req, res) => {
 
     // CREATE USERSTRIPEID FOR USER OBJECT, IF USER OBJECT DOES NOT HAVE USERSTRIPEID
     if (!user.userStripeId) {
-      const stripeCustomer = await stripe.customers.create({
+      const stripeCustomer = await stripeInstance.customers.create({
         email: user.userEmail,
         name: user.userName,
       });
@@ -138,7 +140,7 @@ export const createChargeableBooking = async (req, res) => {
     }
 
     // PROCESS PAYMENT VIA STRIPE
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await stripeInstance.paymentIntents.create({
       amount: totalAmount * 100, // Convert amount to cents
       currency: "usd",
       payment_method: paymentMethodId,
@@ -165,7 +167,7 @@ export const createChargeableBooking = async (req, res) => {
     // SAVE CARD FOR FUTURE USE, SHOULD USER OPTED FOR IT
     let savedCard = null;
     if (saveCard) {
-      const paymentMethod = await stripe.paymentMethods.attach(
+      const paymentMethod = await stripeInstance.paymentMethods.attach(
         paymentMethodId,
         {
           customer: user.userStripeId,
