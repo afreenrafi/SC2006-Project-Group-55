@@ -140,13 +140,17 @@ export const createChargeableBooking = async (req, res) => {
     }
 
     // PROCESS PAYMENT VIA STRIPE
+    console.log("everything fine0");
     const paymentIntent = await stripeInstance.paymentIntents.create({
       amount: totalAmount * 100, // Convert amount to cents
-      currency: "usd",
-      payment_method: paymentMethodId,
+      currency: "sgd",
+      "automatic_payment_methods": {
+        "enabled": true
+      },
       customer: user.userStripeId, // Attach the payment to the customer
       confirm: true,
     });
+    console.log("everything fine1");
 
     // INSTANTIATE NEW BOOKING OBJECT
     const newBooking = new Booking({
@@ -166,6 +170,7 @@ export const createChargeableBooking = async (req, res) => {
 
     // SAVE CARD FOR FUTURE USE, SHOULD USER OPTED FOR IT
     let savedCard = null;
+    console.log("everything fine2");
     if (saveCard) {
       const paymentMethod = await stripeInstance.paymentMethods.attach(
         paymentMethodId,
