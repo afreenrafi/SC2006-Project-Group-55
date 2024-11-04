@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
@@ -18,7 +18,7 @@ const TicketsScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const renderEvent = ({ item }) => (
-    <View style={styles.eventCard}>
+    <TouchableOpacity style={styles.eventCard}>
       <Text style={styles.eventName}>{item.name}</Text>
       <View style={styles.imageContainer}>
         <Image source={item.image} style={styles.eventImage} />
@@ -28,7 +28,7 @@ const TicketsScreen = () => {
         <Text style={styles.eventDate}>{item.date}</Text>
         <Text style={styles.eventTime}>{item.time}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const handleSearch = (text) => {
