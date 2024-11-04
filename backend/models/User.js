@@ -42,24 +42,16 @@ function validateUserEmail(value) {
   return errors;
 }
 
-// USERDOB
-function validateUserDob(value) {
+// USERAGE
+function validateUserAge(age) {
   const errors = [];
-  const todayDate = new Date();
+  const minAge = 13;
+  const maxAge = 99;
 
-  const ageDifference = todayDate.getFullYear() - value.getFullYear();
-  const hasBirthdayPassedThisYear =
-    todayDate.getMonth() > value.getMonth() ||
-    (todayDate.getMonth() === value.getMonth() &&
-      todayDate.getDate() >= value.getDate());
-
-  const actualAge = hasBirthdayPassedThisYear
-    ? ageDifference
-    : ageDifference - 1;
-
-  if (actualAge < 7) {
-    errors.push("User must be at least 7 years old!");
+  if (isNaN(age) || age < minAge || age > maxAge) {
+    errors.push("User age must be between 13 and 99 years old!");
   }
+  
   return errors;
 }
 
@@ -119,20 +111,26 @@ const UserSchema = new mongoose.Schema(
       },
     },
 
-    userDob: {
-      type: Date,
+    userAge: {
+      type: String, 
       required: true,
       validate: {
         validator: function (value) {
-          const errors = validateUserDob(value);
+          // Convert `value` to a number before validation
+          const age = Number(value);
+          if (isNaN(age)) return false; // Ensure value is numeric
+          const errors = validateUserAge(age);
           return errors.length === 0;
         },
         message: function (props) {
-          const errors = validateUserDob(props.value);
+          const age = Number(props.value);
+          if (isNaN(age)) return "Age must be a number.";
+          const errors = validateUserAge(age);
           return errors.join("\n");
         },
       },
     },
+    
 
     userRole: {
       type: String,
