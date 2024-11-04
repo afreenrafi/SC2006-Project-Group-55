@@ -3,6 +3,12 @@
 import { User } from "../models/User.js";
 import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
+import nodemailer from 'nodemailer';
+import { createRequire } from 'module';
+import Stripe from "stripe";
+
+const require = createRequire(import.meta.url);
+//const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // SUPPORTING FUNCTIONS RELATED TO BOOKING ENTITY
 const sendConfirmationEmail = async (
@@ -90,13 +96,13 @@ export const createFreeBooking = async (req, res) => {
   }
 };
 
-// // CREATING NEW BOOKING OBJECT (CHARGEABLE)
+// CREATING NEW BOOKING OBJECT (CHARGEABLE)
 export const createChargeableBooking = async (req, res) => {
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATECHARGEABLEBOOKING
-  const { eventId, bookingQuantity, paymentMethodId, saveCard, userId } =
+  const { eventId, bookingQuantity, paymentMethodId, saveCard, userId, totalAmount } =
     req.body;
 
-  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const stripeInstance = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
   try {
     // CHECKING IF USERID EXISTS IN USER COLLECTION
@@ -118,7 +124,7 @@ export const createChargeableBooking = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ message: "Selected Event does not enough tickets available!" });
+        .json({ message: "Selected Event does not have enough tickets available!" });
     }
 
     // CREATE USERSTRIPEID FOR USER OBJECT, IF USER OBJECT DOES NOT HAVE USERSTRIPEID
@@ -134,14 +140,17 @@ export const createChargeableBooking = async (req, res) => {
     }
 
     // PROCESS PAYMENT VIA STRIPE
-    const totalAmount = event.price * bookingQuantity * 100; // Stripe expects amount in cents
+    console.log("everything fine0");
     const paymentIntent = await stripeInstance.paymentIntents.create({
-      amount: totalAmount,
-      currency: "usd",
-      payment_method: paymentMethodId,
-      customer: user.stripeCustomerId, // Attach the payment to the customer
+      amount: totalAmount * 100, // Convert amount to cents
+      currency: "sgd",
+      "automatic_payment_methods": {
+        "enabled": true
+      },
+      customer: user.userStripeId, // Attach the payment to the customer
       confirm: true,
     });
+    console.log("everything fine1");
 
     // INSTANTIATE NEW BOOKING OBJECT
     const newBooking = new Booking({
@@ -161,6 +170,7 @@ export const createChargeableBooking = async (req, res) => {
 
     // SAVE CARD FOR FUTURE USE, SHOULD USER OPTED FOR IT
     let savedCard = null;
+    console.log("everything fine2");
     if (saveCard) {
       const paymentMethod = await stripeInstance.paymentMethods.attach(
         paymentMethodId,
@@ -175,7 +185,7 @@ export const createChargeableBooking = async (req, res) => {
     }
 
     // SENDING CONFIRMATION EMAIL
-    const confirmedBooking = await sendConfirmationEmail(
+    await sendConfirmationEmail(
       savedBooking.bookingName,
       savedBooking.bookingEmail,
       savedBooking.bookingQuantity,

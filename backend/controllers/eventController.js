@@ -104,32 +104,48 @@ export const getEventById = async (req, res) => {
   }
 };
 
-// RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING EVENTNAME
+// RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING EVENTNAME, EVENTGENRE, AND EVENTTYPE
 export const searchEvents = async (req, res) => {
   try {
-    // EXTRACT SEARCH QUERY PARAMETER OR DEFAULT TO EMPTY STRING IF NONE PROVIDED
-    const searchQuery = req.query.q || "";
+    // Extract search query parameters
+    const { q: searchQuery = "", eventGenre, eventType } = req.query;
 
-    // EXTRACT PAGINATION PARAMETERS OR SET DEFAULT VALUES (LIMIT = 10, PAGE = 1)
+    // Build the query object
+    const query = {};
+
+    // Add genre filter if provided
+    if (eventGenre) {
+      query.eventGenre = new RegExp(eventGenre, "i"); // Case-insensitive match for genre
+    }
+
+    // Add type filter if provided
+    if (eventType) {
+      query.eventType = new RegExp(eventType, "i"); // Case-insensitive match for type
+    }
+
+    // Add name filter if provided
+    if (searchQuery) {
+      query.eventName = new RegExp(searchQuery, "i"); // Case-insensitive match for event name
+    }
+
+    // Extract pagination parameters or set default values (LIMIT = 10, PAGE = 1)
     const limit = parseInt(req.query.limit, 10) || 10;
     const page = parseInt(req.query.page, 10) || 1;
 
-    // SEARCH DATABASE FOR EVENTS WHERE EVENTNAME MATCHES SEARCH QUERY (CASE-INSENSITIVE)
-    const events = await Event.find({
-      eventName: new RegExp(searchQuery, "i"),
-    })
-      .limit(limit) // LIMIT RESULTS TO SPECIFIED NUMBER PER PAGE
-      .skip((page - 1) * limit); // SKIP RESULTS TO IMPLEMENT PAGINATION
+    // Search database for events matching the query
+    const events = await Event.find(query)
+      .limit(limit) // Limit results to specified number per page
+      .skip((page - 1) * limit); // Skip results to implement pagination
 
-    // IF NO MATCHING EVENTS ARE FOUND, RETURN A 404 STATUS
+    // If no matching events are found, return a 404 status
     if (events.length === 0) {
       return res.status(404).json({ message: "No Events Found!" });
     }
 
-    // RETURN MATCHING EVENTS ALONG WITH PAGINATION INFO
+    // Return matching events along with pagination info
     res.json({ events, page, limit });
   } catch (error) {
-    // HANDLE ANY ERRORS DURING THE SEARCH PROCESS
+    // Handle any errors during the search process
     res.status(500).json({ message: "Internal Server Error!" });
   }
 };
