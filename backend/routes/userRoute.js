@@ -1,4 +1,4 @@
-//routes/userRoutes.js
+// IMPORT NECESSARY LIBRARIES
 import express from "express";
 import multer from "multer";
 import {

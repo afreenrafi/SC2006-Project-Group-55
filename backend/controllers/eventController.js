@@ -1,36 +1,11 @@
 // BUSINESS LOGIC FOR EVENT ENTITY (CRUD)
-// IMPORT NECESSARY LIBRARIES
+// IMPORT NESCESSARY LIBRARIES
 import Event from "../models/Event.js";
-import { User } from "../models/User.js";
-
-// SUPPORTING FUNCTIONS RELATED TO EVENT ENTITY
-const verifyEventArtist = async (req, res) => {
-  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION VERIFYEVENTARTIST
-  const { eventArtist, userId } = req.params;
-
-  try {
-    // LOOPING THROUGH EVERY ARTIST TAGGED IN EVENTARTIST
-    for (const artistId of eventArtist) {
-      const artist = await User.findOne({ userId: artistId });
-
-      // VERIFIES ARTIST IF THEIR ARTISTVERIFIEDBY IS NULL
-      if (artist && artist.artistVerifiedBy === null) {
-        artist.artistVerifiedBy = userId;
-        await artist.save();
-      }
-    }
-
-    return { message: "Successfully verified all Artists!" };
-  } catch (error) {
-    res.status(400).json({ message: "Internal Server Error Occurred!" });
-  }
-};
+import { v4 as uuidv4 } from "uuid";
 
 // CREATING NEW EVENT OBJECT
 export const createEvent = async (req, res) => {
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEEVENT
-
-  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETEVENTBYID
   const {
     eventName,
     eventDescription,
@@ -41,8 +16,9 @@ export const createEvent = async (req, res) => {
     eventEndDate,
     eventOpen,
     eventClose,
-    eventArtist,
-    userId
+    eventPrice,
+    eventTicketQuantity,
+    userId,
   } = req.body;
 
   try {
@@ -57,22 +33,17 @@ export const createEvent = async (req, res) => {
       eventEndDate: eventEndDate,
       eventOpen: eventOpen,
       eventClose: eventClose,
-      eventArtist: eventArtist,
+      eventPrice: eventPrice,
+      eventTicketQuantity: eventTicketQuantity,
       userId: userId,
     });
 
     // SAVE NEW EVENT OBJECT TO DATABASE
     await newEvent.save();
 
-    // VERIFIES ALL ARTISTS TAGGED IN THE EVENT OBJECT
-    const verifyEventArtistResult = await verifyEventArtist(
-      { params: { eventArtist, userId } },
-      res
-    );
-
     res.status(201).json({ message: "Successfully created new Event!" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: "Internal Server Error Occurred!" });
   }
 };
 
@@ -104,32 +75,48 @@ export const getEventById = async (req, res) => {
   }
 };
 
-// RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING EVENTNAME
+// RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING EVENTNAME, EVENTGENRE, AND EVENTTYPE
 export const searchEvents = async (req, res) => {
   try {
-    // EXTRACT SEARCH QUERY PARAMETER OR DEFAULT TO EMPTY STRING IF NONE PROVIDED
-    const searchQuery = req.query.q || "";
+    // Extract search query parameters
+    const { q: searchQuery = "", eventGenre, eventType } = req.query;
 
-    // EXTRACT PAGINATION PARAMETERS OR SET DEFAULT VALUES (LIMIT = 10, PAGE = 1)
+    // Build the query object
+    const query = {};
+
+    // Add genre filter if provided
+    if (eventGenre) {
+      query.eventGenre = new RegExp(eventGenre, "i"); // Case-insensitive match for genre
+    }
+
+    // Add type filter if provided
+    if (eventType) {
+      query.eventType = new RegExp(eventType, "i"); // Case-insensitive match for type
+    }
+
+    // Add name filter if provided
+    if (searchQuery) {
+      query.eventName = new RegExp(searchQuery, "i"); // Case-insensitive match for event name
+    }
+
+    // Extract pagination parameters or set default values (LIMIT = 10, PAGE = 1)
     const limit = parseInt(req.query.limit, 10) || 10;
     const page = parseInt(req.query.page, 10) || 1;
 
-    // SEARCH DATABASE FOR EVENTS WHERE EVENTNAME MATCHES SEARCH QUERY (CASE-INSENSITIVE)
-    const events = await Event.find({
-      eventName: new RegExp(searchQuery, "i"),
-    })
-      .limit(limit) // LIMIT RESULTS TO SPECIFIED NUMBER PER PAGE
-      .skip((page - 1) * limit); // SKIP RESULTS TO IMPLEMENT PAGINATION
+    // Search database for events matching the query
+    const events = await Event.find(query)
+      .limit(limit) // Limit results to specified number per page
+      .skip((page - 1) * limit); // Skip results to implement pagination
 
-    // IF NO MATCHING EVENTS ARE FOUND, RETURN A 404 STATUS
+    // If no matching events are found, return a 404 status
     if (events.length === 0) {
       return res.status(404).json({ message: "No Events Found!" });
     }
 
-    // RETURN MATCHING EVENTS ALONG WITH PAGINATION INFO
+    // Return matching events along with pagination info
     res.json({ events, page, limit });
   } catch (error) {
-    // HANDLE ANY ERRORS DURING THE SEARCH PROCESS
+    // Handle any errors during the search process
     res.status(500).json({ message: "Internal Server Error!" });
   }
 };
@@ -140,7 +127,7 @@ export const updateEvent = async (req, res) => {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION UPDATEEVENT
     const { eventId } = req.params;
 
-    // RETRIEVE AND UPDATE CURRENT EVENT OBJECT FROM DATABASE
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
     const event = await Event.findOneAndUpdate(
       { eventId: eventId },
       { ...req.body },

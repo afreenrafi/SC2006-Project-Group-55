@@ -145,7 +145,7 @@ export const deleteUser = async (req, res) => {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION DELETEUSER
     const { userId } = req.params;
 
-    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    // RETRIEVE & DELETE CURRENT USER OBJECT FROM DATABASE
     const user = await User.findOneAndDelete({ userId: userId });
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
@@ -189,3 +189,36 @@ export const userLogin = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
+
+// const verifyArtist = async (organizerId, artistUsername) => {
+//     try {
+//         // Find the organizer by ID
+//         const organizer = await User.findById(organizerId);
+//         if (!organizer || organizer.role !== 'organizer') {
+//             throw new Error('Only organizers can verify artists.');
+//         }
+
+//         // Find the artist by username
+//         const artist = await User.findOne({ username: artistUsername });
+//         if (!artist) {
+//             return { success: false, message: 'Artist not found.' };
+//         }
+
+//         // Check if the user is already a verified artist
+//         if (artist.role === 'artist' && artist.isVerifiedArtist) {
+//             return { success: false, message: 'Artist is already verified.' };
+//         }
+
+//         // Update the artist status to verified
+//         artist.role = 'artist';
+//         artist.isVerifiedArtist = true;
+//         await artist.save();
+
+//         return { success: true, message: 'Artist successfully verified.' };
+//     } catch (error) {
+//         console.error(error);
+//         return { success: false, message: error.message };
+//     }
+// };
+
+// Export each function using named exports
