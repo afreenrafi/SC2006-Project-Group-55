@@ -102,44 +102,80 @@ const Setup = ({ route }) => {
   //   }
   // };
 
-  const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
-    const formData = new FormData();
   
-    formData.append('userId', username); // userId based on the username field
-    formData.append('userName', name);
-    formData.append('userPassword', password); // userPassword field
-    formData.append('userEmail', email);
-    formData.append('userAge', age); // Adjusted from userDob to userAge to match the backend code
-    formData.append('userRole', role);
 
-    console.log(age);
+  // const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
+  //   const formData = new FormData();
+  
+  //   formData.append('userId', username); // userId based on the username field
+  //   formData.append('userName', name);
+  //   formData.append('userPassword', password); // userPassword field
+  //   formData.append('userEmail', email);
+  //   formData.append('userAge', age); // Adjusted from userDob to userAge to match the backend code
+  //   formData.append('userRole', role);
 
-    console.log(formData);
+  //   console.log("formData is " + JSON.stringify(formData));
+  
+  //   // Append role-specific data if needed
+  //   if (role === 'Organiser' && eventPermitId) {
+  //     formData.append('organiserEventPermitId', {
+  //       uri: eventPermitId,
+  //       name: 'eventPermit.jpg', // File name can be adjusted as needed
+  //       type: 'image/jpeg', // Adjust based on file type
+  //     });
+  //   } else if (role === 'Artist') {
+  //     formData.append('artistVerified', artistVerified);
+  //   }
+  
+  //   try {
+  //     const response = await fetch('http://localhost:5001/api/authRoute/register', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+  
+  //     const message = await response.json(); // Parsing response as JSON for clarity
+  //     if (response.ok) {
+  //       console.log("User registered successfully:", message);
+  //       navigation.navigate('startup/Setup', { email: email });
+  //     } else {
+  //       console.error("Registration failed:", message.message || "Unknown error");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //   }
+  // };
+
+  const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
+    // Prepare JSON object with the form fields
+    const jsonData = {
+      userId: username,
+      userName: name,
+      userPassword: password,
+      userEmail: email,
+      userAge: age,
+      userRole: role,
+    };
   
     // Append role-specific data if needed
-    if (role === 'Organiser' && eventPermitId) {
-      formData.append('organiserEventPermitId', {
-        uri: eventPermitId,
-        name: 'eventPermit.jpg', // File name can be adjusted as needed
-        type: 'image/jpeg', // Adjust based on file type
-      });
-    } else if (role === 'Artist') {
-      formData.append('artistVerified', artistVerified);
+    if (role === "Organiser" && eventPermitId) {
+      jsonData.organiserEventPermitId = eventPermitId;
+    } else if (role === "Artist") {
+      jsonData.artistVerified = artistVerified;
     }
   
     try {
-      const response = await fetch('http://localhost:5001/api/authRoute/register', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5001/api/authRoute/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(jsonData), // Send JSON-encoded data
       });
   
-      const message = await response.json(); // Parsing response as JSON for clarity
+      const message = await response.json();
       if (response.ok) {
         console.log("User registered successfully:", message);
-        navigation.navigate('startup/Setup', { email: email });
+        // Navigate or handle success
       } else {
         console.error("Registration failed:", message.message || "Unknown error");
       }
