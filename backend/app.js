@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 import authRoute from "./routes/authRoute.js";
 import userRoute from "./routes/userRoute.js";
 import eventRoute from "./routes/eventRoute.js";
+import eventTicketRoute from "./routes/eventTicketRoute.js";
 import faqRoute from "./routes/faqRoute.js";
 import bookingRoute from "./routes/bookingRoute.js";
 
@@ -55,7 +56,10 @@ app.use("/api/userRoute", userRoute);
 // HANDLE EVENT ROUTES (CRUD)
 app.use("/api/eventRoute", eventRoute);
 
-// HANDLE EVENT ROUTES (CRUD)
+// HANDLE EVENTTICKET ROUTES (CRUD)
+app.use("/api/eventTicketRoute", eventTicketRoute);
+
+// HANDLE FAQ AND FAQITEM ROUTES (CRUD)
 app.use("/api/faqRoute", faqRoute);
 
 // HANDLE BOOKING ROUTES (C)
@@ -66,7 +70,7 @@ app.use("/api/bookingRoute", bookingRoute);
 // DEFAULT PORT
 const PORT = process.env.PORT || 5000;
 
-console.log("MongoDB URI:", process.env.MONGO_URI); // Debugging line to ensure port is connected 
+console.log("MongoDB URI:", process.env.MONGO_URI); // Debugging line to ensure port is connected
 
 // SET UP MONGODB CONNECTION
 mongoose

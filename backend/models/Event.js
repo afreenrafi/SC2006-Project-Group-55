@@ -1,4 +1,4 @@
-// IMPORT NESCESSARY LIBRARIES
+// IMPORT NECESSARY LIBRARIES
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
@@ -47,30 +47,6 @@ function validateEventEndDate(eventEndDate, eventStartDate) {
   return errors;
 }
 
-// EVENTPRICE
-function validateEventPrice(value) {
-  const errors = [];
-  if (value < 0) {
-    errors.push("Event Price must be greater than or equal to 0!");
-  }
-  if (!/^\d+(\.\d{1,2})?$/.test(value)) {
-    errors.push(" Event Price must be rounded to 2 decimal places!");
-  }
-  return errors;
-}
-
-// EVENTTICKETQUANTITY
-function validateEventTicketQuantity(value) {
-  const errors = [];
-  if (value < 1) {
-    errors.push("Event Ticket Quantity must be greater than or equal to 1!");
-  }
-  if (!Number.isInteger(value)) {
-    errors.push(" Event Ticket Quantity must be an integer!");
-  }
-  return errors;
-}
-
 // DATABASE SCHEMA FOR EVENT ENTITY
 const EventSchema = new mongoose.Schema({
   eventId: {
@@ -111,9 +87,9 @@ const EventSchema = new mongoose.Schema({
       },
     },
   },
-  eventGenre:{
+  eventGenre: {
     type: String,
-    required:true,
+    required: true,
     enum: ["All", "Museums", "Exhibitions", "Performances", "Festivals"],
   },
   eventLocation: {
@@ -173,40 +149,21 @@ const EventSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  eventPrice: {
-    type: Number,
-    required: true,
-    min: 0,
-    validate: {
-      validator: function (value) {
-        const errors = validateEventPrice(value);
-        return errors.length === 0;
-      },
-      message: function (props) {
-        const errors = validateEventPrice(props.value);
-        return errors.join("\n");
-      },
+  eventTicket: [
+    {
+      type: String,
+      ref: "EventTicket",
+      default: null,
     },
-  },
-  eventTicketQuantity: {
-    type: Number,
-    required: true,
-    min: 1,
-    validate: {
-      validator: function (value) {
-        const errors = validateEventTicketQuantity(value);
-        return errors.length === 0;
-      },
-      message: function (props) {
-        const errors = validateEventTicketQuantity(props.value);
-        return errors.join("\n");
-      },
+  ],
+  eventArtist: [
+    {
+      type: String,
+      required: true,
+      ref: "User",
+      default: null,
     },
-  },
-  eventTicketQuantityBooked: {
-    type: Number,
-    default: 0,
-  },
+  ],
   userId: {
     type: String,
     required: true,
