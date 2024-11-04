@@ -24,7 +24,7 @@ const Homepage = ({ navigation }) => {
   const renderEventCard = ({ item }) => {
     const isBookmarked = savedEvents.some((e) => e.id === item.id);
     return (
-      <View style={styles.eventCard}>
+      <TouchableOpacity style={styles.eventCard}>
         <Image source={item.image} style={styles.eventImage} />
         <Text style={styles.eventType}>{item.type}</Text>
         <View style={styles.eventDetailsContainer}>
@@ -35,7 +35,7 @@ const Homepage = ({ navigation }) => {
         <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.bookmarkButton}>
           <FontAwesome name={isBookmarked ? "bookmark" : "bookmark-o"} size={20} color={isBookmarked ? "#EE1C43" : "#FFF"} />
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     );
   };
 
