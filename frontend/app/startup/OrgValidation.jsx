@@ -11,7 +11,7 @@ import SelectInput from "../../components/forms/SelectInput";
 const OrgValidation = ({ route }) => {
   const navigation = useNavigation();
 
-  const { email } = route.params;
+  const { email, role } = route.params;
 
   const [Username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState(""); 
@@ -101,13 +101,9 @@ const OrgValidation = ({ route }) => {
         console.log("Proceeding with:", Username, Role, Password);
         const result = await submitAccountDetails(email, Username, Role, Password);
         console.log("Account details submitted:", result);
-        if(Role == 'Organiser'){
-          navigation.navigate('startup/OrgValidation', { email: result.email, role: result.role });
-        }
-        else{
-          //to home page
-          // navigation.navigate('Home page', { email: result.email, role: result.role });
-        }
+
+        //
+          navigation.navigate('tabs', { email: result.email, role: result.role });
         
       }
 
