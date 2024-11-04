@@ -10,7 +10,7 @@ const SingpassBtn = ({ size = 20, alignment = "center", onPress }) => {
       <Text style={[styles.text, { fontSize: size, textAlign: alignment }]}>
         Login with
       </Text>
-      <Image style={styles.logo} source={require('../assets/logo/singpass_logo.png')} />
+      <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} />
     </TouchableOpacity>
   );
 };
