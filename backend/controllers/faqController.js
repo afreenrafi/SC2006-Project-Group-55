@@ -1,5 +1,5 @@
 // BUSINESS LOGIC FOR EVENT ENTITY (CRUD)
-// IMPORT NESCESSARY LIBRARIES
+// IMPORT NECESSARY LIBRARIES
 import Event from "../models/Event.js";
 import Faq from "../models/Faq.js";
 import FaqItem from "../models/FaqItem.js";
