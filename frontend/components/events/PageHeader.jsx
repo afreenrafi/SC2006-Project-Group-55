@@ -12,7 +12,7 @@ const PageHeader = ({ title, onPress }) => {
         <TouchableOpacity style={styles.backBtn} onPress={onPress}>
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <StyledText size={30} textContent={title}/>
+        <StyledText size={20} textContent={title}/>
     </View>
   );
 };
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     position: "absolute",
-    left: 30,
+    left: 10,
   },
 });
 

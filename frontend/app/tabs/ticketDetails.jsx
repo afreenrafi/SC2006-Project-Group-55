@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import PageHeader from '../../components/events/PageHeader';
+
 import QRCode from 'react-native-qrcode-svg';
 
 const TicketDetails = ({ route }) => {
@@ -11,13 +13,9 @@ const TicketDetails = ({ route }) => {
 
     return (
       <View style={styles.container}>
-        {/* Custom Back Button */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <FontAwesome name="arrow-left" size={24} color="#000" />
-        </TouchableOpacity>
   
         {/* Event Header */}
-        <Text style={styles.header}>Event Details</Text>
+        <PageHeader title={"Event Details"} onPress={()=>navigation.goBack()}/>
   
         {/* Ticket Image and Title */}
         <View style={styles.ticketContainer}>
@@ -50,11 +48,12 @@ const TicketDetails = ({ route }) => {
             <Text style={styles.qrButtonText}>Show QR Code</Text>
           </TouchableOpacity>
           
-          {/* Download Image Button */}
+          {/* Download Image Button 
           <TouchableOpacity style={styles.downloadButton}>
             <FontAwesome name="download" size={18} color="#CA3550" />
             <Text style={styles.downloadButtonText}>Download Image</Text>
           </TouchableOpacity>
+          */}
 
           {/* QR Code Modal */}
           <Modal
