@@ -5,10 +5,10 @@ import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
 import nodemailer from 'nodemailer';
 import { createRequire } from 'module';
-//import stripe from "stripe";
+import Stripe from "stripe";
 
 const require = createRequire(import.meta.url);
-//const stripeInstance = stripe(process.env.STRIPE_SECRET_KEY);
+//const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // SUPPORTING FUNCTIONS RELATED TO BOOKING ENTITY
 const sendConfirmationEmail = async (
@@ -102,7 +102,7 @@ export const createChargeableBooking = async (req, res) => {
   const { eventId, bookingQuantity, paymentMethodId, saveCard, userId, totalAmount } =
     req.body;
 
-  const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const stripeInstance = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
   try {
     // CHECKING IF USERID EXISTS IN USER COLLECTION
