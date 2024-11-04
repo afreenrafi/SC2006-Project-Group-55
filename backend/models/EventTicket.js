@@ -4,6 +4,21 @@ import { v4 as uuidv4 } from "uuid";
 
 // VALIDATION FUNCTIONS FOR EVENTTICKET ENTITY
 
+// EVENTTICKETPRICE
+function validateEventTicketPrice(value) {
+  const errors = [];
+
+  const eventTicketPriceRegex = /^\d+(\.\d{1,2})?$/;
+
+  if (!eventTicketPriceRegex.test(value)) {
+    errors.push(
+      "Event Ticket Price must be rounded off to two decimal places!"
+    );
+  }
+
+  return errors;
+}
+
 // EVENTTICKETQUANTITY
 function validateEventTicketQuantity(value) {
   const errors = [];
@@ -28,6 +43,21 @@ const EventTicketSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ["Adult", "Child", "Senior Citizen", "VIP"],
+  },
+  eventTicketPrice: {
+    type: Number,
+    required: true,
+    min: 0,
+    validate: {
+      validator: function (value) {
+        const errors = validateEventTicketPrice(value);
+        return errors.length === 0;
+      },
+      message: function (props) {
+        const errors = validateEventTicketPrice(props.value);
+        return errors.join("\n");
+      },
+    },
   },
   eventTicketQuantity: {
     type: Number,
