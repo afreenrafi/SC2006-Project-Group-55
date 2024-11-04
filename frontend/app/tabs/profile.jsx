@@ -27,15 +27,33 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteAccount = () => {
-    setDeleteModalVisible(false);
-    navigation.navigate("Login");
+  const handleLogout = () => {
+    AsyncStorage.clear();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'auth' }],
+    });
   };
 
-  const handleLogout = () => {
-    // Clear any necessary data, then navigate to login screen
-    AsyncStorage.clear(); // Example: clearing AsyncStorage
-    navigation.navigate("Login"); // Navigate to the login screen
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleteModalVisible(false);
+      
+      // Optional: Show a loading indicator here if you want to indicate deletion in progress
+      
+      // Clear AsyncStorage and wait for it to complete
+      await AsyncStorage.clear();
+  
+      // Navigate to the auth screen only after storage is cleared
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'auth' }],
+        });
+      }, 100); // Adjust the timeout as needed
+    } catch (error) {
+      console.error('Error clearing AsyncStorage:', error);
+    }
   };
 
   useEffect(() => {
