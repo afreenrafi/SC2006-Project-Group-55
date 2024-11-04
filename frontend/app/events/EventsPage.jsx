@@ -12,6 +12,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 
 const EventsPage = ({ route }) => {
   const { email, role } = route.params;
+  const { eventId } = route.params;
 
   const navigation = useNavigation();
 
@@ -22,7 +23,7 @@ const EventsPage = ({ route }) => {
   useEffect(() => {
     const getEventDetails = async () => {
       try {
-        const details = await fetchEventDetails();  // Fetch event details
+        const details = await fetchEventDetails(eventId);  // Fetch event details
         setEventDetails(details);                  // Set the fetched details to state
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
@@ -38,7 +39,8 @@ const EventsPage = ({ route }) => {
 
 
   // Fetch event details
-  const fetchEventDetails = async () => {
+  const fetchEventDetails = async (eventId) => {
+    console.log("eventId is " + eventId)
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({

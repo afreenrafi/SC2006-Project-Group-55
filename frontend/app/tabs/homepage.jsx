@@ -21,10 +21,14 @@ const Homepage = ({ navigation }) => {
     ...mockNearbyEvents,
   ];
 
+  const toEventPage = async (eventId) => {
+    navigation.navigate('events/EventsPage', { eventId: eventId })
+  }
+
   const renderEventCard = ({ item }) => {
     const isBookmarked = savedEvents.some((e) => e.id === item.id);
     return (
-      <TouchableOpacity style={styles.eventCard}>
+      <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.id)}>
         <Image source={item.image} style={styles.eventImage} />
         <Text style={styles.eventType}>{item.type}</Text>
         <View style={styles.eventDetailsContainer}>
@@ -358,6 +362,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#EEE', // Similar color to blend
     borderTopWidth: 0, // Removing top border to "merge"
+    
   },
   activeDateButton: {
     backgroundColor: '#FFFFFF',
