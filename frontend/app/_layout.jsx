@@ -13,6 +13,7 @@ import BuyTickets from './events/BuyTickets';
 import OrderDetails from './events/OrderDetails';
 import BookingComplete from './events/BookingComplete';
 
+
 const Stack = createNativeStackNavigator();
 
 const MainLayout = () => {
