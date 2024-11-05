@@ -3,7 +3,6 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-na
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import PageHeader from '../../components/events/PageHeader';
-
 import QRCode from 'react-native-qrcode-svg';
 
 const TicketDetails = ({ route }) => {

@@ -14,6 +14,7 @@ import OrderDetails from './events/OrderDetails';
 import BookingComplete from './events/BookingComplete';
 
 const Stack = createNativeStackNavigator();
+const TabsWrapper = (props) => <Tabs {...props} role={props.route.params?.role} />;
 
 const MainLayout = () => {
   return (
@@ -49,8 +50,6 @@ const MainLayout = () => {
           title: 'Organisation Validation'
          }}
       />
-
-
       <Stack.Screen
         name="events/EventsPage"
         component={EventsPage}
@@ -79,14 +78,9 @@ const MainLayout = () => {
           title: 'Booking Complete'
          }}
       />
-
-
-      
-
-
       <Stack.Screen
         name="tabs"
-        component={Tabs}
+        component={TabsWrapper}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

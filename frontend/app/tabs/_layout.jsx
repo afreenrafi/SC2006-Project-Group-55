@@ -6,7 +6,8 @@ import Homepage from './homepage';
 import Profile from './profile';
 import Ticket from './ticket';
 import TicketDetails from './ticketDetails'; 
-import SavedEvents from './savedEvents'
+import SavedEvents from './savedEvents';
+import CreateEventsNavigator from './createEventsStack';
 import { DefaultTheme } from '@react-navigation/native';
 
 const navTheme = {
@@ -19,7 +20,7 @@ const navTheme = {
 
 const Tab = createBottomTabNavigator();
 
-const Tabs = () => {
+const Tabs = ( {role} ) => {
   return (
       <Tab.Navigator
         initialRouteName="Homepage"
@@ -33,6 +34,8 @@ const Tabs = () => {
               iconName = focused ? 'ticket-outline' : 'ticket';
             } else if (route.name === 'SavedEvents') {
               iconName = focused ? 'bookmark-outline' : 'bookmark';
+            } else if (route.name === 'CreateEvents') {
+              iconName = focused ? 'create-outline' : 'create';
             } else if (route.name === 'Profile') {
               iconName = focused ? 'person-outline' : 'person';
             }
@@ -56,7 +59,16 @@ const Tabs = () => {
       >
         <Tab.Screen options={{ headerShown: false }} name="Homepage" component={Homepage} />
         <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} />
-        <Tab.Screen options={{ headerShown: false }} name="SavedEvents" component={SavedEvents} />
+        {/* Conditionally render SavedEvents or CreateEvents based on the role */}
+        {role === 'Organiser' ? (
+        <Tab.Screen 
+          options={{ headerShown: false }} 
+          name="CreateEvents" 
+          component={CreateEventsNavigator} // Use the CreateEvents stack
+        />
+        ) : (
+          <Tab.Screen options={{ headerShown: false }} name="SavedEvents" component={SavedEvents} />
+        )}
         <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} />
 
         {/* Add TicketDetails directly to the Tabs but hide tab bar when active */}
