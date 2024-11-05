@@ -30,8 +30,18 @@ const Setup = ({ route }) => {
 
 
   const handleUsername = (text) => {
-    const validUsername = text.replace(/[^a-zA-Z0-9_]/g, '');  // Remove any character that isn't a letter, number, or underscore
-    setUsername(validUsername);  // Update the state with the valid username
+    // Remove any non-alphanumeric characters
+    const validUsername = text.replace(/[^a-zA-Z0-9]/g, '');
+  
+    // Update the state with the valid username
+    setUsername(validUsername);
+  
+    // Validate length and set error message if conditions are not met
+    if (validUsername.length < 8) {
+      setUsernameError('Username must be at least 8 characters long and alphanumeric.');
+    } else {
+      setUsernameError(''); // Clear error if valid
+    }
   };
 
   const handleRoleSelect = (selectedRole) => {
@@ -144,20 +154,19 @@ const Setup = ({ route }) => {
         // const result = await submitAccountDetails(email, Username, Role, Password);
         try{
           await registerUser(email, age, name, Username, Role, Password);
-          
-          if(Role == 'Organiser'){
-            navigation.navigate('startup/OrgValidation', { email: email, role: Role });
-          }
-          else{
-            //to tabs
-            navigation.navigate('tabs', { email: email, role: Role });
-            //for testing
-            // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
-            }
         } catch (error){
           console.error("Failed to submit details:", error);
         }
         // console.log("Account details submitted:", result);
+        if(Role == 'Organiser'){
+          navigation.navigate('startup/OrgValidation', { email: email, role: Role });
+        }
+        else{
+          //to tabs
+          navigation.navigate('tabs', { email: email, role: Role });
+          //for testing
+          // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
+        }
        
         
       }
@@ -182,12 +191,12 @@ const Setup = ({ route }) => {
         <StyledText size={30} textContent="Account Setup" />
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
-          {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
+          {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" alignment="left"/> : null}
           
           <SelectInput label={"Role"} data={Role} onPress={() => setModalVisible(true)}/>
 
           <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
-          {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
+          {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" alignment="left"/> : null}
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
             <StyledText size={18} textContent="must include at least 8 characters" fontColor="#8B8B8B"/>
@@ -202,7 +211,7 @@ const Setup = ({ route }) => {
           </View>
 
           <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
-          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" /> : null}
+          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" alignment="left"/> : null}
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
           
         </View>
