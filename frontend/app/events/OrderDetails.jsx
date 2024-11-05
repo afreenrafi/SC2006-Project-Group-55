@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import { useStripe } from '@stripe/stripe-react-native';
+import { StripeProvider } from "@stripe/stripe-react-native";
 import PageHeader from "../../components/events/PageHeader";
 // import OrgDisplay from "../../components/OrgDisplay";
 // import EventHeader from "../../components/EventHeader";
@@ -11,6 +12,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 // import StyledInput from "../../components/StyledInput";
 // import TicketSelector from "../../components/TicketSelector";
 import { FontAwesome5 } from "@expo/vector-icons";
+
 
 
 
@@ -35,8 +37,6 @@ const OrderDetails = ({ route }) => {
 
 
 
-  
-
 
   useEffect(() => {
     const getEventDetails = async () => {
@@ -52,7 +52,12 @@ const OrderDetails = ({ route }) => {
     };
 
     getEventDetails();  // Call the function when component mounts
+    initializePaymentSheet();
   }, []);
+
+
+
+  
     
 
 
@@ -127,18 +132,26 @@ const OrderDetails = ({ route }) => {
     });
   };
 
-  const createPaymentIntent = async () => {
+  const createPaymentIntent = async (totalPrice, customerStripe) => {
     try {
-      const response = await fetch('http://localhost:5001/api/payments/intents', {
+      console.log(typeof(parseInt(totalPrice)) + parseInt(totalPrice));
+      console.log(typeof(customerStripe) + customerStripe);
+      const response = await fetch('http://localhost:5001/api/stripeRoute/createPaymentIntent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: Math.floor(totalPrice * 100) }),
+        body: JSON.stringify({ 
+          amount: parseInt(totalPrice),
+          currency: "sgd",
+          customerStripeId: customerStripe
+        }),
       });
       const data = await response.json();
       if (response.ok) {
-        return data.paymentIntent;
+        console.log('Payment Intent created successfully:', data.paymentIntent.client_secret);
+        console.log('Key created successfully:', data.ephemeralKey);
+        return data;
       } else {
         throw new Error(data.message || 'Failed to create payment intent');
       }
@@ -147,6 +160,30 @@ const OrderDetails = ({ route }) => {
       return null;
     }
   };
+
+  const createCustomerStripe = async (userId) => {
+    try {
+      const response = await fetch('http://localhost:5001/api/stripeRoute/createStripeCustomer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          userId: userId
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Customer created successfully', data.stripeId);
+        return data.stripeId;
+      } else {
+        throw new Error(data.message || 'Failed to create customer');
+      }
+    } catch (error) {
+      console.error('Error creating customer:', error);
+      return null;
+    }
+  }
 
   const createOrder = async (orderDetails) => {
     try {
@@ -168,34 +205,57 @@ const OrderDetails = ({ route }) => {
     }
   };
 
-  const onCheckout = async () => {
-    const clientSecret = await createPaymentIntent();
-    if (!clientSecret) return;
-    const { error } = await initPaymentSheet({
-      merchantDisplayName: 'YourAppName',
-      paymentIntentClientSecret: clientSecret,
+  const initializePaymentSheet = async () => {
+    const clientStripeId = await createCustomerStripe("Tsiew00015");
+    const intentList = await createPaymentIntent(totalPrice, clientStripeId);
+    if (!intentList) return;
+
+    const { error: initError } = await initPaymentSheet({
+      merchantDisplayName: 'Cultivate',
+      customerId: clientStripeId,
+      paymentIntentClientSecret: intentList.paymentIntent.client_secret,
+      customerEphemeralKeySecret: intentList.ephemeralKey,
+      defaultBillingDetails: {
+        name: 'Testing',
+      }
     });
+    
+    if (initError) {
+      console.error('Error initializing payment sheet:', initError.message);
+      return;
+    }
+  
+    const { error: paymentError } = await presentPaymentSheet();
+  
+    if (paymentError) {
+      console.error('Error presenting payment sheet:', paymentError.message);
+      return;
+    }
+  
+    console.log('Payment completed successfully');
+
+    // const orderDetails = {
+    //   items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
+    //   total: totalPrice,
+    //   customer: { email, role },
+    //   date: selectedDate,
+    // };
+    // await createOrder(orderDetails);
+  };
+
+  const openPaymentSheet = async () => {
+    const { error } = await presentPaymentSheet();
+
     if (error) {
-      console.error('Error initializing payment sheet:', error.message);
-      return;
+      console.error(`Error code: ${error.code}`, error.message);
+    } else {
+      console.error('Success', 'Your order is confirmed!');
     }
-    const paymentResponse = await presentPaymentSheet();
-    if (paymentResponse.error) {
-      console.error(`Error code: ${paymentResponse.error.code}`, paymentResponse.error.message);
-      return;
-    }
-    const orderDetails = {
-      items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
-      total: totalPrice,
-      customer: { email, role },
-      date: selectedDate,
-    };
-    await createOrder(orderDetails);
   };
 
   const handleNext = async () => {
     try {
-      await onCheckout();
+      await openPaymentSheet();
       // navigation.navigate('events/BookingComplete', { 
       //   email: email, 
       //   role: role, 
@@ -219,6 +279,8 @@ const OrderDetails = ({ route }) => {
 
 
   return (
+    <StripeProvider 
+    publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
     <View style={{ flex:1 }}>
       <SafeAreaView style={styles.bgColour}>
         <PageHeader title={"Order Details"} onPress={()=>navigation.goBack()}/>
@@ -302,6 +364,7 @@ const OrderDetails = ({ route }) => {
       
 
     </View>
+    </StripeProvider>
   );
 };
 
