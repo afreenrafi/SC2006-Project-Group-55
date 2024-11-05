@@ -1,7 +1,8 @@
-import { View, Text, Image, StyleSheet, TextInput, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform, Touchable } from "react-native";
 import React, { useState } from "react";
 import StyledText from "../../components/forms/StyledText";
-import SingpassBtn from "../../components/forms/SingpassBtn";
+// import SingpassBtn from "../../components/forms/SingpassBtn";
+import RoundBtn from "../../components/forms/RoundBtn";
 import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {
@@ -38,6 +39,16 @@ const Login = () => {
       console.error("Failed to fetch user singpass details:", error);
     }
   };
+
+  const goRegisterPage = async () => {
+    navigation.navigate('startup/Details');  // Navigate to 'Details' page
+  };
+
+  const goLoginPage = async () => {
+    navigation.navigate('startup/LoginAccount');  // Navigate to 'Details' page
+  };
+
+
   
 
   return (
@@ -47,8 +58,19 @@ const Login = () => {
       <StyledText size={40} textContent="Cultivate" />
       <StyledText size={26} textContent="Cultivate Connections," />
       <StyledText size={26} textContent="Celebrate Culture." />
-      <SingpassBtn onPress={handleSingpassLogin}/>
-      {/* <Image style={styles.logo} source={require('../../assets/logo/singpass_logo.png')} /> */}
+      <View style={styles.actionBtns}>
+        <RoundBtn onPress={goRegisterPage} alignment="center" text="Register" />
+        {/* <StyledText size={16} textContent="Have an account? Login here!"/> */}
+        <View style={styles.loginCont}>
+          <StyledText size={16} textContent="Have an account?"/>
+          <TouchableOpacity onPress={goLoginPage}>
+            <StyledText size={16} textContent="Login here!" underline="true"/>
+          </TouchableOpacity>
+          
+        </View>
+      </View>
+      
+      {/* <SingpassBtn onPress={handleSingpassLogin}/> */}
 
     </View>
     
@@ -67,6 +89,18 @@ const styles = StyleSheet.create({
     width: '60%',
     resizeMode: 'contain',
   },
+  actionBtns: {
+    width: "100%",
+    padding: 30,
+    gap: 10,
+    flexDirection: "column",
+    alignItems: "center"
+  },
+  loginCont: {
+    flexDirection: "row",
+    gap: 5,
+    paddingVertical: 10
+  }
  
 });
 

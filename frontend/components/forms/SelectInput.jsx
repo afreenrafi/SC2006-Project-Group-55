@@ -10,7 +10,7 @@ const StyledInput = ({ label, data, onPress }) => {
       {label && <Text style={styles.text}>{label}</Text>}
       <TouchableOpacity style={styles.inputCont} onPress={onPress}>
         <Text 
-            style={styles.input}
+            style={[styles.input, {color: data ? "#000000" : "#999999"}]}
             // value={data}
             // placeholder={label}
             // onChangeText={onChangeText}
@@ -18,7 +18,7 @@ const StyledInput = ({ label, data, onPress }) => {
             // secureTextEntry={pwd}
             // editable={false}
         >
-            {data}
+            {data ? data : "Select Gender"}
         </Text>
       </TouchableOpacity>
     </View>
