@@ -24,15 +24,17 @@ export const createStripeCustomer = async (req, res) => {
             });
             user.userStripeId = stripeCustomer.id;
 
+            
             // Save the updated user object with the new Stripe ID
             await user.save();
         }
 
-        return res.status(200).json({ stripeId: user.userStripeId });
+        return res.status(200).json({ stripeId: user.userStripeId});
     } catch (error) {
         return res.status(500).json({ error: `Failed to create Stripe customer: ${error.message}` });
     }
 };
+
 
 // Create a payment intent
 export const createPaymentIntent = async (req, res) => {
@@ -40,6 +42,7 @@ export const createPaymentIntent = async (req, res) => {
         const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
         const { amount, currency, customerStripeId } = req.body; // Get data from req.body
 
+        // Create the payment intent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100, // Convert amount to cents
             currency: currency,
@@ -48,11 +51,24 @@ export const createPaymentIntent = async (req, res) => {
             },
             customer: customerStripeId,
         });
-        return res.status(200).json(paymentIntent);
+
+        // Create an ephemeral key
+        const ephemeralKey = await stripe.ephemeralKeys.create(
+            { customer: customerStripeId }, // Use customerStripeId here
+            { apiVersion: '2024-09-30.acacia' }
+        );
+
+        // Return payment intent and ephemeral key in a single object
+        return res.status(200).json({
+            paymentIntent,
+            ephemeralKey: ephemeralKey.secret,
+            publishableKey: 'pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM',
+        });
     } catch (error) {
         return res.status(500).json({ error: `Failed to create payment intent: ${error.message}` });
     }
 };
+
 
 // Attach payment method to a customer and save for future use
 export const attachPaymentMethod = async (req, res) => {
