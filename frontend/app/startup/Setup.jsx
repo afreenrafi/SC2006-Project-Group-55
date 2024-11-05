@@ -7,6 +7,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 import Entypo from '@expo/vector-icons/Entypo';
 import SelectInput from "../../components/forms/SelectInput";
 import SelectModal from "../../components/forms/SelectModal";
+import { registerUser } from "../../apicalls/UserApi";
 
 
 const Setup = ({ route }) => {
@@ -63,80 +64,37 @@ const Setup = ({ route }) => {
     }
   }
 
-  // const registerUser = async (email, age, name, username, role, password, eventPermitId) => {
-  //   const formData = new FormData();
-
-  //   formData.append('userId', username); // Assuming email as userId for simplicity
-  //   formData.append('userName', name);
-  //   formData.append('userPassword', password); // Placeholder, replace with actual password field if needed
-  //   formData.append('userEmail', email);
-  //   formData.append('userDob', age);
-  //   formData.append('userRole', role);
-
-  //   if (role === 'Organiser' && eventPermitId) {
-  //     formData.append('eventPermitId', {
-  //       uri: eventPermitId,
-  //       name: 'eventPermit.jpg', // Change file name as appropriate
-  //       type: 'image/jpeg', // Adjust based on file type
-  //     });
-  //   }
-
-  //   try {
-  //     const response = await fetch('http://localhost:5001/api/authRoute/register', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //       body: formData,
-  //     });
-
-  //     const message = await response.text();
-  //     if (response.ok) {
-  //       console.log("User registered successfully");
-  //       navigation.navigate('startup/Setup', { email: email });
-  //     } else {
-  //       console.error("Registration failed:", message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
-
-  
-
   // const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
-  //   const formData = new FormData();
-  
-  //   formData.append('userId', username); // userId based on the username field
-  //   formData.append('userName', name);
-  //   formData.append('userPassword', password); // userPassword field
-  //   formData.append('userEmail', email);
-  //   formData.append('userAge', age); // Adjusted from userDob to userAge to match the backend code
-  //   formData.append('userRole', role);
-
-  //   console.log("formData is " + JSON.stringify(formData));
+  //   // Prepare JSON object with the form fields
+  //   const jsonData = {
+  //     userId: username,
+  //     userName: name,
+  //     userPassword: password,
+  //     userEmail: email,
+  //     userAge: age,
+  //     userRole: role,
+  //   };
   
   //   // Append role-specific data if needed
-  //   if (role === 'Organiser' && eventPermitId) {
-  //     formData.append('organiserEventPermitId', {
-  //       uri: eventPermitId,
-  //       name: 'eventPermit.jpg', // File name can be adjusted as needed
-  //       type: 'image/jpeg', // Adjust based on file type
-  //     });
-  //   } else if (role === 'Artist') {
-  //     formData.append('artistVerified', artistVerified);
+  //   if (role === "Organiser" && eventPermitId) {
+  //     jsonData.organiserEventPermitId = eventPermitId;
+  //   } else if (role === "Artist") {
+  //     jsonData.artistVerified = artistVerified;
   //   }
   
   //   try {
-  //     const response = await fetch('http://localhost:5001/api/authRoute/register', {
-  //       method: 'POST',
-  //       body: formData,
+  //     const response = await fetch("http://localhost:5001/api/authRoute/register", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(jsonData), // Send JSON-encoded data
   //     });
   
-  //     const message = await response.json(); // Parsing response as JSON for clarity
+  //     const message = await response.json();
   //     if (response.ok) {
   //       console.log("User registered successfully:", message);
-  //       navigation.navigate('startup/Setup', { email: email });
+  //       // Navigate or handle success
   //     } else {
   //       console.error("Registration failed:", message.message || "Unknown error");
   //     }
@@ -144,45 +102,6 @@ const Setup = ({ route }) => {
   //     console.error("Error:", error);
   //   }
   // };
-
-  const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
-    // Prepare JSON object with the form fields
-    const jsonData = {
-      userId: username,
-      userName: name,
-      userPassword: password,
-      userEmail: email,
-      userAge: age,
-      userRole: role,
-    };
-  
-    // Append role-specific data if needed
-    if (role === "Organiser" && eventPermitId) {
-      jsonData.organiserEventPermitId = eventPermitId;
-    } else if (role === "Artist") {
-      jsonData.artistVerified = artistVerified;
-    }
-  
-    try {
-      const response = await fetch("http://localhost:5001/api/authRoute/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(jsonData), // Send JSON-encoded data
-      });
-  
-      const message = await response.json();
-      if (response.ok) {
-        console.log("User registered successfully:", message);
-        // Navigate or handle success
-      } else {
-        console.error("Registration failed:", message.message || "Unknown error");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
   
 
 
@@ -201,7 +120,7 @@ const Setup = ({ route }) => {
 
 
   const handleNext = async () => {
-    try{
+    
       if (Username === '') {
         setUsernameError('Username cannot be empty');
         setPwdError('');
@@ -223,23 +142,25 @@ const Setup = ({ route }) => {
         setRePwdError('');
         console.log("Proceeding with:", email, age, name, Username, Role, Password);
         // const result = await submitAccountDetails(email, Username, Role, Password);
-        const result = await registerUser(email, age, name, Username, Role, Password);
+        try{
+          await registerUser(email, age, name, Username, Role, Password);
+          
+          if(Role == 'Organiser'){
+            navigation.navigate('startup/OrgValidation', { email: email, role: Role });
+          }
+          else{
+            //to tabs
+            navigation.navigate('tabs', { email: email, role: Role });
+            //for testing
+            // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
+            }
+        } catch (error){
+          console.error("Failed to submit details:", error);
+        }
         // console.log("Account details submitted:", result);
-        if(Role == 'Organiser'){
-          navigation.navigate('startup/OrgValidation', { email: email, role: Role });
-        }
-        else{
-          //to tabs
-          navigation.navigate('tabs', { email: email, role: Role });
-          //for testing
-          // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
-        }
+       
         
       }
-
-    } catch (error){
-      console.error("Failed to submit account details:", error);
-    }
     
     // try {
     //   const result = await submitUserDetails();  // Simulate sending data

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Tabs from './tabs/_layout'; // Adjust the path if necessary
 import Login from './auth/Login'; // Adjust the path if necessary
 //startup pages
+import LoginAccount from './startup/LoginAccount';
 import Details from './startup/Details';
 import Setup from './startup/Setup';
 import OrgValidation from './startup/OrgValidation';
@@ -24,6 +25,13 @@ const MainLayout = () => {
         component={Login}
         options={{ headerShown: false,
           title: 'Login', 
+         }}
+      />
+      <Stack.Screen
+        name="startup/LoginAccount"
+        component={LoginAccount}
+        options={{ headerShown: false,
+          title: 'Account Login',
           gestureEnabled: false
          }}
       />
@@ -32,23 +40,26 @@ const MainLayout = () => {
         component={Details}
         options={{ headerShown: false,
           title: 'Your Details', 
-          gestureEnabled: false
+          
          }}
       />
       <Stack.Screen
         name="startup/Setup"
         component={Setup}
         options={{ headerShown: false,
-          title: 'Setup'
+          title: 'Setup',
+          gestureEnabled: false
          }}
       />
       <Stack.Screen
         name="startup/OrgValidation"
         component={OrgValidation}
         options={{ headerShown: false,
-          title: 'Organisation Validation'
+          title: 'Organisation Validation',
+          gestureEnabled: false
          }}
       />
+
 
 
       <Stack.Screen

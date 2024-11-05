@@ -6,20 +6,21 @@ import StyledInput from "../../components/forms/StyledInput";
 import RoundBtn from "../../components/forms/RoundBtn";
 import SelectInput from "../../components/forms/SelectInput";
 import SelectModal from "../../components/forms/SelectModal";
+import PageHeader from "../../components/events/PageHeader";
 
 const Details = ({ route }) => {
   const navigation = useNavigation();
-  const { lastName, firstName, gender, age, email } = route.params;
+  // const { lastName, firstName, gender, age, email } = route.params;
 
-  const [editedLastName, setLastName] = useState(lastName);
-  const [editedFirstName, setFirstName] = useState(firstName);
+  const [editedLastName, setLastName] = useState("");
+  const [editedFirstName, setFirstName] = useState("");
 
-  const [editedGender, setGender] = useState(gender);
+  const [editedGender, setGender] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [editedAge, setAge] = useState(age);
+  const [editedAge, setAge] = useState("");
 
-  const [editedEmail, setEmail] = useState(email);
+  const [editedEmail, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");  // State to hold email error message
 
   const handleAgeChange = (text) => {
@@ -77,7 +78,8 @@ const Details = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Your Details" />
+        {/* <StyledText size={30} textContent="Your Details" /> */}
+        <PageHeader title={"Registration"} onPress={()=>navigation.goBack()} fontSize={30}/>
 
         <View style={styles.inputs}>
           <StyledInput label={"Last Name"} data={editedLastName} onChangeText={setLastName}/>
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
   },
   inputs: {
     width: "100%",
-    paddingVertical: 40,
+    paddingBottom: 40,
     paddingHorizontal: "5%",
   },
   btnContainer:{
