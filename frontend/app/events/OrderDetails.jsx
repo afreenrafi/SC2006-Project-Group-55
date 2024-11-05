@@ -2,6 +2,7 @@ import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, Activit
 import React, { useState, useEffect } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
+import { useStripe } from '@stripe/stripe-react-native';
 import PageHeader from "../../components/events/PageHeader";
 // import OrgDisplay from "../../components/OrgDisplay";
 // import EventHeader from "../../components/EventHeader";
@@ -22,6 +23,7 @@ const OrderDetails = ({ route }) => {
 
   const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [loading, setLoading] = useState(true);            // State to manage loading status
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 //   const [selectedDate, setSelectedDate] = useState(null); 
 //   const [modalVisible, setModalVisible] = useState(false);
 //   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
@@ -29,6 +31,7 @@ const OrderDetails = ({ route }) => {
 //   const [inputQty, setInputQty] = useState(0);
 //   const [totalQty, setTotalQty] = useState(0);
 //   const [totalPrice, setTotalPrice] = useState(0);
+
 
 
 
@@ -124,25 +127,81 @@ const OrderDetails = ({ route }) => {
     });
   };
 
+  const createPaymentIntent = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/payments/intents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount: Math.floor(totalPrice * 100) }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        return data.paymentIntent;
+      } else {
+        throw new Error(data.message || 'Failed to create payment intent');
+      }
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      return null;
+    }
+  };
+
+  const createOrder = async (orderDetails) => {
+    try {
+      const response = await fetch('http://localhost:5001/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderDetails),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Order created successfully:', data);
+      } else {
+        console.error('Order creation failed:', data.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
+  };
+
   const onCheckout = async () => {
-    // 1. Create a payment intent
-   
-    // 2. Initialize the Payment sheet
-    
-    // 3. Present the Payment Sheet from Stripe
-    
-    // 4. If payment ok -> create the order
-    // onCreateOrder();
+    const clientSecret = await createPaymentIntent();
+    if (!clientSecret) return;
+    const { error } = await initPaymentSheet({
+      merchantDisplayName: 'YourAppName',
+      paymentIntentClientSecret: clientSecret,
+    });
+    if (error) {
+      console.error('Error initializing payment sheet:', error.message);
+      return;
+    }
+    const paymentResponse = await presentPaymentSheet();
+    if (paymentResponse.error) {
+      console.error(`Error code: ${paymentResponse.error.code}`, paymentResponse.error.message);
+      return;
+    }
+    const orderDetails = {
+      items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
+      total: totalPrice,
+      customer: { email, role },
+      date: selectedDate,
+    };
+    await createOrder(orderDetails);
   };
 
   const handleNext = async () => {
     try {
-      navigation.navigate('events/BookingComplete', { 
-        email: email, 
-        role: role, 
-        eventDetails: eventDetails,
-        selectedDate: selectedDate
-      });
+      await onCheckout();
+      // navigation.navigate('events/BookingComplete', { 
+      //   email: email, 
+      //   role: role, 
+      //   eventDetails: eventDetails,
+      //   selectedDate: selectedDate
+      // });
     } catch (error) {
       console.error("Failed to submit details:", error);
     }
