@@ -16,6 +16,7 @@ import eventRoute from "./routes/eventRoute.js";
 import eventTicketRoute from "./routes/eventTicketRoute.js";
 import faqRoute from "./routes/faqRoute.js";
 import bookingRoute from "./routes/bookingRoute.js";
+import stripeRoute from "./routes/stripeRoute.js";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -64,6 +65,9 @@ app.use("/api/faqRoute", faqRoute);
 
 // HANDLE BOOKING ROUTES (C)
 app.use("/api/bookingRoute", bookingRoute);
+
+// Use the route with a base path, like `/stripe`
+app.use("/api/stripeRoute", stripeRoute);
 
 // MONGOOSE SETUP
 
