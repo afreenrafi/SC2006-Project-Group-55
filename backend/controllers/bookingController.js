@@ -7,6 +7,9 @@ import nodemailer from 'nodemailer';
 import { createRequire } from 'module';
 import Stripe from "stripe";
 
+
+const { createStripeCustomer, createPaymentIntent, attachPaymentMethod } = require('./stripeController.js');
+
 const require = createRequire(import.meta.url);
 //const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -96,95 +99,51 @@ export const createFreeBooking = async (req, res) => {
   }
 };
 
-// CREATING NEW BOOKING OBJECT (CHARGEABLE)
 export const createChargeableBooking = async (req, res) => {
-  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATECHARGEABLEBOOKING
-  const { eventId, bookingQuantity, paymentMethodId, saveCard, userId, totalAmount } =
-    req.body;
-
-  const stripeInstance = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  const { eventId, bookingQuantity, paymentMethodId, saveCard, userId, totalAmount } = req.body;
 
   try {
-    // CHECKING IF USERID EXISTS IN USER COLLECTION
+    // Find user and event in the database
     const user = await User.findOne({ userId: userId });
-    if (!user) {
-      return res.status(404).json({ message: "User not found!" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found!" });
 
-    // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
     const event = await Event.findOne({ eventId: eventId });
-    if (!event) {   
-      return res.status(404).json({ message: "Event not found!" });
+    if (!event) return res.status(404).json({ message: "Event not found!" });
+
+    // Check ticket availability
+    if (event.eventTicketQuantity - event.eventTicketQuantityBooked < bookingQuantity) {
+      return res.status(400).json({ message: "Not enough tickets available!" });
     }
 
-    // CHECKING IF EVENT HAS ENOUGH TICKETS AVAILABLE
-    if (
-      event.eventTicketQuantity - event.eventTicketQuantityBooked <
-      bookingQuantity
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Selected Event does not have enough tickets available!" });
-    }
+    // Create Stripe customer if needed
+    const customerStripeId = await createStripeCustomer(user);
 
-    // CREATE USERSTRIPEID FOR USER OBJECT, IF USER OBJECT DOES NOT HAVE USERSTRIPEID
-    if (!user.userStripeId) {
-      const stripeCustomer = await stripeInstance.customers.create({
-        email: user.userEmail,
-        name: user.userName,
-      });
-      user.userStripeId = stripeCustomer.id;
+    // Create payment intent
+    const paymentIntent = await createPaymentIntent(totalAmount, "sgd", customerStripeId);
 
-      // SAVE UPDATED USER OBJECT INTO DATABASE
-      await user.save();
-    }
-
-    // PROCESS PAYMENT VIA STRIPE
-    console.log("everything fine0");
-    const paymentIntent = await stripeInstance.paymentIntents.create({
-      amount: totalAmount * 100, // Convert amount to cents
-      currency: "sgd",
-      "automatic_payment_methods": {
-        "enabled": true
-      },
-      customer: user.userStripeId, // Attach the payment to the customer
-      confirm: true,
-    });
-    console.log("everything fine1");
-
-    // INSTANTIATE NEW BOOKING OBJECT
+    // Create new booking object
     const newBooking = new Booking({
       bookingName: user.userName,
       bookingEmail: user.userEmail,
       eventId: eventId,
       bookingQuantity: bookingQuantity,
-      paymentId: paymentIntent.id, // Store the Stripe payment intent ID
+      paymentId: paymentIntent.id,
     });
 
-    // SAVE NEW BOOKING OBJECT TO DATABASE
     const savedBooking = await newBooking.save();
 
-    // UPDATE EVENT OBJECT'S EVENTTICKETQUANTITYBOOKED ATTRIBUTE
+    // Update event booked ticket quantity
     event.bookedTickets += bookingQuantity;
-    const savedEvent = await event.save();
+    await event.save();
 
-    // SAVE CARD FOR FUTURE USE, SHOULD USER OPTED FOR IT
-    let savedCard = null;
-    console.log("everything fine2");
+    // Attach and save payment method if saveCard is true
     if (saveCard) {
-      const paymentMethod = await stripeInstance.paymentMethods.attach(
-        paymentMethodId,
-        {
-          customer: user.userStripeId,
-        }
-      );
+      const paymentMethod = await attachPaymentMethod(paymentMethodId, customerStripeId);
       user.userPaymentMethods.push(paymentMethod.id);
-
-      // SAVE UPDATED USER OBJECT
-      savedCard = await user.save();
+      await user.save();
     }
 
-    // SENDING CONFIRMATION EMAIL
+    // Send confirmation email
     await sendConfirmationEmail(
       savedBooking.bookingName,
       savedBooking.bookingEmail,
@@ -192,9 +151,7 @@ export const createChargeableBooking = async (req, res) => {
       event.eventName
     );
 
-    res.status(201).json({
-      message: "Successfully booked tickets!",
-    });
+    res.status(201).json({ message: "Successfully booked tickets!" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
