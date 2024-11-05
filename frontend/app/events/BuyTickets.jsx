@@ -2,6 +2,8 @@ import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView } 
 import React, { useState, useEffect } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
+// import { useStripe } from '@stripe/stripe-react-native';
+
 import PageHeader from "../../components/events/PageHeader";
 import OrgDisplay from "../../components/OrgDisplay";
 import EventHeader from "../../components/events/EventHeader";
@@ -9,6 +11,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 import SingleDate from "../../components/SingleDate";
 import StyledInput from "../../components/forms/StyledInput";
 import TicketSelector from "../../components/events/TicketSelector";
+
 
 
 
@@ -28,6 +31,14 @@ const BuyTickets = ({ route }) => {
   const [inputQty, setInputQty] = useState(0);
   const [totalQty, setTotalQty] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+
+  // const { initPaymentSheet, presentPaymentSheet } = useStripe();
+
+
+  // const dispatch = useDispatch();
+  // const [createOrder, { data, error, isLoading }] = useCreateOrderMutation();
+  // const [createPaymentIntent] = useCreatePaymentIntentMutation();
+  // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const handleQtyChange = (ticketType, qty) => {
     setQuantities(prev => {
@@ -186,6 +197,73 @@ const BuyTickets = ({ route }) => {
   };
 
   const handleSelectDate = (date) => setSelectedDate(date);
+
+  // const createPaymentIntent = async () => {
+  //   try {
+  //     const response = await fetch('http://localhost:5001/api/payments/intents', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ amount: Math.floor(totalPrice * 100) }),
+  //     });
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       return data.paymentIntent;
+  //     } else {
+  //       throw new Error(data.message || 'Failed to create payment intent');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error creating payment intent:', error);
+  //     return null;
+  //   }
+  // };
+
+  // const createOrder = async (orderDetails) => {
+  //   try {
+  //     const response = await fetch('http://localhost:5001/api/orders', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(orderDetails),
+  //     });
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       console.log('Order created successfully:', data);
+  //     } else {
+  //       console.error('Order creation failed:', data.message || 'Unknown error');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error creating order:', error);
+  //   }
+  // };
+
+  // const onCheckout = async () => {
+  //   const clientSecret = await createPaymentIntent();
+  //   if (!clientSecret) return;
+  //   const { error } = await initPaymentSheet({
+  //     merchantDisplayName: 'YourAppName',
+  //     paymentIntentClientSecret: clientSecret,
+  //   });
+  //   if (error) {
+  //     console.error('Error initializing payment sheet:', error.message);
+  //     return;
+  //   }
+  //   const paymentResponse = await presentPaymentSheet();
+  //   if (paymentResponse.error) {
+  //     console.error(`Error code: ${paymentResponse.error.code}`, paymentResponse.error.message);
+  //     return;
+  //   }
+  //   const orderDetails = {
+  //     items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
+  //     total: totalPrice,
+  //     customer: { email, role },
+  //     date: selectedDate,
+  //   };
+  //   await createOrder(orderDetails);
+  // };
+  
   
 
   const handleNext = async () => {
