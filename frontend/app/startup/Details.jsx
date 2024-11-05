@@ -12,8 +12,10 @@ const Details = ({ route }) => {
   const navigation = useNavigation();
   // const { lastName, firstName, gender, age, email } = route.params;
 
-  const [editedLastName, setLastName] = useState("");
-  const [editedFirstName, setFirstName] = useState("");
+  // const [editedLastName, setLastName] = useState("");
+  // const [editedFirstName, setFirstName] = useState("");
+
+  const [editedDisplayName, setDisplayName] = useState(""); 
 
   const [editedGender, setGender] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -22,6 +24,10 @@ const Details = ({ route }) => {
 
   const [editedEmail, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");  // State to hold email error message
+
+  const handleNameChange = (text) => {
+    setDisplayName(text);
+  }
 
   const handleAgeChange = (text) => {
     // Ensure the input is a valid number and within the allowed range
@@ -48,11 +54,11 @@ const Details = ({ route }) => {
 
 
   // Dummy API call that simulates submitting the user details
-  const submitUserDetails = async (email, firstName, lastName, age, gender) => {
+  const submitUserDetails = async (email, displayName, age, gender) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         console.log("Submitting the following data:");
-        console.log({ email, firstName, lastName, age, gender });  // Log the data that would be submitted
+        console.log({ email, displayName, age, gender });  // Log the data that would be submitted
         resolve({ email });  // Simulate that the email is returned from the API
       }, 2000);  // Simulate a 2-second delay
     });
@@ -61,9 +67,9 @@ const Details = ({ route }) => {
   const handleNext = async () => {
     try {
       if(emailError==""){
-        const userEmail = await submitUserDetails(editedEmail, editedFirstName, editedLastName, editedAge, editedGender);
+        const userEmail = await submitUserDetails(editedEmail, editedDisplayName, editedAge, editedGender);
         console.log("User details submitted:", userEmail);
-        navigation.navigate('startup/Setup', { email: userEmail.email, age: editedAge, name: editedFirstName + " " + editedLastName });  // Navigate to new page with email
+        navigation.navigate('startup/Setup', { email: userEmail.email, age: editedAge, name: editedDisplayName });  // Navigate to new page with email
       }
     } catch (error) {
       console.error("Failed to submit details:", error);
@@ -82,8 +88,8 @@ const Details = ({ route }) => {
         <PageHeader title={"Registration"} onPress={()=>navigation.goBack()} fontSize={30}/>
 
         <View style={styles.inputs}>
-          <StyledInput label={"Last Name"} data={editedLastName} onChangeText={setLastName}/>
-          <StyledInput label={"First Name"} data={editedFirstName} onChangeText={setFirstName}/>
+          <StyledInput label={"Display Name"} data={editedDisplayName} onChangeText={handleNameChange}/>
+          {/* <StyledInput label={"First Name"} data={editedFirstName} onChangeText={setFirstName}/> */}
           <SelectInput label={"Gender"} data={editedGender} onPress={() => setModalVisible(true)}/>
           <StyledInput label={"Age"} data={editedAge} onChangeText={handleAgeChange} type="numeric"/>
           <StyledInput label={"Email"} data={editedEmail} onChangeText={handleEmailChange}/>

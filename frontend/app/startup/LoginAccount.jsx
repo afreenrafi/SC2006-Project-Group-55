@@ -4,6 +4,7 @@ import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import StyledInput from "../../components/forms/StyledInput";
 import RoundBtn from "../../components/forms/RoundBtn";
+import PageHeader from "../../components/events/PageHeader";
 import Entypo from '@expo/vector-icons/Entypo';
 import SelectInput from "../../components/forms/SelectInput";
 import SelectModal from "../../components/forms/SelectModal";
@@ -133,7 +134,8 @@ const LoginAccount = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Account Setup" />
+        {/* <StyledText size={30} textContent="Account Setup" /> */}
+        <PageHeader title={"Account Setup"} onPress={()=>navigation.goBack()} fontSize={30}/>
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
           {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
@@ -161,7 +163,7 @@ const styles = StyleSheet.create({
   },
   inputs: {
     width: "100%",
-    paddingVertical: 40,
+    paddingBottom: 40,
     paddingHorizontal: "5%",
   },
   btnContainer:{
