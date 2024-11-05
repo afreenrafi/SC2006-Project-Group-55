@@ -61,8 +61,7 @@ export const createPaymentIntent = async (req, res) => {
         // Return payment intent and ephemeral key in a single object
         return res.status(200).json({
             paymentIntent,
-            ephemeralKey: ephemeralKey.secret,
-            publishableKey: 'pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM',
+            ephemeralKey: ephemeralKey.secret
         });
     } catch (error) {
         return res.status(500).json({ error: `Failed to create payment intent: ${error.message}` });
