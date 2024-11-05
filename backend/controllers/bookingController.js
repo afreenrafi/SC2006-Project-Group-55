@@ -4,13 +4,8 @@ import { User } from "../models/User.js";
 import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
 import nodemailer from 'nodemailer';
-import { createRequire } from 'module';
-import Stripe from "stripe";
+import { createStripeCustomer, createPaymentIntent, attachPaymentMethod, } from "./stripeController.js";
 
-
-const { createStripeCustomer, createPaymentIntent, attachPaymentMethod } = require('./stripeController.js');
-
-const require = createRequire(import.meta.url);
 //const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // SUPPORTING FUNCTIONS RELATED TO BOOKING ENTITY
