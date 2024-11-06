@@ -3,6 +3,7 @@ import { AppProvider } from './context/AppContext';
 import { NavigationContainer } from '@react-navigation/native';
 import MainLayout from './_layout'; // Adjust the path if necessary
 import { StripeProvider } from '@stripe/stripe-react-native'; // Import StripeProvider
+import 'react-native-get-random-values';
 
 const linking = {
   prefixes: ['cultivate://'], // Custom scheme you defined in app.json

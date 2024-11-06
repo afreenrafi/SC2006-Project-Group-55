@@ -4,6 +4,7 @@ import StyledInput from '../../components/forms/StyledInput';
 import SelectModal from '../../components/forms/SelectModal';
 import SelectInput from '../../components/forms/SelectInput';
 import GenreSelectModal from '../../components/GenreSelectModal';
+import EventLocation from '../../components/forms/EventLocation';
 import RoundBtn from '../../components/forms/RoundBtn';
 import PageHeader from '../../components/events/PageHeader';
 import { useNavigation } from '@react-navigation/native';
@@ -18,7 +19,10 @@ const EventCreationForm = () => {
         eventName: "",
         eventDescription: "",
         eventGenre: "",
-        eventLocation: "",
+        eventLocation: {
+            address: "",
+            coordinates: null,
+        },
         eventType: "", // Free or Chargeable
         eventStartDate: "", // Format: YYYY-MM-DD
         eventEndDate: "",   // Format: YYYY-MM-DD
@@ -34,6 +38,17 @@ const EventCreationForm = () => {
             [name]: value
         }));
     };
+
+    const handleLocationUpdate = (address, coordinates) => {
+        setEventDetails(prevState => ({
+            ...prevState,
+            eventLocation: {
+                address,
+                coordinates,
+            },
+        }));
+    };
+      
 
     const handleArtistChange = (index, value) => {
         const newArtists = [...eventDetails.eventArtist];
@@ -99,11 +114,11 @@ const EventCreationForm = () => {
                 optFour="Festival"
             />
 
-            <StyledInput
-                label="Event Location"
-                data={eventDetails.eventLocation}
-                onChangeText={(text) => handleChange("eventLocation", text)}
-            />
+            <Text style={styles.text}>Location</Text>        
+            {/* <Text style={styles.selectedLocation}>
+                Selected Location: {eventDetails.eventLocation.address}
+            </Text> */}
+            <EventLocation onLocationSelect={handleLocationUpdate} />
 
             <SelectInput
                 label="Event Type"
@@ -191,6 +206,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 10,
     },
+    selectedLocation: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#555',
+      },
     input: {
         borderWidth: 1,
         borderColor: '#CCC',
@@ -217,10 +237,13 @@ const styles = StyleSheet.create({
     },
     addButton: {
         backgroundColor: '#CA3550',
-        paddingVertical: 10,
-        borderRadius: 8,
+        paddingVertical: 15,
+        borderRadius: 50,
         alignItems: 'center',
         marginBottom: 15,
+        marginTop: 10,
+        width: "50%",
+        alignSelf: 'center',
     },
     addButtonText: {
         color: '#FFF',
@@ -237,6 +260,10 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontWeight: 'bold',
         fontSize: 16,
+    },
+    text: {
+        fontSize: 26,
+        marginBottom: 5
     },
 });
 export default EventCreationForm;
