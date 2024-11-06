@@ -4,7 +4,7 @@ import { User } from "../models/User.js";
 import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
 import nodemailer from 'nodemailer';
-import { createStripeCustomer, createPaymentIntent, attachPaymentMethod, } from "./stripeController.js";
+import { createStripeCustomer, createPaymentIntent } from "./stripeController.js";
 
 //const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -112,41 +112,48 @@ export const createChargeableBooking = async (req, res) => {
 
     // Create Stripe customer if needed
     const customerStripeId = await createStripeCustomer(user);
+    if (!customerStripeId) return res.status(500).json({ message: "Failed to create Stripe customer" });
 
     // Create payment intent
     const paymentIntent = await createPaymentIntent(totalAmount, "sgd", customerStripeId);
+    if (!paymentIntent) return res.status(500).json({ message: "Failed to create payment intent" });
 
-    // Create new booking object
-    const newBooking = new Booking({
-      bookingName: user.userName,
-      bookingEmail: user.userEmail,
-      eventId: eventId,
-      bookingQuantity: bookingQuantity,
-      paymentId: paymentIntent.id,
-    });
+     // Confirm the payment intent
+    if (paymentIntent.status === 'succeeded') {
+      // Create new booking object
+      const newBooking = new Booking({
+        bookingName: user.userName,
+        bookingEmail: user.userEmail,
+        eventId: eventId,
+        bookingQuantity: bookingQuantity,
+        paymentId: paymentIntent.id,
+      });
 
-    const savedBooking = await newBooking.save();
+      const savedBooking = await newBooking.save();
 
-    // Update event booked ticket quantity
-    event.bookedTickets += bookingQuantity;
-    await event.save();
+      // Update event booked ticket quantity
+      event.bookedTickets += bookingQuantity;
+      await event.save();
 
-    // Attach and save payment method if saveCard is true
-    if (saveCard) {
-      const paymentMethod = await attachPaymentMethod(paymentMethodId, customerStripeId);
-      user.userPaymentMethods.push(paymentMethod.id);
-      await user.save();
+      // Attach and save payment method if saveCard is true
+      if (saveCard) {
+        const paymentMethod = await attachPaymentMethod(paymentMethodId, customerStripeId);
+        user.userPaymentMethods.push(paymentMethod.id);
+        await user.save();
+      }
+
+      // Send confirmation email
+      await sendConfirmationEmail(
+        savedBooking.bookingName,
+        savedBooking.bookingEmail,
+        savedBooking.bookingQuantity,
+        event.eventName
+      );
+
+      return res.status(201).json({ message: "Successfully booked tickets!" });
+    } else {
+      return res.status(400).json({ message: "Payment not successful. Please try again." });
     }
-
-    // Send confirmation email
-    await sendConfirmationEmail(
-      savedBooking.bookingName,
-      savedBooking.bookingEmail,
-      savedBooking.bookingQuantity,
-      event.eventName
-    );
-
-    res.status(201).json({ message: "Successfully booked tickets!" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
