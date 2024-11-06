@@ -54,8 +54,9 @@ Cultivate was made with the **MERN** tech stack where:
 ## **Contributers:**
 | **Name**              | **Github Profile**                            | **Role**          |
 |-----------------------|-----------------------------------------------|-------------------|
-|   Adolphus            |[@ggeojyeo] (https://github.com/ggeojyeo)      |   Backend         |
-|   Afreen              |[@afreenrafi] (https://github.com/afreenrafi)  |   Backend         |
-|   Ting Hooi           |[@Kurome02] (https://github.com/Kurome02)      |   Backend         |
-|   Gwendalene          |[@gwenionna] (https://github.com/gwenionna)    |   Frontend        |
-|   Venus               |[@venusnmj] (https://github.com/venusnmj)      |   Frontend        |
+|   Adolphus            |[@ggeojyeo](https://github.com/ggeojyeo)       |   Backend         |
+|   Afreen              |[@afreenrafi](https://github.com/afreenrafi)   |   Backend         |
+|   Ting Hooi           |[@Kurome02](https://github.com/Kurome02)       |   Backend         |
+|   Gwendalene          |[@gwenionna](https://github.com/gwenionna)     |   Frontend        |
+|   Venus               |[@venusnmj](https://github.com/venusnmj)       |   Frontend        |
+
