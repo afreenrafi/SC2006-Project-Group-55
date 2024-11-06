@@ -24,9 +24,7 @@ router.get("/faqitem", getAllFaqItems);
 router.get("/faq", getAllFaqs);
 router.get("/faqitem/:faqItemId", getFaqItemById);
 router.get("/faq/:faqId", getFaqById);
-router.get('/profile', isAuth, (req, res) => {
-  res.status(200).json({message: "Access granted.", userId: req.userId}); 
-}); //Importing the session token for userId 
+
 
 // UPDATE
 router.put("/faqitem/:faqItemId", updateFaqItem);

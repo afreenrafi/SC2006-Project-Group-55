@@ -86,9 +86,7 @@ router.post("/register", upload.single("eventPermitId"), async (req, res) => {
 
 router.get("/all", getAllUsers);
 router.get("/:userId", getUserById);
-router.get('/profile', isAuth, (req, res) => {
-  res.status(200).json({message: "Access granted.", userId: req.userId}); 
-}); //Importing the session token for userId 
+
 
 // UPDATE
 // ENABLE THIS ONCE ISAUTH FROM AUTHMIDDLEWARE.JS IS WORKING FINE

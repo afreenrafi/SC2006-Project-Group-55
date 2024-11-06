@@ -14,8 +14,5 @@ const router = express.Router();
 router.post("/bookFree", createFreeBooking);
 router.post("/bookChargeable", createChargeableBooking);
 
-router.get('/profile', isAuth, (req, res) => {
-  res.status(200).json({message: "Access granted.", userId: req.userId}); 
-}); //Importing the session token for userId 
 
 export default router;
