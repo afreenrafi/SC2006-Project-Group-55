@@ -21,9 +21,7 @@ router.post("/", createEvent);
 router.get("/", getAllEvents);
 router.get("/search", searchEvents);
 router.get("/:eventId", getEventById); 
-router.get('/profile', isAuth, (req, res) => {
-  res.status(200).json({message: "Access granted.", userId: req.userId}); 
-}); //Importing the session token for userId 
+
 
 // UPDATE
 router.put("/:eventId", updateEvent);
