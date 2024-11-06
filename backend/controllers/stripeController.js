@@ -70,16 +70,16 @@ export const createPaymentIntent = async (req, res) => {
 
 
 // Attach payment method to a customer and save for future use
-export const attachPaymentMethod = async (req, res) => {
-    try {
-        const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-        const { paymentMethodId, customerStripeId } = req.body; // Get data from req.body
+//export const attachPaymentMethod = async (req, res) => {
+    //try {
+        //const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+        //const { paymentMethodId, customerStripeId } = req.body; // Get data from req.body
 
-        const paymentMethod = await stripe.paymentMethods.attach(paymentMethodId, {
-            customer: customerStripeId,
-        });
-        return res.status(200).json(paymentMethod);
-    } catch (error) {
-        return res.status(500).json({ error: `Failed to attach payment method: ${error.message}` });
-    }
-};
+        //const paymentMethod = await stripe.paymentMethods.attach(paymentMethodId, {
+            //customer: customerStripeId,
+        //});
+        //return res.status(200).json(paymentMethod);
+    //} catch (error) {
+        //return res.status(500).json({ error: `Failed to attach payment method: ${error.message}` });
+    //}
+//};
