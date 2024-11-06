@@ -1,0 +1,43 @@
+import axios from 'axios';
+import { useState } from 'react';
+
+const BookEvent = ({ event }) => {
+  const [quantity, setQuantity] = useState(1);
+  const [email, setEmail] = useState('');
+
+  const bookTickets = async () => {
+    try {
+      const response = await axios.post('/api/book', {
+        userEmail: email,
+        eventId: event._id,
+        quantity,
+      });
+      alert('Booking confirmed! Check your email.');
+    } catch (error) {
+      alert('Error booking tickets');
+    }
+  };
+
+  return (
+    <div>
+      <h2>{event.name}</h2>
+      <p>{event.location}</p>
+      <input
+        type="number"
+        value={quantity}
+        onChange={(e) => setQuantity(e.target.value)}
+        min="1"
+        max={event.availableTickets}
+      />
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <button onClick={bookTickets}>Book Tickets</button>
+    </div>
+  );
+};
+
+export default BookEvent;
