@@ -138,7 +138,7 @@ const OrderDetails = ({ route }) => {
   const handleNext = async () => {
     try {
       navigation.navigate('events/BookingComplete', { 
-        email: email, 
+        username: username, 
         role: role, 
         eventDetails: eventDetails,
         selectedDate: selectedDate

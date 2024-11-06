@@ -13,7 +13,7 @@ import TicketSelector from "../../components/events/TicketSelector";
 
 
 const BuyTickets = ({ route }) => {
-  const { email, role } = route.params;
+  const { username, role } = route.params;
 
   const navigation = useNavigation();
 
@@ -191,7 +191,7 @@ const BuyTickets = ({ route }) => {
   const handleNext = async () => {
     try {
       navigation.navigate('events/OrderDetails', { 
-        email: email, 
+        username: username, 
         role: role, 
         totalPrice: totalPrice, 
         totalQty: totalQty,

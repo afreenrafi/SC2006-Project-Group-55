@@ -11,7 +11,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 
 
 const EventsPage = ({ route }) => {
-  const { email, role } = route.params;
+  const { username, role } = route.params;
   const { eventId } = route.params;
 
   const navigation = useNavigation();
@@ -90,7 +90,7 @@ const EventsPage = ({ route }) => {
     try {
       // const result = await submitUserDetails();  // Simulate sending data
       // console.log("User details submitted:", result);
-      navigation.navigate('events/BuyTickets', { email: email, role: role });  // Navigate to new page with email
+      navigation.navigate('events/BuyTickets', { username: username, role: role });  // Navigate to new page with email
     } catch (error) {
       console.error("Failed to submit details:", error);
     }

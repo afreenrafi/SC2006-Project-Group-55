@@ -6,7 +6,11 @@ import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockD
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
-const Homepage = ({ navigation }) => {
+const Homepage = ({ navigation, route }) => {
+
+  const { username, role } = route.params;
+  console.log("username is "+ username);
+
   const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
