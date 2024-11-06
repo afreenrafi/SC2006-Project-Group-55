@@ -153,20 +153,22 @@ const Setup = ({ route }) => {
         console.log("Proceeding with:", email, age, name, Username, Role, Password);
         // const result = await submitAccountDetails(email, Username, Role, Password);
         try{
-          await registerUser(email, age, name, Username, Role, Password);
+          const registered = await registerUser(email, age, name, Username, Role, Password);
+
+          if(Role == 'Organiser' && registered){
+            navigation.navigate('startup/OrgValidation', { username: Username, role: Role });
+          }
+          else if(registered){
+            //to tabs
+            navigation.navigate('tabs', { username: Username, role: Role });
+            //for testing
+            // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
+          }
         } catch (error){
           console.error("Failed to submit details:", error);
         }
         // console.log("Account details submitted:", result);
-        if(Role == 'Organiser'){
-          navigation.navigate('startup/OrgValidation', { email: email, role: Role });
-        }
-        else{
-          //to tabs
-          navigation.navigate('tabs', { email: email, role: Role });
-          //for testing
-          // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
-        }
+        
        
         
       }

@@ -19,7 +19,8 @@ const navTheme = {
 
 const Tab = createBottomTabNavigator();
 
-const Tabs = () => {
+const Tabs = ({ route }) => {
+  const { username, role } = route.params;
   return (
       <Tab.Navigator
         initialRouteName="Homepage"
@@ -54,10 +55,10 @@ const Tabs = () => {
           tabBarShowLabel: false,
         })}
       >
-        <Tab.Screen options={{ headerShown: false }} name="Homepage" component={Homepage} />
-        <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} />
-        <Tab.Screen options={{ headerShown: false }} name="SavedEvents" component={SavedEvents} />
-        <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} />
+        <Tab.Screen options={{ headerShown: false }} name="Homepage" component={Homepage} initialParams={{ username, role }}/>
+        <Tab.Screen options={{ headerShown: false }} name="Ticket" component={Ticket} initialParams={{ username, role }}/>
+        <Tab.Screen options={{ headerShown: false }} name="SavedEvents" component={SavedEvents} initialParams={{ username, role }}/>
+        <Tab.Screen options={{ headerShown: false }} name="Profile" component={Profile} initialParams={{ username, role }}/>
 
         {/* Add TicketDetails directly to the Tabs but hide tab bar when active */}
       <Tab.Screen 
