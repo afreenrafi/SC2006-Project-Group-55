@@ -16,17 +16,17 @@ Cultivate is the very first mobile application that consolidates all Art and Cul
 
 ### **Frontend**
 1. In the '/frontend' folder, install the relevant node modules using the following command:
-npm install
+```bash npm install
 
 2. The application can now be run using this command: 
-npm run start 
+```bash npm run start 
 
 ### **Backend**
 1. In the /frontend folder, install the relevant node modules using the following command:
-npm install
+```bash npm install
 
 2. The application can now be run using this command: 
-node app.js 
+```bash node app.js 
 
 ---
 
