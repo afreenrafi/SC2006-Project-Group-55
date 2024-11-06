@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 
 
-const StyledInput = ({ label, data, onPress }) => {
+const SelectInput = ({ label, data, onPress }) => {
  
 
   return (
@@ -53,4 +53,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default StyledInput;
+export default SelectInput;

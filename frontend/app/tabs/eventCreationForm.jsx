@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, Button, ScrollView, View, TouchableOpacity } from 'react-native';
 import StyledInput from '../../components/forms/StyledInput';
 import SelectModal from '../../components/forms/SelectModal';
+import SelectInput from '../../components/forms/SelectInput';
+import GenreSelectModal from '../../components/GenreSelectModal';
 import RoundBtn from '../../components/forms/RoundBtn';
 import PageHeader from '../../components/events/PageHeader';
 import { useNavigation } from '@react-navigation/native';
@@ -23,7 +25,7 @@ const EventCreationForm = () => {
         eventOpen: "",      // Format: HH:MM
         eventClose: "",     // Format: HH:MM
         eventArtist: [""],
-        userId: ""
+        // userId: ""
     });
 
     const handleChange = (name, value) => {
@@ -74,19 +76,27 @@ const EventCreationForm = () => {
                 style={styles.textArea}
             />
 
-            <StyledInput
+            <SelectInput
                 label="Event Genre"
                 data={eventDetails.eventGenre || "Select Genre"}
                 onPress={() => setGenreModalVisible(true)}
+                modalVisible={genreModalVisible}
+                onRequestClose={() => setGenreModalVisible(false)}
+                options={["Museum", "Exhibition", "Performance", "Festival"]}
+                onSelectOption={(option) => handleChange("eventGenre", option)}
             />
-            <SelectModal
+            <GenreSelectModal
                 modalTitle="Select Genre"
                 modalVisible={genreModalVisible}
                 onRequestClose={() => setGenreModalVisible(false)}
                 oneOptPress={() => { handleChange("eventGenre", "Museum"); setGenreModalVisible(false); }}
                 twoOptPress={() => { handleChange("eventGenre", "Exhibition"); setGenreModalVisible(false); }}
+                threeOptPress={() => { handleChange("eventGenre", "Performance"); setGenreModalVisible(false); }}
+                fourOptPress={() => { handleChange("eventGenre", "Festival"); setGenreModalVisible(false); }}
                 optOne="Museum"
                 optTwo="Exhibition"
+                optThree="Performance"
+                optFour="Festival"
             />
 
             <StyledInput
@@ -95,11 +105,16 @@ const EventCreationForm = () => {
                 onChangeText={(text) => handleChange("eventLocation", text)}
             />
 
-            <StyledInput
+            <SelectInput
                 label="Event Type"
                 data={eventDetails.eventType || "Select Type"}
                 onPress={() => setTypeModalVisible(true)}
+                modalVisible={typeModalVisible}
+                onRequestClose={() => setTypeModalVisible(false)}
+                options={["Free", "Chargeable"]}
+                onSelectOption={(option) => handleChange("eventType", option)}
             />
+            
             <SelectModal
                 modalTitle="Select Event Type"
                 modalVisible={typeModalVisible}
@@ -150,13 +165,12 @@ const EventCreationForm = () => {
                 <Text style={styles.addButtonText}>Add Another Artist</Text>
             </TouchableOpacity>
 
-            <Text style={styles.sectionHeader}>Organizer</Text>
-
+            {/* <Text style={styles.sectionHeader}>Organizer</Text>
             <StyledInput
                 label="Organizer User ID"
                 data={eventDetails.userId}
                 onChangeText={(text) => handleChange("userId", text)}
-            />
+            /> */}
 
             <View style={styles.btnContainer}>
                 <RoundBtn onPress={handleSubmit} text="Create Event" icon="arrow-circle-right" />
