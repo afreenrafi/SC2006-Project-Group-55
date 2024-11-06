@@ -25,7 +25,7 @@ const OrderDetails = ({ route }) => {
 
   const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [loading, setLoading] = useState(true);            // State to manage loading status
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
 //   const [selectedDate, setSelectedDate] = useState(null); 
 //   const [modalVisible, setModalVisible] = useState(false);
 //   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
@@ -52,7 +52,7 @@ const OrderDetails = ({ route }) => {
     };
 
     getEventDetails();  // Call the function when component mounts
-    initializePaymentSheet();
+    // initializePaymentSheet();
   }, []);
 
 
@@ -228,11 +228,25 @@ const OrderDetails = ({ route }) => {
     const { error: paymentError } = await presentPaymentSheet();
   
     if (paymentError) {
-      console.error('Error presenting payment sheet:', paymentError.message);
+      console.log('Error presenting payment sheet:', paymentError.message);
+      // navigation.navigate('events/BuyTickets', { 
+      //   email: email, 
+      //   role: role, 
+      //   // totalPrice: totalPrice, 
+      //   // totalQty: totalQty,
+      //   // selectedDate: selectedDate,
+      //   // quantities: quantities
+      // });
       return;
     }
   
     console.log('Payment completed successfully');
+    navigation.navigate('events/BookingComplete', { 
+        email: email, 
+        role: role, 
+        eventDetails: eventDetails,
+        selectedDate: selectedDate
+    });
 
     // const orderDetails = {
     //   items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
@@ -249,13 +263,14 @@ const OrderDetails = ({ route }) => {
     if (error) {
       console.error(`Error code: ${error.code}`, error.message);
     } else {
-      console.error('Success', 'Your order is confirmed!');
+      console.log('Success', 'Your order is confirmed!');
     }
   };
 
   const handleNext = async () => {
     try {
-      await openPaymentSheet();
+      await initializePaymentSheet();
+      // await openPaymentSheet();
       // navigation.navigate('events/BookingComplete', { 
       //   email: email, 
       //   role: role, 
@@ -279,8 +294,8 @@ const OrderDetails = ({ route }) => {
 
 
   return (
-    <StripeProvider 
-    publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
+    // <StripeProvider 
+    // publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
     <View style={{ flex:1 }}>
       <SafeAreaView style={styles.bgColour}>
         <PageHeader title={"Order Details"} onPress={()=>navigation.goBack()}/>
@@ -364,7 +379,7 @@ const OrderDetails = ({ route }) => {
       
 
     </View>
-    </StripeProvider>
+    // </StripeProvider>
   );
 };
 

@@ -27,7 +27,10 @@ const BookingComplete = ({ route }) => {
 
     return (
         <SafeAreaView style={{ flex:1, backgroundColor: "#FBF3F1" }}>
-            <PageHeader title={"Booking Complete"} onPress={()=>navigation.goBack()}/>
+            {/* <PageHeader title={"Booking Complete"} onPress={()=>navigation.goBack()}/> */}
+            <View style={styles.headerTitle}>
+              <StyledText size={20} textContent={"Booking Complete"}/>
+            </View>
             <View style={styles.container}>
                 {/* Ticket Image and Title */}
                 <View style={styles.ticketContainer}>
@@ -98,6 +101,11 @@ const BookingComplete = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  headerTitle: {
+    padding: 30,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
   container: {
     flex: 1,
     backgroundColor: '#FBF3F1',
