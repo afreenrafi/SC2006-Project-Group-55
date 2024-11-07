@@ -28,7 +28,7 @@ const sendConfirmationEmail = async (
     from: process.env.EMAIL_USER,
     to: bookingEmail,
     subject: "Event Booking Confirmation",
-    text: `Hello ${bookingName},\n\nYou have successfully booked ${bookingQuantity} ticket(s) for the event: ${eventName}.\n\nThank you for booking with us!`,
+    text: `Hello ${bookingName},\n\nYou have successfully booked ${bookingQuantity} ${eventName} ticket(s) for the event.\n\nThank you for booking with us!`,
   };
 
   try {
@@ -111,8 +111,9 @@ export const createBookingAndSendEmail = async (req, res) => {
       bookingName: user.userName,
       bookingEmail: user.userEmail,
       bookingQuantity: bookingQuantity,
-      eventTicketId: eventTicket.eventTicketId,  // Store event ticket id
-      userId: userId,
+      eventId: eventId,  // Store eventId from the request body
+      eventTicketId: eventTicket.eventTicketId,  // Store event ticket ID from the EventTicket
+      userId: userId,  // Store userId from the request body
     });
 
     // Save the new booking to the database
