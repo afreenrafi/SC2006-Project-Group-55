@@ -29,14 +29,20 @@ const BookingSchema = new mongoose.Schema({
   eventId: {
     type: String,
     required: true,
-    ref: "Event",
+    ref: "Event",  // Reference to the Event model
+  },
+  eventTicketId: {
+    type: String,
+    required: true,  // Ensure it's required
+    ref: "EventTicket",  // Reference to the EventTicket model
   },
   userId: {
     type: String,
     required: true,
-    ref: "User",
+    ref: "User",  // Reference to the User model
   },
 });
+
 
 const Booking = mongoose.model("Booking", BookingSchema);
 export default Booking;
