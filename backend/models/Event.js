@@ -169,6 +169,17 @@ const EventSchema = new mongoose.Schema({
     required: true,
     ref: "User",
   },
+  eventPic: {
+    type: String,
+    validate: {
+      validator: function (value) {
+        // Simple URL validation regex
+        const urlRegex = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/;
+        return urlRegex.test(value);
+      },
+      message: "Invalid URL format for eventPic",
+    },
+  },
 });
 
 // INSTANCE OF EVENT ENTITY
