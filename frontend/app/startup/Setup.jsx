@@ -8,6 +8,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import SelectInput from "../../components/forms/SelectInput";
 import SelectModal from "../../components/forms/SelectModal";
 import { registerUser } from "../../apicalls/UserApi";
+import PageHeader from "../../components/events/PageHeader";
 
 
 const Setup = ({ route }) => {
@@ -27,162 +28,95 @@ const Setup = ({ route }) => {
   const [rePassword, setRePassword] = useState('');
   const [rePwdError, setRePwdError] = useState(""); 
 
+  const [formError, setFormError] = useState(false);
 
-
-  const handleUsername = (text) => {
-    // Remove any non-alphanumeric characters
+  // Validation functions
+  const validateUsername = (text) => {
     const validUsername = text.replace(/[^a-zA-Z0-9]/g, '');
-  
-    // Update the state with the valid username
     setUsername(validUsername);
-  
-    // Validate length and set error message if conditions are not met
     if (validUsername.length < 8) {
       setUsernameError('Username must be at least 8 characters long and alphanumeric.');
+      return false;
     } else {
-      setUsernameError(''); // Clear error if valid
+      setUsernameError('');
+      return true;
     }
   };
+
+  const validatePassword = (text) => {
+    const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(text)) {
+      setPwdError('Password must have at least 8 characters, 1 special character, and 1 number.');
+      return false;
+    } else {
+      setPwdError('');
+      return true;
+    }
+  };
+
+  const validateRePassword = (text) => {
+    setRePassword(text);
+    if (text !== Password) {
+      setRePwdError('Passwords do not match');
+      return false;
+    } else {
+      setRePwdError('');
+      return true;
+    }
+  };
+
+  const handleUsername = (text) => validateUsername(text);
+  const handlePassword = (text) => {
+    setPassword(text);
+    // validatePassword(text);
+    if (validatePassword(text)) {
+      setPwdError("");
+    } else {
+      setPwdError("Password must have at least 8 characters, 1 special character, and 1 number.");
+    }
+  };
+  const handleRePassword = (text) => validateRePassword(text);
+
+  const validateForm = () => {
+    const isUsernameValid = validateUsername(Username);
+    const isPasswordValid = validatePassword(Password);
+    const isRePasswordValid = validateRePassword(rePassword);
+    console.log(isUsernameValid + isPasswordValid + isRePasswordValid);
+
+    // setFormError(!(isUsernameValid && isPasswordValid && isRePasswordValid));
+    return isUsernameValid && isPasswordValid && isRePasswordValid;
+  };
+
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);  // Set the gender value based on the selection
     setModalVisible(false);     // Close the modal
   };
 
-  const handlePassword = (text) => {
-    const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*\d).{8,}$/;  // At least 1 special character, 1 number, and minimum 8 characters
-    if (!passwordRegex.test(text)) {
-      setPwdError('Password must have at least 8 characters, 1 special character, and 1 number.');
-    } else {
-      setPwdError('');  // Clear the error if the password is valid
-    }
-    setPassword(text);
-
-    if (rePassword !== '' && text !== rePassword) {
-      setRePwdError('Passwords do not match');
-    } else {
-      setRePwdError('');
-    }
-  };
-
-  const handleRePassword = (text) => {
-    setRePassword(text);
-    if (text !== Password) {
-      setRePwdError('Passwords do not match');
-    } else {
-      setRePwdError('');
-    }
-  }
-
-  // const registerUser = async (email, age, name, username, role, password, eventPermitId = null, artistVerified = false) => {
-  //   // Prepare JSON object with the form fields
-  //   const jsonData = {
-  //     userId: username,
-  //     userName: name,
-  //     userPassword: password,
-  //     userEmail: email,
-  //     userAge: age,
-  //     userRole: role,
-  //   };
-  
-  //   // Append role-specific data if needed
-  //   if (role === "Organiser" && eventPermitId) {
-  //     jsonData.organiserEventPermitId = eventPermitId;
-  //   } else if (role === "Artist") {
-  //     jsonData.artistVerified = artistVerified;
-  //   }
-  
-  //   try {
-  //     const response = await fetch("http://localhost:5001/api/authRoute/register", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(jsonData), // Send JSON-encoded data
-  //     });
-  
-  //     const message = await response.json();
-  //     if (response.ok) {
-  //       console.log("User registered successfully:", message);
-  //       // Navigate or handle success
-  //     } else {
-  //       console.error("Registration failed:", message.message || "Unknown error");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
-  
-
-
-  // Dummy API call that simulates submitting the user details
-  const submitAccountDetails = async (email, username, role, password) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("Submitting the following data:");
-        console.log({ email, username, role, password });  
-        resolve({ 
-          email, role
-        });  
-      }, 2000);  
-    });
-  };
-
 
   const handleNext = async () => {
-    
-      if (Username === '') {
-        setUsernameError('Username cannot be empty');
-        setPwdError('');
-        setRePwdError('');
-      } 
-      else if(Password === ''){
-        setPwdError('Password cannot be empty');
-        setUsernameError('');  
-        setRePwdError('');
-      }
-      else if(rePassword === ''){
-        setRePwdError('Password cannot be empty');
-        setUsernameError('');  
-        setPwdError('');
+    if (!validateForm()) {
+      // console.error("Please resolve form errors before proceeding.");
+      return;
+    }
+
+    try {
+      const registered = await registerUser(email, age, name, Username, Role, Password);
+      if (registered) {
+        navigation.navigate(
+          Role === 'Organiser' ? 'startup/OrgValidation' : 'tabs',
+          { username: Username, role: Role }
+        );
       }
       else {
-        setUsernameError('');  
-        setPwdError('');
-        setRePwdError('');
-        console.log("Proceeding with:", email, age, name, Username, Role, Password);
-        // const result = await submitAccountDetails(email, Username, Role, Password);
-        try{
-          const registered = await registerUser(email, age, name, Username, Role, Password);
-
-          if(Role == 'Organiser' && registered){
-            navigation.navigate('startup/OrgValidation', { username: Username, role: Role });
-          }
-          else if(registered){
-            //to tabs
-            navigation.navigate('tabs', { username: Username, role: Role });
-            //for testing
-            // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
-          }
-        } catch (error){
-          console.error("Failed to submit details:", error);
-        }
-        // console.log("Account details submitted:", result);
-        
-       
-        
+        console.log('username is already taken');
+        setUsernameError('username is already taken');
       }
-    
-    // try {
-    //   const result = await submitUserDetails();  // Simulate sending data
-    //   console.log("User details submitted:", result);
-    //   navigation.navigate('NextPage', { email: result.email });  // Navigate to new page with email
-    // } catch (error) {
-    //   console.error("Failed to submit details:", error);
-    // }
-  }
+    } catch (error) {
 
-
+      console.error("Failed to submit details:", error);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -190,7 +124,8 @@ const Setup = ({ route }) => {
       style={{ flex: 1 }}
     >
       <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Account Setup" />
+        {/* <StyledText size={30} textContent="Account Setup" /> */}
+        <PageHeader title={"Account Setup"} onPress={()=>navigation.goBack()} fontSize={30}/>
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
           {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" alignment="left"/> : null}
@@ -231,27 +166,6 @@ const Setup = ({ route }) => {
         optTwo="Organiser"
         />
 
-        {/* <Modal
-          animationType="none"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}  // Close the modal on request
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Role" />
-              <View style={styles.modalOptions}>
-                <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
-                  <StyledText size={20} textContent="General Public" fontColor="#FFF"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
-                  <StyledText size={20} textContent="Organiser" fontColor="#FFF"/>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal> */}
-
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -266,7 +180,7 @@ const styles = StyleSheet.create({
   },
   inputs: {
     width: "100%",
-    paddingVertical: 40,
+    paddingBottom: 40,
     paddingHorizontal: "5%",
   },
   btnContainer:{
