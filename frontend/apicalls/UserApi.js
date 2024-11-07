@@ -31,18 +31,18 @@ export const registerUser = async (email, age, name, username, role, password, e
         console.log(response.status);
         if (response.ok) {
             console.log("User registered successfully:", message);
-            return true;
+            return "success";
             // Navigate or handle success
         } 
         else if(response.status == 400){
-            return false;
+            return "taken";
         }
         // else {
         // console.error("Registration failed:", message.message || "Unknown error");
         // }
     } catch (error) {
         console.error("Registration failed:", error);
-        return false;
+        return "failed";
     }
 };
 

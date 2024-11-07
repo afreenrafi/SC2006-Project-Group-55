@@ -28,7 +28,7 @@ const Setup = ({ route }) => {
   const [rePassword, setRePassword] = useState('');
   const [rePwdError, setRePwdError] = useState(""); 
 
-  const [formError, setFormError] = useState(false);
+  const [formError, setFormError] = useState('');
 
   // Validation functions
   const validateUsername = (text) => {
@@ -102,19 +102,25 @@ const Setup = ({ route }) => {
 
     try {
       const registered = await registerUser(email, age, name, Username, Role, Password);
-      if (registered) {
+      if (registered == "success") {
         navigation.navigate(
           Role === 'Organiser' ? 'startup/OrgValidation' : 'tabs',
           { username: Username, role: Role }
         );
       }
-      else {
+      else if(registered == "taken"){
         console.log('username is already taken');
         setUsernameError('username is already taken');
+        setFormError('');
+      }
+      else if(registered == "failed"){
+        setFormError('Network error. Please try again later.');
+        setUsernameError('');
       }
     } catch (error) {
-
-      console.error("Failed to submit details:", error);
+      setFormError('Something went wrong');
+      setUsernameError('');
+      // console.error("Failed to submit details:", error);
     }
   };
 
@@ -150,7 +156,7 @@ const Setup = ({ route }) => {
           <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
           {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" alignment="left"/> : null}
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
-          
+          {formError ? <StyledText size={16} textContent={formError} fontColor="#CA3550" alignment="left"/> : null}
         </View>
         <View style={styles.btnContainer}>
           <RoundBtn onPress={handleNext} text="Next" icon="arrow-circle-right"/>
