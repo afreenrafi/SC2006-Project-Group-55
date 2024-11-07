@@ -68,11 +68,11 @@ export const loginUser = async (userId, userPassword) => {
         console.log("Login successful:", data);
         return { success: true, sessionToken: data.sessionToken };
         } else {
-        console.error("Login failed:", data.message || "Unknown error");
+        console.log("Login failed:", data.message || "Unknown error");
         return { success: false, error: data.message || "Unknown error" };
         }
     } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
         return { success: false, error: error.message };
     }
 };

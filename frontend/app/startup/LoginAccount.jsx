@@ -14,7 +14,7 @@ import { loginUser } from "../../apicalls/UserApi";
 const LoginAccount = ({ route }) => {
   const navigation = useNavigation();
 
-//   const { email, age, name } = route.params;
+  // const { username } = route.params;
 
   const [Username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState(""); 
@@ -22,33 +22,44 @@ const LoginAccount = ({ route }) => {
   const [Password, setPassword] = useState('');
   const [pwdError, setPwdError] = useState(""); 
 
-  const handleUsername = (text) => {
-    // const validUsername = text.replace(/[^a-zA-Z0-9_]/g, '');  // Remove any character that isn't a letter, number, or underscore
-    // setUsername(validUsername);  // Update the state with the valid username
-    setUsername(text);
-  };
+  const [formError, setFormError] = useState('');
 
-//   const handleRoleSelect = (selectedRole) => {
-//     setRole(selectedRole);  // Set the gender value based on the selection
-//     setModalVisible(false);     // Close the modal
-//   };
+  const handleUsername = (text) => {
+    setUsername(text);
+    if(text != ''){
+      setUsernameError('');
+    }
+  };
 
   const handlePassword = (text) => {
-//     const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*\d).{8,}$/;  // At least 1 special character, 1 number, and minimum 8 characters
-//     if (!passwordRegex.test(text)) {
-//       setPwdError('Password must have at least 8 characters, 1 special character, and 1 number.');
-//     } else {
-//       setPwdError('');  // Clear the error if the password is valid
-//     }
-//     setPassword(text);
-
-//     if (rePassword !== '' && text !== rePassword) {
-//       setRePwdError('Passwords do not match');
-//     } else {
-//       setRePwdError('');
-//     }
     setPassword(text);
+    if(text != ''){
+      setPwdError('');
+    }
   };
+
+  const checkEmpty = (text) => {
+    if(text == ''){
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
+
+  const validateForm = (username, pwd) => {
+    const isUsernameValid = checkEmpty(username);
+    const isPasswordValid = checkEmpty(pwd);
+  
+    if(!isUsernameValid){
+      setUsernameError('Username cannot be empty');
+    }
+    if(!isPasswordValid){
+      setPwdError('Password cannot be empty');
+    }
+
+    return isUsernameValid && isPasswordValid;
+  }
 
   
 
@@ -68,62 +79,25 @@ const LoginAccount = ({ route }) => {
 
 
   const handleNext = async () => {
-    
-    //   if (Username === '') {
-    //     setUsernameError('Username cannot be empty');
-    //     setPwdError('');
-    //     setRePwdError('');
-    //   } 
-    //   else if(Password === ''){
-    //     setPwdError('Password cannot be empty');
-    //     setUsernameError('');  
-    //     setRePwdError('');
-    //   }
-    //   else if(rePassword === ''){
-    //     setRePwdError('Password cannot be empty');
-    //     setUsernameError('');  
-    //     setPwdError('');
-    //   }
-    //   else {
-    //     setUsernameError('');  
-    //     setPwdError('');
-    //     setRePwdError('');
-    //     console.log("Proceeding with:", email, age, name, Username, Role, Password);
-    //     // const result = await submitAccountDetails(email, Username, Role, Password);
-    //     try{
-    //       await registerUser(email, age, name, Username, Role, Password);
-          
-    //       if(Role == 'Organiser'){
-    //         navigation.navigate('startup/OrgValidation', { email: email, role: Role });
-    //       }
-    //       else{
-    //         //to tabs
-    //         navigation.navigate('tabs', { email: email, role: Role });
-    //         //for testing
-    //         // navigation.navigate('events/EventsPage', { email: result.email, role: result.role })
-    //         }
-    //     } catch (error){
-    //       console.error("Failed to submit details:", error);
-    //     }
-    //     // console.log("Account details submitted:", result);
-       
-        
-    //   }
-    
-    // try {
-    //   const result = await submitUserDetails();  // Simulate sending data
-    //   console.log("User details submitted:", result);
-    //   navigation.navigate('NextPage', { email: result.email });  // Navigate to new page with email
-    // } catch (error) {
-    //   console.error("Failed to submit details:", error);
-    // }
-
-    try{
-        await loginUser(Username, Password);
-        navigation.navigate('tabs', { Username: Username });
-    } catch( error ){
-        console.error("Failed to login user:", error);
+    if(!validateForm(Username, Password)){
+      return;
     }
+    try{
+      const result = await loginUser(Username, Password);
+      if(result.success){
+        navigation.navigate('tabs', { username: Username });
+        setFormError('');
+      }
+      else{
+        setFormError('Your username/password is incorrect or does not exist.');
+      }
+    } catch( error ){
+        console.log("Failed to login user:", error);
+    }
+    
+    
+
+    
   }
 
 
@@ -142,6 +116,8 @@ const LoginAccount = ({ route }) => {
           
           <StyledInput label={"Password"} pwd={true} data={Password} onChangeText={handlePassword}/>
           {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
+
+          {formError ? <StyledText size={16} textContent={formError} fontColor="#CA3550" /> : null}
           
         </View>
         <View style={styles.btnContainer}>

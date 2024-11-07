@@ -3,12 +3,14 @@ import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView} 
 import { FontAwesome } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
 import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
+import { useNavigation } from '@react-navigation/native';
 
 const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
-const Homepage = ({ navigation, route }) => {
+const Homepage = ({ route }) => {
+  const navigation = useNavigation();
 
-  const { username, role } = route.params;
+  const { username } = route.params;
   console.log("username is "+ username);
 
   const { savedEvents, toggleBookmark } = useContext(AppContext);
