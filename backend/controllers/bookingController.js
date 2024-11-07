@@ -1,9 +1,10 @@
 // BUSINESS LOGIC FOR BOOKING ENTITY (CRUD)
 // IMPORT NESCESSARY LIBRARIES
 import { User } from "../models/User.js";
-import Event from "../models/Event.js";
+// import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
 import nodemailer from 'nodemailer';
+import EventTicket from "../models/EventTicket.js";
 //import { createStripeCustomer, createPaymentIntent } from "./stripeController.js";
 
 //const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -37,15 +38,15 @@ const sendConfirmationEmail = async (
   }
 };
 
-// FUNCTION TO GET AVAILABLE TICKETS FOR AN EVENT
-const getAvailableTickets = (event) => {
-  return event.eventTicketQuantity - event.eventTicketQuantityBooked;
+// FUNCTION TO GET AVAILABLE TICKETS FOR AN EVENT TICKET
+const getAvailableTickets = (eventTicket) => {
+  return eventTicket.eventTicketQuantity - eventTicket.eventTicketQuantityBooked;
 };
 
 // VALIDATION FUNCTION FOR USER, EVENT, AND TICKET AVAILABILITY
 export const validateBookingRequest = async (req, res) => {
   try {
-    const { userId, eventId, bookingQuantity } = req.body;
+    const { userId, eventId, bookingQuantity, eventTicketType } = req.body;
 
     // Check if the user exists
     const user = await User.findOne({ userId: userId });
@@ -53,26 +54,29 @@ export const validateBookingRequest = async (req, res) => {
       return res.status(404).json({ message: "User not found!" });
     }
 
-    // Check if the event exists
-    const event = await Event.findOne({ eventId: eventId });
-    if (!event) {
-      return res.status(404).json({ message: "Event not found!" });
+    // Check if the event ticket exists for the given eventId and eventTicketType
+    const eventTicket = await EventTicket.findOne({
+      eventId: eventId,
+      eventTicketType: eventTicketType,
+    });
+    if (!eventTicket) {
+      return res.status(404).json({ message: "Event ticket not found!" });
     }
 
     // Get the available ticket quantity
-    const availableTickets = getAvailableTickets(event);
+    const availableTickets = getAvailableTickets(eventTicket);
 
     // Check if there are enough tickets available
     if (availableTickets < bookingQuantity) {
-      return res
-        .status(400)
-        .json({ message: "Selected Event does not have enough tickets available!" });
+      return res.status(400).json({
+        message: "Selected Event Ticket does not have enough tickets available!",
+      });
     }
 
-    // Send a successful response with validated user, event, and available ticket quantity
+    // Send a successful response with validated user, event ticket, and available ticket quantity
     return res.status(200).json({
       message: "Validation successful!",
-      data: { user, event, availableTickets },
+      data: { user, eventTicket, availableTickets },
     });
   } catch (error) {
     return res.status(400).json({ message: error.message });
@@ -82,37 +86,54 @@ export const validateBookingRequest = async (req, res) => {
 // FUNCTION TO CREATE BOOKING AND SEND CONFIRMATION EMAIL
 export const createBookingAndSendEmail = async (req, res) => {
   try {
-    const { userId, eventId, bookingQuantity } = req.body;
-    const user = await User.findOne({ userId: userId });
-    const event = await Event.findOne({ eventId: eventId });
+    const { userId, eventId, bookingQuantity, eventTicketType } = req.body;
 
-    // Create a new booking document
+    // Find the user by userId
+    const user = await User.findOne({ userId: userId });
+
+    // Find the event ticket by eventTicketId (associated with the eventId and eventTicketType)
+    const eventTicket = await EventTicket.findOne({
+      eventId: eventId,
+      eventTicketType: eventTicketType,  // Ensure the ticket type matches
+    });
+
+    if (!eventTicket) {
+      return res.status(404).json({ message: "Event ticket not found." });
+    }
+
+    // Check if the quantity to be booked is available
+    if (eventTicket.eventTicketQuantity - eventTicket.eventTicketQuantityBooked < bookingQuantity) {
+      return res.status(400).json({ message: "Not enough tickets available." });
+    }
+
+    // Create a new booking document associated with the eventTicket
     const newBooking = new Booking({
       bookingName: user.userName,
       bookingEmail: user.userEmail,
       bookingQuantity: bookingQuantity,
-      eventId: eventId,
+      eventTicketId: eventTicket.eventTicketId,  // Store event ticket id
       userId: userId,
     });
 
     // Save the new booking to the database
     await newBooking.save();
 
-    // Update the event's booked ticket quantity
-    event.eventTicketQuantityBooked += bookingQuantity;
-    await event.save();
+    // Update the event ticket's booked quantity
+    eventTicket.eventTicketQuantityBooked += bookingQuantity;
+    await eventTicket.save();
 
     // Send confirmation email
     await sendConfirmationEmail(
       newBooking.bookingName,
       newBooking.bookingEmail,
       bookingQuantity,
-      event.eventName
+      eventTicket.eventTicketType,  // Send the ticket type in the confirmation email
+      eventTicket.eventId // Send the eventId for context in the email
     );
 
     // Respond with booking details
     return res.status(201).json({
-      message: "Successfully booked tickets! A confirmation email had been sent to your email! ",
+      message: "Successfully booked tickets! A confirmation email has been sent to your email!",
       booking: newBooking,
     });
   } catch (error) {
