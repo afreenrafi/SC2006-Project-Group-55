@@ -41,7 +41,7 @@ export const registerUser = async (email, age, name, username, role, password, e
         // console.error("Registration failed:", message.message || "Unknown error");
         // }
     } catch (error) {
-        console.error("Registration failed:", error);
+        console.log("Registration failed:", error);
         return "failed";
     }
 };
