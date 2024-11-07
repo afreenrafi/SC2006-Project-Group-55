@@ -138,7 +138,7 @@ const Setup = ({ route }) => {
           
           <SelectInput label={"Role"} data={Role} onPress={() => setModalVisible(true)}/>
 
-          <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
+          <StyledInput label={"Password"} pwd={true} data={Password} onChangeText={handlePassword}/>
           {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" alignment="left"/> : null}
           <View style={styles.bullets}>
             <Entypo name="dot-single" size={24} color="#8B8B8B" />
@@ -153,7 +153,7 @@ const Setup = ({ route }) => {
             <StyledText size={18} textContent="must include at least 1 number" fontColor="#8B8B8B"/>
           </View>
 
-          <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
+          <StyledInput label={"Re-enter Password"} pwd={true} data={rePassword} onChangeText={handleRePassword}/>
           {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" alignment="left"/> : null}
           {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
           {formError ? <StyledText size={16} textContent={formError} fontColor="#CA3550" alignment="left"/> : null}

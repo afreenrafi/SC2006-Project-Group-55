@@ -140,7 +140,7 @@ const LoginAccount = ({ route }) => {
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
           {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
           
-          <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
+          <StyledInput label={"Password"} pwd={true} data={Password} onChangeText={handlePassword}/>
           {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
           
         </View>

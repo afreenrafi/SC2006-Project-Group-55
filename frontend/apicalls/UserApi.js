@@ -17,6 +17,7 @@ export const registerUser = async (email, age, name, username, role, password, e
     } else if (role === "Artist") {
         jsonData.artistVerified = artistVerified;
     }
+    console.log("going to called register backend");
 
     try {
         const response = await fetch("http://localhost:5001/api/authRoute/register", {
