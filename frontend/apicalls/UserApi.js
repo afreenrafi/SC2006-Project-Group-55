@@ -28,11 +28,15 @@ export const registerUser = async (email, age, name, username, role, password, e
         });
 
         const message = await response.json();
+        console.log(response.status);
         if (response.ok) {
-        console.log("User registered successfully:", message);
-        return true;
-        // Navigate or handle success
+            console.log("User registered successfully:", message);
+            return true;
+            // Navigate or handle success
         } 
+        else if(response.status == 400){
+            return false;
+        }
         // else {
         // console.error("Registration failed:", message.message || "Unknown error");
         // }
