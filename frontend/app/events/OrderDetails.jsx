@@ -294,8 +294,8 @@ const OrderDetails = ({ route }) => {
 
 
   return (
-    // <StripeProvider 
-    // publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
+    <StripeProvider 
+    publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
     <View style={{ flex:1 }}>
       <SafeAreaView style={styles.bgColour}>
         <PageHeader title={"Order Details"} onPress={()=>navigation.goBack()}/>
@@ -379,7 +379,7 @@ const OrderDetails = ({ route }) => {
       
 
     </View>
-    // </StripeProvider>
+    </StripeProvider>
   );
 };
 
