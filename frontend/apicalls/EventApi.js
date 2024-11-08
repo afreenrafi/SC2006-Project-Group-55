@@ -1,3 +1,21 @@
+export const fetchAllEvents = async () => {
+  try {
+    const response = await fetch("http://localhost:5001/api/eventRoute"); // Replace with your backend URL
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch events");
+    }
+
+    const events = await response.json();
+    // console.log("Fetched events:", events);
+    return events;
+
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    return null;
+  }
+}
+
 export const fetchEvents = async ({ searchQuery = "", eventGenre = "", eventType = "", limit = 10, page = 1 }) => {
     try {
       // Construct the query parameters for the API call
@@ -32,4 +50,6 @@ export const fetchEvents = async ({ searchQuery = "", eventGenre = "", eventType
       return { error: "An error occurred while fetching events." };
     }
   };
+
+
   

@@ -59,10 +59,10 @@ const Homepage = ({ route }) => {
 
   const getHomepageData = async ()=> {
     try{
-       const freeEvents = await getFreeEvents();
-       setPageFreeEvents(freeEvents);
-       const paidEvents = await getPaidEvents();
-       setPagePaidEvents(paidEvents);
+      const freeEvents = await getFreeEvents();
+      setPageFreeEvents(freeEvents);
+      const paidEvents = await getPaidEvents();
+      setPagePaidEvents(paidEvents);
 
       setLoading(false);
     } catch (error) {
@@ -99,7 +99,7 @@ const Homepage = ({ route }) => {
 
 
     return (
-      <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
+      <TouchableOpacity key={item.eventId} style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
         <Image source={{uri: item.eventPic}} style={styles.eventImage} />
         <Text style={styles.eventType}>{item.eventGenre}</Text>
         <View style={styles.eventDetailsContainer}>
@@ -232,7 +232,7 @@ const Homepage = ({ route }) => {
           horizontal
           data={filteredPopularEvents}
           renderItem={renderEventCard}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.eventId}
           contentContainerStyle={styles.flatListContainer}
         />
       </View>
@@ -248,7 +248,7 @@ const Homepage = ({ route }) => {
           horizontal
           data={filteredNearbyEvents}
           renderItem={renderEventCard}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.eventId}
           contentContainerStyle={styles.flatListContainer}
         />
       </View>
