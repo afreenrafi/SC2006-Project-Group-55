@@ -1,14 +1,16 @@
-export const fetchEvents = async (searchQuery = "", eventGenre = "", eventType = "") => {
+export const fetchEvents = async ({ searchQuery = "", eventGenre = "", eventType = "", limit = 10, page = 1 }) => {
     try {
       // Construct the query parameters for the API call
-      const queryParams = new URLSearchParams({
-        q: searchQuery,
-        eventGenre: eventGenre,
-        eventType: eventType,
-      }).toString();
+    //   const queryParams = new URLSearchParams({
+    //     q: searchQuery,
+    //     eventGenre: eventGenre,
+    //     eventType: eventType,
+    //     limit: limit.toString(),
+    //     page: page.toString(),
+    //   }).toString();
   
       // Make the fetch request to the backend endpoint with the query parameters
-      const response = await fetch(`http://10.0.2.2:5001/api/events/search?${queryParams}`, {
+      const response = await fetch(`http://localhost:5001/api/eventRoute/search?q=${searchQuery}&eventGenre=${eventGenre}&eventType=${eventType}&limit=${limit}&page=${page}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -21,7 +23,7 @@ export const fetchEvents = async (searchQuery = "", eventGenre = "", eventType =
         return data; // Returns an object with `events`, `page`, and `limit`
       } else if (response.status === 404) {
         console.warn("No events found!");
-        return { message: "No events found!" };
+        return { message: "No events found!" + response.status };
       } else {
         throw new Error("Failed to fetch events");
       }

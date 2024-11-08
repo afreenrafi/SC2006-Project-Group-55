@@ -20,7 +20,7 @@ export const registerUser = async (email, age, name, username, role, password, e
     console.log("going to called register backend");
 
     try {
-        const response = await fetch("http://10.0.2.2:5001/api/authRoute/register", {
+        const response = await fetch("http://localhost:5001/api/authRoute/register", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -55,7 +55,7 @@ export const loginUser = async (userId, userPassword) => {
     };
 
     try {
-        const response = await fetch("http://10.0.2.2:5001/api/authRoute/login", {
+        const response = await fetch("http://localhost:5001/api/authRoute/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

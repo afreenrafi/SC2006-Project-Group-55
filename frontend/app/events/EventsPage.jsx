@@ -11,7 +11,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 
 
 const EventsPage = ({ route }) => {
-  const { username, role } = route.params;
+  const { username } = route.params;
   const { eventId } = route.params;
 
   const navigation = useNavigation();
@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: "#FBF3F1",
   },
   eventCont: {
     position: "relative",
