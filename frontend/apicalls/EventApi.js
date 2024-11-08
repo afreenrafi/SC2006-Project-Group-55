@@ -52,4 +52,31 @@ export const fetchEvents = async ({ searchQuery = "", eventGenre = "", eventType
   };
 
 
+  // Frontend API call to fetch event by ID
+export const fetchEventById = async (eventId) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/eventRoute/${eventId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch event");
+    }
+
+    const event = await response.json();
+    return event;
+
+  } catch (error) {
+    console.error("Error fetching event by ID:", error);
+    return null;
+  }
+};
+
+
+
+
+
   
