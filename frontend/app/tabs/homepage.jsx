@@ -100,7 +100,7 @@ const Homepage = ({ route }) => {
 
     return (
       <TouchableOpacity key={item.eventId} style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
-        <Image source={{uri: item.eventPic}} style={styles.eventImage} />
+        <Image source={item.eventPic ? {uri: item.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
         <Text style={styles.eventType}>{item.eventGenre}</Text>
         <View style={styles.eventDetailsContainer}>
           <Text style={styles.eventName}>{item.eventName}</Text>

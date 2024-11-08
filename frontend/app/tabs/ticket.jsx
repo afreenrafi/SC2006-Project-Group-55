@@ -35,7 +35,7 @@ const TicketsScreen = () => {
     <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
       <Text style={styles.eventName}>{item.eventName}</Text>
       <View style={styles.imageContainer}>
-        <Image source={{ uri: item.eventPic }} style={styles.eventImage} />
+        <Image source={item.eventPic ? {uri: item.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
       </View>
       <View style={styles.eventDetails}>
         <Text style={styles.eventLocation}>{item.eventLocation}</Text>
