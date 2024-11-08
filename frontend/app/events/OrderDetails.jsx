@@ -15,7 +15,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 
 const OrderDetails = ({ route }) => {
-  const { email, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
+  const { username, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
 
 
   const navigation = useNavigation();
