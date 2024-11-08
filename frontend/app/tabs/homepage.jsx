@@ -39,8 +39,7 @@ const Homepage = ({ route }) => {
   const getFreeEvents = async () => {
     try {
       const result = await fetchEvents({ eventType: "Free" });
-      // setEventDetails(details);                  // Set the fetched details to state
-      console.log(result.events);
+      // console.log(result.events);
       return result.events;
 
     } catch (error) {
@@ -50,8 +49,7 @@ const Homepage = ({ route }) => {
   const getPaidEvents = async () => {
     try {
       const result = await fetchEvents({ eventType: "Chargeable" });
-      // setEventDetails(details);                  // Set the fetched details to state
-      console.log(result.events);
+      // console.log(result.events);
       return result.events;
 
     } catch (error) {
@@ -89,6 +87,7 @@ const Homepage = ({ route }) => {
   }
 
   const renderEventCard = ({ item }) => {
+    // console.log("eventcard rendering"+item.eventId);
     const isBookmarked = savedEvents.some((e) => e.eventId === item.eventId);
     const dateString = item.eventStartDate;
     const date = new Date(dateString);
@@ -223,32 +222,37 @@ const Homepage = ({ route }) => {
       </View>
 
       {/* Popular Events Section */}
+      {console.log(filteredPopularEvents.length)}
+      {filteredPopularEvents.length > 0 && 
       <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Free Events</Text>
-          </View>
-          <FlatList 
-            horizontal
-            data={filteredPopularEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Free Events</Text>
+        </View>
+        <FlatList 
+          horizontal
+          data={filteredPopularEvents}
+          renderItem={renderEventCard}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.flatListContainer}
+        />
       </View>
+      }
 
       {/* Nearby Events Section */}
+      {filteredNearbyEvents.length > 0 && 
       <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Paid Events</Text>
-          </View>
-          <FlatList 
-            horizontal
-            data={filteredNearbyEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Paid Events</Text>
         </View>
+        <FlatList 
+          horizontal
+          data={filteredNearbyEvents}
+          renderItem={renderEventCard}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.flatListContainer}
+        />
+      </View>
+      }
     </ScrollView>
   );
 };
