@@ -13,8 +13,8 @@ const filters = ['All', 'Museums', 'Exhibitions', 'Performances', 'Festivals']; 
 const Homepage = ({ route }) => {
   const navigation = useNavigation();
 
-  const { username } = route.params;
-  console.log("username is "+ username);
+  const { username, role } = route.params;
+  console.log("username is "+ username + " " + role);
 
   const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');

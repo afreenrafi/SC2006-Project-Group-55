@@ -8,7 +8,7 @@ import PageHeader from "../../components/events/PageHeader";
 import Entypo from '@expo/vector-icons/Entypo';
 import SelectInput from "../../components/forms/SelectInput";
 import SelectModal from "../../components/forms/SelectModal";
-import { loginUser } from "../../apicalls/UserApi";
+import { loginUser, fetchUserById } from "../../apicalls/UserApi";
 
 
 const LoginAccount = ({ route }) => {
@@ -21,6 +21,8 @@ const LoginAccount = ({ route }) => {
 
   const [Password, setPassword] = useState('');
   const [pwdError, setPwdError] = useState(""); 
+
+  const [Role, setRole] = useState('');
 
   const [formError, setFormError] = useState('');
 
@@ -85,7 +87,9 @@ const LoginAccount = ({ route }) => {
     try{
       const result = await loginUser(Username, Password);
       if(result.success){
-        navigation.navigate('tabs', { username: Username });
+        const assignRole = await fetchUserById(Username);
+        setRole(assignRole.userRole);
+        navigation.navigate('tabs', { username: Username, role: assignRole.userRole });
         setFormError('');
       }
       else{

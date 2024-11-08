@@ -76,4 +76,32 @@ export const loginUser = async (userId, userPassword) => {
         return { success: false, error: error.message };
     }
 };
+
+
+export const fetchUserById = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/userRoute/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("User not found!");
+        } else {
+          throw new Error("Internal Server Error Occurred!");
+        }
+      }
+  
+      const userData = await response.json();
+      return userData;
+  
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return { error: error.message };
+    }
+  };
+  
   

@@ -11,7 +11,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 
 
 const EventsPage = ({ route }) => {
-  const { username } = route.params;
+  const { username, role } = route.params;
   const { eventId } = route.params;
 
   const navigation = useNavigation();
