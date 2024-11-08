@@ -1,50 +1,70 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
 import { useNavigation } from '@react-navigation/native';
-
-const allEvents = [
-  ...mockUpcomingEvents,
-  ...mockPopularEvents,
-  ...mockNearbyEvents,
-];
-
-// remove duplicate events based on id
-const uniqueEvents = Array.from(new Map(allEvents.map(item => [item.id, item])).values());
+import { fetchAllEvents } from '../../apicalls/EventApi';
 
 const TicketsScreen = () => {
-  const [displayEvents, setDisplayEvents] = useState(uniqueEvents);
+  const [allEvents, setAllEvents] = useState(null);
+  const [displayEvents, setDisplayEvents] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
 
   const toEventPage = async (eventId) => {
-    navigation.navigate('events/EventsPage', { eventId: eventId })
-  }
+    navigation.navigate('events/EventsPage', { eventId: eventId });
+  };
+
+  useEffect(() => {
+    const getAllEvents = async () => {
+      const events = await fetchAllEvents();
+      if (events) {
+        const uniqueEvents = Array.from(new Map(events.map(item => [item.eventId, item])).values());
+        setAllEvents(uniqueEvents);
+        setDisplayEvents(uniqueEvents);
+      }
+      setLoading(false);
+    };
+
+    getAllEvents();
+  }, []);
 
   const renderEvent = ({ item }) => (
-    <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.id)}>
-      <Text style={styles.eventName}>{item.name}</Text>
+    <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
+      <Text style={styles.eventName}>{item.eventName}</Text>
       <View style={styles.imageContainer}>
-        <Image source={item.image} style={styles.eventImage} />
+        <Image source={item.eventPic ? {uri: item.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
       </View>
       <View style={styles.eventDetails}>
-        <Text style={styles.eventLocation}>{item.location}</Text>
-        <Text style={styles.eventDate}>{item.date}</Text>
-        <Text style={styles.eventTime}>{item.time}</Text>
+        <Text style={styles.eventLocation}>{item.eventLocation}</Text>
+        <Text style={styles.eventDate}>{new Date(item.eventStartDate).toLocaleDateString()}</Text>
+        <Text style={styles.eventTime}>{new Date(item.eventOpen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
       </View>
     </TouchableOpacity>
   );
 
   const handleSearch = (text) => {
-    const filteredEvents = uniqueEvents.filter((event) =>
-      event.name.toLowerCase().includes(text.toLowerCase())
-    );
     setSearchQuery(text);
-    setDisplayEvents(filteredEvents);
+    if (text === "") {
+      setDisplayEvents(allEvents);
+    } else {
+      const filteredEvents = allEvents.filter((event) =>
+        event.eventName.toLowerCase().includes(text.toLowerCase())
+      );
+      setDisplayEvents(filteredEvents);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <Text>Loading event details...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -62,13 +82,19 @@ const TicketsScreen = () => {
       <FlatList
         data={displayEvents}
         renderItem={renderEvent}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.eventId}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#FBF3F1",
+  },
   container: {
     flex: 1,
     padding: 10,

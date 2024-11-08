@@ -8,16 +8,34 @@ import Event from "../models/Event.js";
 // CREATING NEW EVENTTICKET OBJECT
 export const createEventTicket = async (req, res) => {
   // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEEVENTTICKET
-  const { eventTicketType, eventTicketQuantity, eventId } = req.body;
+  const { eventTicketType, eventTicketPrice, eventTicketQuantity, eventId } =
+    req.body;
 
   try {
     // CHECKS IF EXISTING EVENTS IN DATABASE HAVE THE SAME EVENTID
     const event = await Event.findOne({ eventId: eventId });
     if (!event) return res.status(404).json({ message: "Event not found!" });
 
+    // CHECKS IF EXISTING EVENT OBJECT IS FREE OR CHARGEABLE, REJECTS CREATION OF EVENTTICKET OBJECT IF EVENT IS FREE BUT EVENTICKETPRICE IS NOT 0
+    if (event.eventType === "Free" && eventTicketPrice != 0) {
+      return res
+        .status(404)
+        .json({ message: "Event Ticket Price must be 0 as Event is Free!" });
+    }
+
+    if (event.eventType === "Chargeable" && eventTicketPrice === 0) {
+      return res
+        .status(404)
+        .json({
+          message:
+            "Event Ticket Price must be greater than 0 as Event is Chargeable!",
+        });
+    }
+
     // INSTANTIATING NEW EVENTTICKET OBJECT
     const newEventTicket = new EventTicket({
       eventTicketType: eventTicketType,
+      eventTicketPrice: eventTicketPrice,
       eventTicketQuantity: eventTicketQuantity,
       eventId: eventId,
     });

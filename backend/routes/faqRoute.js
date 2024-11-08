@@ -25,6 +25,7 @@ router.get("/faq", getAllFaqs);
 router.get("/faqitem/:faqItemId", getFaqItemById);
 router.get("/faq/:faqId", getFaqById);
 
+
 // UPDATE
 router.put("/faqitem/:faqItemId", updateFaqItem);
 

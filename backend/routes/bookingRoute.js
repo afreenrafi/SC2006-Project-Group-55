@@ -14,4 +14,5 @@ const router = express.Router();
 router.post("/bookFree", createFreeBooking);
 router.post("/bookChargeable", createChargeableBooking);
 
+
 export default router;

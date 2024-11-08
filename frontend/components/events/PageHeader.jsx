@@ -4,7 +4,7 @@ import * as Font from 'expo-font';
 import StyledText from '../forms/StyledText';
 import { Ionicons } from '@expo/vector-icons';
 
-const PageHeader = ({ title, onPress }) => {
+const PageHeader = ({ title, onPress, fontSize="20" }) => {
   // const [text, onChangeText] = React.useState({data});
 
   return (
@@ -12,7 +12,7 @@ const PageHeader = ({ title, onPress }) => {
         <TouchableOpacity style={styles.backBtn} onPress={onPress}>
           <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
-        <StyledText size={20} textContent={title}/>
+        <StyledText size={fontSize} textContent={title}/>
     </View>
   );
 };

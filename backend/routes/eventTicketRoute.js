@@ -20,6 +20,7 @@ router.post("/", createEventTicket);
 router.get("/", getAllEventTickets);
 router.get("/:eventTicketId", getEventTicketById); 
 
+
 // UPDATE
 router.put("/:eventTicketId", updateEventTicket);
 

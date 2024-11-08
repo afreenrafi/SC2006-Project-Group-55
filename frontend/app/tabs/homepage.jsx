@@ -1,40 +1,111 @@
-import React, { useState, useContext } from 'react';
-import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView} from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, ActivityIndicator} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
-import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
+// import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
+import { useNavigation } from '@react-navigation/native';
+import { fetchEvents } from '../../apicalls/EventApi';
+import StyledText from "../../components/forms/StyledText";
 
-const filters = ['All', 'Museum', 'Exhibition', 'Performance', 'Festival']; // Filter categories
 
-const Homepage = ({ navigation }) => {
+const filters = ['All', 'Museums', 'Exhibitions', 'Performances', 'Festivals']; // Filter categories
+
+const Homepage = ({ route }) => {
+  const navigation = useNavigation();
+
+  const { username, role } = route.params;
+  console.log("username is "+ username + " " + role);
+
   const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
 
-  // Filter the events based on selected filter
-  const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.type === selectedFilter);
-  const filteredNearbyEvents = selectedFilter === 'All' ? mockNearbyEvents : mockNearbyEvents.filter(event => event.type === selectedFilter);
+  const [loading, setLoading] = useState(true);            // State to manage loading status
 
-  const allEvents = [
-    ...mockUpcomingEvents,
-    ...mockPopularEvents,
-    ...mockNearbyEvents,
-  ];
+  const [mockPopularEvents, setPageFreeEvents] = useState(null);
+  const [mockNearbyEvents, setPagePaidEvents] = useState(null);
+  const [mockUpcomingEvents, setUpcomingEvents] = useState(null);
+
+  // Filter the events based on selected filter
+  const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.eventGenre === selectedFilter);
+  const filteredNearbyEvents = selectedFilter === 'All' ? mockNearbyEvents : mockNearbyEvents.filter(event => event.eventGenre === selectedFilter);
+
+  // const allEvents = [
+  //   ...mockUpcomingEvents,
+  //   ...mockPopularEvents,
+  //   ...mockNearbyEvents,
+  // ];
+
+  const getFreeEvents = async () => {
+    try {
+      const result = await fetchEvents({ eventType: "Free" });
+      // console.log(result.events);
+      return result.events;
+
+    } catch (error) {
+      console.error("Error fetching free event details:", error);
+    }
+  };
+  const getPaidEvents = async () => {
+    try {
+      const result = await fetchEvents({ eventType: "Chargeable" });
+      // console.log(result.events);
+      return result.events;
+
+    } catch (error) {
+      console.error("Error fetching free event details:", error);
+    }
+  };
+
+  const getHomepageData = async ()=> {
+    try{
+      const freeEvents = await getFreeEvents();
+      setPageFreeEvents(freeEvents);
+      const paidEvents = await getPaidEvents();
+      setPagePaidEvents(paidEvents);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching homepage details:", error);
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getHomepageData();
+  }, []);
+
+
+  
+
+  
+
+
 
   const toEventPage = async (eventId) => {
     navigation.navigate('events/EventsPage', { eventId: eventId })
   }
 
   const renderEventCard = ({ item }) => {
-    const isBookmarked = savedEvents.some((e) => e.id === item.id);
+    // console.log("eventcard rendering"+item.eventId);
+    const isBookmarked = savedEvents.some((e) => e.eventId === item.eventId);
+    const dateString = item.eventStartDate;
+    const date = new Date(dateString);
+    const formattedDate = new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }).format(date);
+
+
     return (
-      <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.id)}>
-        <Image source={item.image} style={styles.eventImage} />
-        <Text style={styles.eventType}>{item.type}</Text>
+      <TouchableOpacity key={item.eventId} style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
+        <Image source={item.eventPic ? {uri: item.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
+        <Text style={styles.eventType}>{item.eventGenre}</Text>
         <View style={styles.eventDetailsContainer}>
-          <Text style={styles.eventName}>{item.name}</Text>
-          <Text style={styles.eventLocation}>{item.location}</Text>
-          <Text style={styles.eventDate}>{item.date}</Text>
+          <Text style={styles.eventName}>{item.eventName}</Text>
+          <Text style={styles.eventLocation}>{item.eventLocation}</Text>
+          <Text style={styles.eventDate}>{formattedDate}</Text>
         </View>
         <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.bookmarkButton}>
           <FontAwesome name={isBookmarked ? "bookmark" : "bookmark-o"} size={20} color={isBookmarked ? "#EE1C43" : "#FFF"} />
@@ -46,6 +117,15 @@ const Homepage = ({ navigation }) => {
   const handleDetailsPress = (event) => {
     navigation.navigate('TicketDetails', { event });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <StyledText size={20} textContent="Loading event details..." />
+      </View>
+    );
+  }
 
   const renderUpcomingEvent = () => {
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
@@ -138,41 +218,52 @@ const Homepage = ({ navigation }) => {
       {/* Upcoming Events */}
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Upcoming Events</Text>
-        {renderUpcomingEvent()}
+        {/* {renderUpcomingEvent()} */}
       </View>
 
       {/* Popular Events Section */}
+      {console.log(filteredPopularEvents.length)}
+      {filteredPopularEvents.length > 0 && 
       <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Most Popular</Text>
-          </View>
-          <FlatList 
-            horizontal
-            data={filteredPopularEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Free Events</Text>
+        </View>
+        <FlatList 
+          horizontal
+          data={filteredPopularEvents}
+          renderItem={renderEventCard}
+          keyExtractor={(item) => item.eventId}
+          contentContainerStyle={styles.flatListContainer}
+        />
       </View>
+      }
 
       {/* Nearby Events Section */}
+      {filteredNearbyEvents.length > 0 && 
       <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Nearby</Text>
-          </View>
-          <FlatList 
-            horizontal
-            data={filteredNearbyEvents}
-            renderItem={renderEventCard}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.flatListContainer}
-          />
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Paid Events</Text>
         </View>
+        <FlatList 
+          horizontal
+          data={filteredNearbyEvents}
+          renderItem={renderEventCard}
+          keyExtractor={(item) => item.eventId}
+          contentContainerStyle={styles.flatListContainer}
+        />
+      </View>
+      }
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#FBF3F1",
+  },
   container: {
     flex: 1,
     backgroundColor: '#FBF3F1',

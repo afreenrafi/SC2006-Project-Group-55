@@ -15,7 +15,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 
 const OrderDetails = ({ route }) => {
-  const { email, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
+  const { username, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
 
 
   const navigation = useNavigation();
@@ -138,7 +138,7 @@ const OrderDetails = ({ route }) => {
   const handleNext = async () => {
     try {
       navigation.navigate('events/BookingComplete', { 
-        email: email, 
+        username: username, 
         role: role, 
         eventDetails: eventDetails,
         selectedDate: selectedDate
