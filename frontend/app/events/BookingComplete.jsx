@@ -9,8 +9,9 @@ import RoundBtn from '../../components/forms/RoundBtn';
 
 const BookingComplete = ({ route }) => {
     const navigation = useNavigation();
-    const { username, role, eventDetails, selectedDate } = route.params;
+    const { username, role, eventDetails, selectedDate, eventTime } = route.params;
     const [isQrModalVisible, setQrModalVisible] = useState(false);
+    console.log(eventTime);
 
     const handleNext = async () => {
         try {
@@ -34,7 +35,7 @@ const BookingComplete = ({ route }) => {
             <View style={styles.container}>
                 {/* Ticket Image and Title */}
                 <View style={styles.ticketContainer}>
-                <Image source={eventDetails.eventPic && { uri: eventDetails.eventPic }} style={styles.ticketImage} />
+                <Image source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.ticketImage} />
                 <Text style={styles.ticketTitle}>{eventDetails.eventName}</Text>
         
                 {/* Ticket Info */}
@@ -45,7 +46,7 @@ const BookingComplete = ({ route }) => {
                     </View>
                     <View style={styles.infoColumn}>
                     <Text style={styles.infoLabel}>Time</Text>
-                    <Text style={styles.infoText}>{eventDetails.eventTime}</Text>
+                    <Text style={styles.infoText}>{eventTime}</Text>
                     </View>
                     <View style={styles.infoColumn}>
                     <Text style={styles.infoLabel}>Venue</Text>

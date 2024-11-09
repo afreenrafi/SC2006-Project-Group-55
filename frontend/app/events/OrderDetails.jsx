@@ -21,12 +21,17 @@ const OrderDetails = ({ route }) => {
   const { username, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
   const { eventDetails, ticketDetails } = route.params;
 
+  console.log(eventDetails.eventOpen);
+  console.log(eventDetails.eventClose);
+
 
   const navigation = useNavigation();
 
   // const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [loading, setLoading] = useState(true);            // State to manage loading status
   const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
+  const [eventTime, setEventTime] = useState(null);
+
 //   const [selectedDate, setSelectedDate] = useState(null); 
 //   const [modalVisible, setModalVisible] = useState(false);
 //   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
@@ -44,6 +49,9 @@ const OrderDetails = ({ route }) => {
       try {
         // const details = await fetchEventDetails();  // Fetch event details
         // setEventDetails(details);                  // Set the fetched details to state
+        const timeRange = await formatEventTime(eventDetails.eventOpen, eventDetails.eventClose);
+        setEventTime(timeRange);
+        
 
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
@@ -55,6 +63,26 @@ const OrderDetails = ({ route }) => {
     getEventDetails();  // Call the function when component mounts
     // initializePaymentSheet();
   }, []);
+
+  const formatEventTime = async (eventStartDate, eventEndDate) => {
+    // Create Date objects from the ISO strings
+    const start = new Date(eventStartDate);
+    const end = new Date(eventEndDate);
+  
+    // Format the time to get hour and period (AM/PM)
+    const startTime = start.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true,
+    }).toLowerCase();
+  
+    const endTime = end.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true,
+    }).toLowerCase();
+  
+    // Combine start and end times in the desired format
+    return `${startTime} - ${endTime}`;
+  }
 
 
 
@@ -243,10 +271,11 @@ const OrderDetails = ({ route }) => {
   
     console.log('Payment completed successfully');
     navigation.navigate('events/BookingComplete', { 
-        email: email, 
+        username: username, 
         role: role, 
         eventDetails: eventDetails,
-        selectedDate: selectedDate
+        selectedDate: selectedDate,
+        eventTime: eventTime
     });
 
     // const orderDetails = {
@@ -269,15 +298,22 @@ const OrderDetails = ({ route }) => {
   };
 
   const handleNext = async () => {
+    console.log(totalPrice);
+    
     try {
-      await initializePaymentSheet();
-      // await openPaymentSheet();
-      // navigation.navigate('events/BookingComplete', { 
-      //   email: email, 
-      //   role: role, 
-      //   eventDetails: eventDetails,
-      //   selectedDate: selectedDate
-      // });
+      if(totalPrice > 0){
+        await initializePaymentSheet();
+      }
+      else{
+        navigation.navigate('events/BookingComplete', { 
+          username: username, 
+          role: role, 
+          eventDetails: eventDetails,
+          selectedDate: selectedDate,
+          eventTime: eventTime
+        });
+      }
+      
     } catch (error) {
       console.error("Failed to submit details:", error);
     }
@@ -319,7 +355,7 @@ const OrderDetails = ({ route }) => {
                             </View>
                             <View style={[styles.sumTime, styles.sumTags]}>
                                 <FontAwesome5 name="clock" size={14} color="#ffffff" />
-                                <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventTime} fontColor="#fff" />
+                                <StyledText style={styles.pageTitle} size={14} textContent={eventTime} fontColor="#fff" />
                             </View>
                         </View>
                     </View>
