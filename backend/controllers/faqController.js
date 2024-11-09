@@ -129,6 +129,22 @@ export const getFaqById = async (req, res) => {
   }
 };
 
+// RETRIEVING SPECIFIC FAQ OBJECT FROM DATABASE USING EVENTID
+export const getFaqByEventId = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETFAQBYEVENTID
+    const { eventId } = req.params;
+
+    // CHECKS IF EXISTING FAQS IN DATABASE HAVE THE SAME EVENTID
+    const faq = await Faq.findOne({ eventId: eventId });
+    if (!faq) return res.status(404).json({ message: "Faq not found!" });
+
+    res.status(200).json(faq);
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
 // UPDATING SPECIFIC EXISTENCE OF EXISTING FAQITEM ENTITY
 export const updateFaqItem = async (req, res) => {
   try {
