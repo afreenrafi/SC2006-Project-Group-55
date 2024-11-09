@@ -17,7 +17,7 @@ const SavedEvents = () => {
           <View key={event.eventId} style={styles.savedEventCard}>
             <Image source={event.eventPic ? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
             <View style={styles.eventDetailsContainer}>
-              <Text style={styles.eventType}>{event.eventType}</Text>
+              <Text style={styles.eventType}>{event.eventGenre}</Text>
               <Text style={styles.eventName}>{event.eventName}</Text>
               <Text style={styles.eventDate}>{
                 new Intl.DateTimeFormat("en-GB", {
