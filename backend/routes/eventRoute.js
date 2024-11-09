@@ -7,6 +7,7 @@ import {
   updateEvent,
   deleteEvent,
   searchEvents,
+  bookmarkEvent,
 } from "../controllers/eventController.js";
 
 // INSTANTIATE ROUTER
@@ -20,13 +21,15 @@ router.post("/", createEvent);
 // READ
 router.get("/", getAllEvents);
 router.get("/search", searchEvents);
-router.get("/:eventId", getEventById); 
-
+router.get("/:eventId", getEventById);
 
 // UPDATE
 router.put("/:eventId", updateEvent);
 
 // DELETE
-router.delete("/:eventId", deleteEvent); 
+router.delete("/:eventId", deleteEvent);
+
+// BOOKMARK / UNBOOKMARK EVENT FOR USER
+router.put("/bookmark/:userId/:eventId", bookmarkEvent);
 
 export default router;

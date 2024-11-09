@@ -24,12 +24,10 @@ export const createEventTicket = async (req, res) => {
     }
 
     if (event.eventType === "Chargeable" && eventTicketPrice === 0) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "Event Ticket Price must be greater than 0 as Event is Chargeable!",
-        });
+      return res.status(404).json({
+        message:
+          "Event Ticket Price must be greater than 0 as Event is Chargeable!",
+      });
     }
 
     // INSTANTIATING NEW EVENTTICKET OBJECT
@@ -68,18 +66,31 @@ export const getAllEventTickets = async (req, res) => {
 };
 
 // RETRIEVING SPECIFIC EVENTTICKET OBJECT FROM DATABASE USING EVENTTICKETID
-export const getEventTicketById = async (req, res) => {
+export const getEventTicketsById = async (req, res) => {
   try {
     // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETEVENTTICKETBYID
-    const { eventTicketId } = req.params;
+    const eventTicketIds = req.params.eventTicketIds.split(",");
 
-    // CHECKS IF EXISTING EVENTTICKETSS IN DATABASE HAVE THE SAME EVENTTICKETID
-    const eventTicket = await Event.findOne({ eventTicketId: eventTicketId });
-    if (!eventTicket) {
-      return res.status(404).json({ message: "Event Ticket Type not found!" });
+    // CHECK IF eventTicketIds ARRAY IS VALID
+    if (eventTicketIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Types of Event Tickets will be updated soon!" });
     }
 
-    res.status(200).json(eventTicket);
+    // FIND ALL EVENT TICKETS THAT MATCH THE PROVIDED eventTicketIds
+    const eventTickets = await EventTicket.find({
+      eventTicketId: { $in: eventTicketIds },
+    });
+
+    // CHECK IF ANY EVENT TICKETS WERE FOUND
+    if (eventTickets.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No Event Tickets found for the provided IDs!" });
+    }
+
+    res.status(200).json(eventTickets);
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
