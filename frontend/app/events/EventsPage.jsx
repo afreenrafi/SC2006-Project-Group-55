@@ -15,6 +15,7 @@ import { fetchEventById, fetchFaqByEventId, fetchFaqItemById } from "../../apica
 const EventsPage = ({ route }) => {
   const { username, role } = route.params;
   const { eventId } = route.params;
+  console.log(username);
 
   const navigation = useNavigation();
 
