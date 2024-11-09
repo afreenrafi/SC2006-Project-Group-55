@@ -1,12 +1,10 @@
 // IMPORT NECESSARY LIBRARIES
 import express from "express";
-// import {
-//   createFreeBooking,
-//   createChargeableBooking,
-// } from "../controllers/bookingController.js";
+
 import {
   validateBookingRequest,
   createBookingAndSendEmail,
+  getTicketBooked
 } from "../controllers/bookingController.js";
 
 // INSTANTIATE ROUTER
@@ -21,6 +19,7 @@ const router = express.Router();
 // CREATE
 router.post("/validateBookingRequest", validateBookingRequest);
 router.post("/createBookingAndSendEmail", createBookingAndSendEmail);
+router.get("/getTicketBooked/:userId", getTicketBooked);
 
 
 export default router;

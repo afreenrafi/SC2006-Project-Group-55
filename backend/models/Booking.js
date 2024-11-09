@@ -46,6 +46,11 @@ const BookingSchema = new mongoose.Schema({
     required: true, // Ensure the ticket price is required
     min: 0, // Ensure the price is a positive number
   },
+  eventTicketType: {
+    type: String,
+    required: true,
+    enum: ["Adult", "Child", "Senior Citizen", "VIP"],
+  },
 });
 
 

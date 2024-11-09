@@ -152,6 +152,10 @@ const UserSchema = new mongoose.Schema(
         default: null,
       },
     ],
+    TicketBooked: {
+      type: [String], // Array of strings to store bookingId values
+      default: [],
+    },
   },
   userOptions
 );
