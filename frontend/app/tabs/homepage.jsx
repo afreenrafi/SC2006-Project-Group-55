@@ -83,7 +83,7 @@ const Homepage = ({ route }) => {
 
 
   const toEventPage = async (eventId) => {
-    navigation.navigate('events/EventsPage', { eventId: eventId })
+    navigation.navigate('events/EventsPage', { eventId: eventId, username: username })
   }
 
   const renderEventCard = ({ item }) => {

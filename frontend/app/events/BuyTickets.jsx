@@ -13,13 +13,14 @@ import StyledInput from "../../components/forms/StyledInput";
 import TicketSelector from "../../components/events/TicketSelector";
 
 import { fetchTicketCatByTixId } from "../../apicalls/EventApi";
+import { validateBookingRequestAPI } from "../../apicalls/BookingApi";
 
 
 
 
 const BuyTickets = ({ route }) => {
   const { username, role, eventDetails } = route.params;
-  // console.log(eventDetails);
+  console.log(username);
 
   const navigation = useNavigation();
 
@@ -394,23 +395,33 @@ const BuyTickets = ({ route }) => {
   //   };
   //   await createOrder(orderDetails);
   // };
+
+
   
   
 
   const handleNext = async () => {
-    try {
-      navigation.navigate('events/OrderDetails', { 
-        username: username, 
-        role: role, 
-        eventDetails: eventDetails,
-        totalPrice: totalPrice, 
-        totalQty: totalQty,
-        selectedDate: selectedDate,
-        quantities: quantities,
-        ticketDetails: ticketDetails
-      });
-    } catch (error) {
-      console.error("Failed to submit details:", error);
+    console.log(username);
+    for (const [ticketType, bookingQuantity] of Object.entries(quantities)) {
+      try {
+        const data = await validateBookingRequestAPI(username, eventDetails.eventId, bookingQuantity, ticketType);
+        console.log(`Validation successful for ${ticketType}:`, data);
+        navigation.navigate('events/OrderDetails', { 
+          username: username, 
+          role: role, 
+          eventDetails: eventDetails,
+          totalPrice: totalPrice, 
+          totalQty: totalQty,
+          selectedDate: selectedDate,
+          quantities: quantities,
+          ticketDetails: ticketDetails
+        });
+        
+        // Process successful validation if needed
+      } catch (error) {
+        console.error(`Error validating booking for ${ticketType}:`, error.message);
+        // Handle error if needed
+      }
     }
   };
   
