@@ -136,10 +136,10 @@ export const getFaqByEventId = async (req, res) => {
     const { eventId } = req.params;
 
     // CHECKS IF EXISTING FAQS IN DATABASE HAVE THE SAME EVENTID
-    const faq = await Faq.findOne({ eventId: eventId });
-    if (!faq) return res.status(404).json({ message: "Faq not found!" });
+    const faqs = await Faq.find({ eventId: eventId });
+    if (!faqs) return res.status(404).json({ message: "Faq not found!" });
 
-    res.status(200).json(faq);
+    res.status(200).json(faqs);
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
