@@ -12,6 +12,7 @@ import RoundBtn from "../../components/forms/RoundBtn";
 // import StyledInput from "../../components/StyledInput";
 // import TicketSelector from "../../components/TicketSelector";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { createBookingAndSendEmailAPI } from "../../apicalls/BookingApi";
 
 
 
@@ -21,8 +22,8 @@ const OrderDetails = ({ route }) => {
   const { username, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
   const { eventDetails, ticketDetails } = route.params;
 
-  console.log(eventDetails.eventOpen);
-  console.log(eventDetails.eventClose);
+  console.log(quantities);
+  console.log(ticketDetails);
 
 
   const navigation = useNavigation();
@@ -270,13 +271,22 @@ const OrderDetails = ({ route }) => {
     }
   
     console.log('Payment completed successfully');
+    try{
+      await createBooking(username, eventDetails.eventId, quantities, ticketDetails);
+      
+    } catch (error){
+      console.error("Failed to create one or more bookings:", error.message);
+      return;
+    }
+
     navigation.navigate('events/BookingComplete', { 
-        username: username, 
-        role: role, 
-        eventDetails: eventDetails,
-        selectedDate: selectedDate,
-        eventTime: eventTime
+      username: username, 
+      role: role, 
+      eventDetails: eventDetails,
+      selectedDate: selectedDate,
+      eventTime: eventTime
     });
+    
 
     // const orderDetails = {
     //   items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
@@ -297,6 +307,61 @@ const OrderDetails = ({ route }) => {
     }
   };
 
+  const createBooking = async (userId, eventId, quantities, ticketDetails) => {
+    try {
+      const bookingResults = await Promise.all(
+        Object.entries(quantities).map(async ([ticketType, bookingQuantity]) => {
+          // Find the corresponding ticket detail
+          const ticketDetail = ticketDetails.find(detail => detail.ticketType === ticketType);
+  
+          if (!ticketDetail) {
+            throw new Error(`Ticket details for type ${ticketType} not found.`);
+          }
+  
+          const { ticketPrice } = ticketDetail;
+  
+          return await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, ticketType, ticketPrice);
+        })
+      );
+  
+      console.log("All bookings created successfully:", bookingResults);
+      // Proceed to the next page or display a success message
+    } catch (error) {
+      console.error("Failed to create one or more bookings:", error.message);
+      // Show error message to the user
+    }
+
+    // try {
+    //   // Use Promise.all to send all API requests concurrently
+    //   const results = await Promise.all(
+    //     Object.entries(quantities).map(([ticketType, bookingQuantity]) => 
+    //       validateBookingRequestAPI(username, eventDetails.eventId, bookingQuantity, ticketType)
+    //     )
+    //   );
+      
+    //   // If all requests succeed, navigate to the next page
+    //   console.log("All validations succeeded:", results);
+    //   navigateToNextPage(); // Replace this with your actual navigation function
+      
+    // } catch (error) {
+    //   // If any request fails, display an error message
+    //   console.error("One or more validations failed:", error.message);
+    //   showErrorMessage("Failed to validate all bookings. Please try again."); // Replace this with your actual error handling
+    // }
+
+
+
+
+    // try {
+    //   const data = await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice);
+    //   // If successful, navigate to the next page or display a success message
+    //   console.log('Booking and email sent successfully:', data);
+    // } catch (error) {
+    //   // If there is an error, show an error message to the user
+    //   console.error('Failed to create booking:', error.message);
+    // }
+  }
+
   const handleNext = async () => {
     console.log(totalPrice);
     
@@ -305,6 +370,14 @@ const OrderDetails = ({ route }) => {
         await initializePaymentSheet();
       }
       else{
+        try{
+          await createBooking(username, eventDetails.eventId, quantities, ticketDetails);
+          
+        } catch (error){
+          console.error("Failed to create one or more bookings:", error.message);
+          return;
+        }
+    
         navigation.navigate('events/BookingComplete', { 
           username: username, 
           role: role, 

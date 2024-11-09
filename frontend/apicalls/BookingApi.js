@@ -27,5 +27,40 @@ export const validateBookingRequestAPI = async (userId, eventId, bookingQuantity
       throw error; // Re-throw to allow error handling by the caller
     }
   }
+
+
+  export const createBookingAndSendEmailAPI = async (userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice) => {
+    try {
+      const response = await fetch('http://localhost:5001/api/bookingRoute/createBookingAndSendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          eventId,
+          bookingQuantity,
+          eventTicketType,
+          eventTicketPrice,
+        }),
+      });
+  
+      if (!response.ok) {
+        // If the response is not successful, throw an error to handle in the catch block
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create booking');
+      }
+  
+      // If the response is successful, parse and return the result
+      const data = await response.json();
+      console.log('Booking created successfully:', data);
+      return data;
+    } catch (error) {
+      // Handle any errors (e.g., display an error message to the user)
+      console.error('Error creating booking:', error.message);
+      throw error; // rethrow the error if needed
+    }
+  }
+    
   
   
