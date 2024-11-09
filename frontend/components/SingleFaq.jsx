@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
-        gap: 10
-        
+        gap: 10,
+        position: "relative",
       },
       Qlogo: {
         // backgroundColor: "#fff",
@@ -51,6 +51,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 100,
+      },
+      Qtext:{
+        width: "100%",
+        maxWidth: "100%",
+        position: "relative"
       },
       ans:{
         // width: "100%",

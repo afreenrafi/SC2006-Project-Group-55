@@ -42,7 +42,7 @@ export const createEvent = async (req, res) => {
     eventOpen,
     eventClose,
     eventArtist,
-    userId
+    userId,
   } = req.body;
 
   try {
@@ -185,6 +185,46 @@ export const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found!" });
 
     res.status(200).json({ message: "Event deleted successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
+// BOOKMARKING/UNBOOKMARKING SPECIFIC EVENT OBJECT
+export const bookmarkEvent = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION BOOKMARKEVENT
+    const { userId, eventId } = req.params;
+
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    const user = await User.findOne({ userId: userId });
+    if (!user) return res.status(404).json({ message: "User not found!" });
+
+    // UPDATE USER OBJECT USERBOOKMARK ATTRIBUTE
+    // BOOKMARK IF EVENT HAS NOT BEEN BOOKMARK
+    // UNBOOKMARK IF EVENT HAS BEEN BOOKMARK
+
+    // CHECK IF EVENTID IS ALREADY IN userBookmark ARRAY
+    const bookmarkIndex = user.userBookmark.indexOf(eventId);
+
+    if (bookmarkIndex === -1) {
+      // BOOKMARK EVENT IF NOT PRESENT IN ARRAY
+      user.userBookmark.push(eventId);
+    } else {
+      // UNBOOKMARK EVENT IF ALREADY PRESENT IN ARRAY
+      user.userBookmark.splice(bookmarkIndex, 1);
+    }
+
+    // SAVE UPDATED USER OBJECT
+    await user.save();
+
+    res
+      .status(200)
+      .json({
+        message:
+          bookmarkIndex === -1 ? "Event bookmarked!" : "Event unbookmarked!",
+        userBookmark: user.userBookmark,
+      });
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error Occurred!" });
   }

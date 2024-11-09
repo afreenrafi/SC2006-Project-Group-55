@@ -7,6 +7,7 @@ import {
   getAllFaqs,
   getFaqItemById,
   getFaqById,
+  getFaqByEventId,
   updateFaqItem,
   deleteFaqItem,
 } from "../controllers/faqController.js";
@@ -23,7 +24,9 @@ router.post("/faqitem", createFaqItemAnswer);
 router.get("/faqitem", getAllFaqItems);
 router.get("/faq", getAllFaqs);
 router.get("/faqitem/:faqItemId", getFaqItemById);
+router.get("/faq/event/:eventId", getFaqByEventId);
 router.get("/faq/:faqId", getFaqById);
+
 
 // UPDATE
 router.put("/faqitem/:faqItemId", updateFaqItem);

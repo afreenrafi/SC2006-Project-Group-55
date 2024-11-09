@@ -7,9 +7,9 @@ export const AppProvider = ({ children }) => {
 
   const toggleBookmark = (event) => {
     setSavedEvents((prevSavedEvents) => {
-      if (prevSavedEvents.some((e) => e.id === event.id)) {
+      if (prevSavedEvents.some((e) => e.eventId === event.eventId)) {
         // Remove event if already saved
-        return prevSavedEvents.filter((e) => e.id !== event.id);
+        return prevSavedEvents.filter((e) => e.eventId !== event.eventId);
       } else {
         // Add new event
         return [...prevSavedEvents, event];

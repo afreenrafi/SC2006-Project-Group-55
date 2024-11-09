@@ -22,4 +22,5 @@ const router = express.Router();
 router.post("/validateBookingRequest", validateBookingRequest);
 router.post("/createBookingAndSendEmail", createBookingAndSendEmail);
 
+
 export default router;

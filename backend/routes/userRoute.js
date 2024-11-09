@@ -33,7 +33,7 @@ const upload = multer({ storage: storage });
 // router.post("/register", upload.single("eventPermitId"), createUser);
 // Use the upload middleware in the registration route
 router.post("/register", upload.single("eventPermitId"), async (req, res) => {
-  const { userId, userName, userPassword, userEmail, userDob, userRole, organiserEventPermitId, artistVerified } = req.body;
+  const { userId, userName, userPassword, userEmail, userAge, userRole, organiserEventPermitId, artistVerified } = req.body;
   try {
     switch (userRole) {
       case "Public":
@@ -42,7 +42,7 @@ router.post("/register", upload.single("eventPermitId"), async (req, res) => {
           userName: userName,
           userPassword: userPassword,
           userEmail: userEmail,
-          userDob: userDob,
+          userAge: userAge,
           userRole: userRole,
         });
         break;
@@ -53,7 +53,7 @@ router.post("/register", upload.single("eventPermitId"), async (req, res) => {
           userName: userName,
           userPassword: userPassword,
           userEmail: userEmail,
-          userDob: userDob,
+          userAge: userAge,
           userRole: userRole,
           organiserEventPermitId: req.file ? req.file.path : null,
         });
@@ -65,7 +65,7 @@ router.post("/register", upload.single("eventPermitId"), async (req, res) => {
           userName: userName,
           userPassword: userPassword,
           userEmail: userEmail,
-          userDob: userDob,
+          userAge: userAge,
           userRole: userRole,
           artistVerified: artistVerified,
         });
@@ -86,6 +86,7 @@ router.post("/register", upload.single("eventPermitId"), async (req, res) => {
 
 router.get("/all", getAllUsers);
 router.get("/:userId", getUserById);
+
 
 // UPDATE
 // ENABLE THIS ONCE ISAUTH FROM AUTHMIDDLEWARE.JS IS WORKING FINE

@@ -18,12 +18,13 @@ import { FontAwesome5 } from "@expo/vector-icons";
 
 
 const OrderDetails = ({ route }) => {
-  const { email, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
+  const { username, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
+  const { eventDetails, ticketDetails } = route.params;
 
 
   const navigation = useNavigation();
 
-  const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
+  // const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [loading, setLoading] = useState(true);            // State to manage loading status
   const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
 //   const [selectedDate, setSelectedDate] = useState(null); 
@@ -41,8 +42,8 @@ const OrderDetails = ({ route }) => {
   useEffect(() => {
     const getEventDetails = async () => {
       try {
-        const details = await fetchEventDetails();  // Fetch event details
-        setEventDetails(details);                  // Set the fetched details to state
+        // const details = await fetchEventDetails();  // Fetch event details
+        // setEventDetails(details);                  // Set the fetched details to state
 
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
@@ -294,8 +295,8 @@ const OrderDetails = ({ route }) => {
 
 
   return (
-    // <StripeProvider 
-    // publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
+    <StripeProvider 
+    publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
     <View style={{ flex:1 }}>
       <SafeAreaView style={styles.bgColour}>
         <PageHeader title={"Order Details"} onPress={()=>navigation.goBack()}/>
@@ -307,7 +308,7 @@ const OrderDetails = ({ route }) => {
           <SafeAreaView style={[styles.container, {flex: 1}]} >
           <View style={styles.eventSummary}>
                 <View style={styles.selectCont}>
-                    <Image style={styles.selectBg} source={{ uri: eventDetails.eventPic }} />
+                    <Image style={styles.selectBg} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} />
                     <View style={styles.selectView}>
                         <StyledText size={20} textContent={eventDetails.eventName} fontColor="#fff" fweight="bold"/>                        
                         <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff" />
@@ -327,7 +328,7 @@ const OrderDetails = ({ route }) => {
                     <View style={styles.divTitle}>
                         <StyledText size={26} textContent="Order Summary" alignment="left"/>
                     </View>
-                    {eventDetails.ticketOptions.map((option) => {
+                    {ticketDetails.map((option) => {
                         const qty = quantities[option.ticketType];
                         if (qty > 0) {
                             return (
@@ -379,7 +380,7 @@ const OrderDetails = ({ route }) => {
       
 
     </View>
-    // </StripeProvider>
+    </StripeProvider>
   );
 };
 
@@ -516,6 +517,7 @@ const styles = StyleSheet.create({
       },
       selectBg: {
         height: "100%",
+        width: "100%"
       },
       selectView: {
         width: "100%",

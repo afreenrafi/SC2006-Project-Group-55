@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TextInput, View, Text, StyleSheet } from 'react-native';
 import * as Font from 'expo-font';
 
-const StyledInput = ({ label, data, onChangeText, type="string", pwd="false", edit="true" }) => {
+const StyledInput = ({ label, data, onChangeText, type="string", pwd=false, edit=true }) => {
   // const [text, onChangeText] = React.useState({data});
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -17,7 +17,7 @@ const StyledInput = ({ label, data, onChangeText, type="string", pwd="false", ed
         onChangeText={onChangeText}
         keyboardType={type}
         secureTextEntry={pwd}
-        editable={edit}
+        // editable={edit}
         autoCapitalize='none'
       />
     </View>

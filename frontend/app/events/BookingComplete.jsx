@@ -9,13 +9,13 @@ import RoundBtn from '../../components/forms/RoundBtn';
 
 const BookingComplete = ({ route }) => {
     const navigation = useNavigation();
-    const { email, role, eventDetails, selectedDate } = route.params;
+    const { username, role, eventDetails, selectedDate } = route.params;
     const [isQrModalVisible, setQrModalVisible] = useState(false);
 
     const handleNext = async () => {
         try {
             navigation.navigate('tabs', { 
-            email: email, 
+            username: username, 
             role: role, 
             // eventDetails: eventDetails,
             // selectedDate: selectedDate

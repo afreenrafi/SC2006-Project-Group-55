@@ -14,13 +14,19 @@ const SavedEvents = () => {
         </View>
       ) : (
         savedEvents.map((event) => (
-          <View key={event.id} style={styles.savedEventCard}>
-            <Image source={event.image} style={styles.eventImage} />
+          <View key={event.eventId} style={styles.savedEventCard}>
+            <Image source={event.eventPic ? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
             <View style={styles.eventDetailsContainer}>
-              <Text style={styles.eventType}>{event.type}</Text>
-              <Text style={styles.eventName}>{event.name}</Text>
-              <Text style={styles.eventDate}>{event.date}</Text>
-              <Text style={styles.eventLocation}>{event.location}</Text>
+              <Text style={styles.eventType}>{event.eventGenre}</Text>
+              <Text style={styles.eventName}>{event.eventName}</Text>
+              <Text style={styles.eventDate}>{
+                new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric"
+                }).format(new Date(event.eventStartDate))}
+            </Text>
+              <Text style={styles.eventLocation}>{event.eventLocation}</Text>
             </View>
           </View>
         ))
