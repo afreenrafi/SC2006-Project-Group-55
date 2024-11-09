@@ -1,115 +1,94 @@
-import { View, SafeAreaView, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, SafeAreaView, Alert, StyleSheet, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
-import StyledInput from "../../components/forms/StyledInput";
 import RoundBtn from "../../components/forms/RoundBtn";
-import Entypo from '@expo/vector-icons/Entypo';
-import SelectInput from "../../components/forms/SelectInput";
-
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 
 const OrgValidation = ({ route }) => {
   const navigation = useNavigation();
+  const [imageUri, setImageUri] = useState(null);
+  const [base64Image, setBase64Image] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  const { email, role } = route.params;
+  // // Dummy API call that simulates submitting the user details
+  // const submitAccountDetails = async (email, username, role, password) => {
+  //   return new Promise((resolve) => {
+  //     setTimeout(() => {
+  //       console.log("Submitting the following data:");
+  //       console.log({ email, username, role, password });  
+  //       resolve({ 
+  //         email, role
+  //       });  
+  //     }, 2000);  
+  //   });
+  // };
 
-  const [Username, setUsername] = useState('');
-  const [usernameError, setUsernameError] = useState(""); 
-
-  const [Role, setRole] = useState('General Public');
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const [Password, setPassword] = useState('');
-  const [pwdError, setPwdError] = useState(""); 
-
-  const [rePassword, setRePassword] = useState('');
-  const [rePwdError, setRePwdError] = useState(""); 
-
-
-
-  const handleUsername = (text) => {
-    const validUsername = text.replace(/[^a-zA-Z0-9_]/g, '');  // Remove any character that isn't a letter, number, or underscore
-    setUsername(validUsername);  // Update the state with the valid username
-  };
-
-  const handleRoleSelect = (selectedRole) => {
-    setRole(selectedRole);  // Set the gender value based on the selection
-    setModalVisible(false);     // Close the modal
-  };
-
-  const handlePassword = (text) => {
-    const passwordRegex = /^(?=.*[!@#$%^&*])(?=.*\d).{8,}$/;  // At least 1 special character, 1 number, and minimum 8 characters
-    if (!passwordRegex.test(text)) {
-      setPwdError('Password must have at least 8 characters, 1 special character, and 1 number.');
-    } else {
-      setPwdError('');  // Clear the error if the password is valid
+  const handleImageUpload = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  
+    if (permissionResult.granted === false) {
+      alert("You've refused to allow this app to access your photos!");
+      return;
     }
-    setPassword(text);
-
-    if (rePassword !== '' && text !== rePassword) {
-      setRePwdError('Passwords do not match');
-    } else {
-      setRePwdError('');
-    }
-  };
-
-  const handleRePassword = (text) => {
-    setRePassword(text);
-    if (text !== Password) {
-      setRePwdError('Passwords do not match');
-    } else {
-      setRePwdError('');
-    }
-  }
-
-
-  // Dummy API call that simulates submitting the user details
-  const submitAccountDetails = async (email, username, role, password) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("Submitting the following data:");
-        console.log({ email, username, role, password });  
-        resolve({ 
-          email, role
-        });  
-      }, 2000);  
+  
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
     });
+  
+    if (!result.canceled) {
+      setImageUri(result.uri);
+      const base64 = await FileSystem.readAsStringAsync(result.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      setBase64Image(base64);  // Store the base64 encoded image
+      console.log("Image converted to base64:", base64);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!base64Image) {
+      Alert.alert("Image Required", "Please select an image to upload.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/authRoute/uploadEventPermit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          organiserEventPermitId: base64Image, // Send the image as base64
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Upload result:", result);
+        Alert.alert("Success", "Event permit uploaded successfully.");
+        setUploadSuccess(true); // Set success to true on successful upload
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+      Alert.alert("Upload Failed", "There was an error uploading the image.");
+    }
   };
 
 
-  const handleNext = async () => {
-    try{
-      if (Username === '') {
-        setUsernameError('Username cannot be empty');
-        setPwdError('');
-        setRePwdError('');
-      } 
-      else if(Password === ''){
-        setPwdError('Password cannot be empty');
-        setUsernameError('');  
-        setRePwdError('');
-      }
-      else if(rePassword === ''){
-        setRePwdError('Password cannot be empty');
-        setUsernameError('');  
-        setPwdError('');
-      }
-      else {
-        setUsernameError('');  
-        setPwdError('');
-        setRePwdError('');
-        console.log("Proceeding with:", Username, Role, Password);
-        const result = await submitAccountDetails(email, Username, Role, Password);
-        console.log("Account details submitted:", result);
-
-        //
-          navigation.navigate('tabs', { email: result.email, role: result.role });
-        
-      }
-
-    } catch (error){
-      console.error("Failed to submit account details:", error);
+  const handleNext = () => {
+    if (uploadSuccess) {
+      console.log("Navigating to the next screen.");
+      navigation.navigate('tabs');
+    } else {
+      Alert.alert("Upload Required", "Please upload an event permit before proceeding.");
     }
+  };
     
     // try {
     //   const result = await submitUserDetails();  // Simulate sending data
@@ -118,75 +97,36 @@ const OrgValidation = ({ route }) => {
     // } catch (error) {
     //   console.error("Failed to submit details:", error);
     // }
-  }
 
-
-
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <SafeAreaView style={styles.container}>
-        <StyledText size={30} textContent="Organisation Validation" />
-        <View style={styles.inputs}>
-          <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
-          {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <SafeAreaView style={styles.container}>
+          <StyledText size={30} textContent="Organiser Verification" />
           
-          <SelectInput label={"Role"} data={Role} onPress={() => setModalVisible(true)}/>
-
-          <StyledInput label={"Password"} pwd="true" data={Password} onChangeText={handlePassword}/>
-          {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
-          <View style={styles.bullets}>
-            <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 8 characters" fontColor="#8B8B8B"/>
+          <View style={styles.imageUploadContainer}>
+            <TouchableOpacity style={styles.imageUpload} onPress={handleImageUpload}>
+              {imageUri ? (
+                <Image source={{ uri: imageUri }} style={styles.uploadedImage} />
+              ) : (
+                <StyledText size={18} textContent="Image upload" />
+              )}
+            </TouchableOpacity>
           </View>
-          <View style={styles.bullets}>
-            <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 special character" fontColor="#8B8B8B"/>
+  
+          <TouchableOpacity style={styles.uploadButton} onPress={uploadImage}>
+            <Text style={styles.uploadButtonText}>Upload Event Permit</Text>
+          </TouchableOpacity>
+  
+          <View style={styles.btnContainer}>
+            <RoundBtn onPress={handleNext} text="Next" />
           </View>
-          <View style={styles.bullets}>
-            <Entypo name="dot-single" size={24} color="#8B8B8B" />
-            <StyledText size={18} textContent="must include at least 1 number" fontColor="#8B8B8B"/>
-          </View>
-
-          <StyledInput label={"Re-enter Password"} pwd="true" data={rePassword} onChangeText={handleRePassword}/>
-          {rePwdError ? <StyledText size={16} textContent={rePwdError} fontColor="#CA3550" /> : null}
-          {/* <StyledInput label={"Email"} data={email} onChangeText={setEmail}/> */}
-          
-        </View>
-        <View style={styles.btnContainer}>
-          <RoundBtn onPress={handleNext}/>
-        </View>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}  // Close the modal on request
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalView}>
-              <StyledText size={24} textContent="Select Gender" />
-              <View style={styles.modalOptions}>
-                <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("General Public")}>
-                  {/* <Text style={styles.modalText}>Male</Text> */}
-                  <StyledText size={20} textContent="General Public" underline="true"/>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.modalItem} onPress={() => handleRoleSelect("Organiser")}>
-                  {/* <Text style={styles.modalText}>Female</Text> */}
-                  <StyledText size={20} textContent="Organiser" underline="true"/>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-      </SafeAreaView>
-    </KeyboardAvoidingView>
-  );
-};
-
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    );
+  };
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -194,51 +134,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  inputs: {
+  imageUploadContainer: {
+    width: "90%",
+    alignItems: "center",
+    marginVertical: 20,
+    backgroundColor: "#FFF",
+  },
+  imageUpload: {
     width: "100%",
-    paddingVertical: 40,
-    paddingHorizontal: "5%",
+    height: 150,
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadedImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  uploadButton: {
+    backgroundColor: "#FFF",
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginVertical: 10,
+    width: '50%',
+  },
+  uploadButtonText: {
+    color: "#000",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   btnContainer:{
     width: "100%",
     paddingHorizontal: "5%",
+    marginVertical: 10,
   },
-  bullets: {
-    display: 'flex',
-    flexDirection: 'row'
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",  // Semi-transparent background
-  },
-  modalView: {
-    width: 300,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalOptions: {
-    alignItems: "center",
-    paddingVertical: 30,
-  },
-  modalItem: {
-    paddingVertical: 10,
-    width: "100%",
-    alignItems: "center",
-  },
-  modalText: {
-    fontSize: 18,
-    color: "#333",
-  },
-
 });
 
 export default OrgValidation;
