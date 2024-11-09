@@ -70,6 +70,7 @@ export const validateBookingRequest = async (req, res) => {
     if (availableTickets < bookingQuantity) {
       return res.status(400).json({
         message: "Selected Event Ticket does not have enough tickets available!",
+        data: { availableTickets }
       });
     }
 
