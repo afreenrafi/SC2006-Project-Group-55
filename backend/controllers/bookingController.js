@@ -87,19 +87,27 @@ export const validateBookingRequest = async (req, res) => {
 // FUNCTION TO CREATE BOOKING AND SEND CONFIRMATION EMAIL
 export const createBookingAndSendEmail = async (req, res) => {
   try {
-    const { userId, eventId, bookingQuantity, eventTicketType } = req.body;
+    const { userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice } = req.body;
 
     // Find the user by userId
     const user = await User.findOne({ userId: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
 
-    // Find the event ticket by eventTicketId (associated with the eventId and eventTicketType)
+    // Find the event ticket by eventId and eventTicketType
     const eventTicket = await EventTicket.findOne({
       eventId: eventId,
-      eventTicketType: eventTicketType,  // Ensure the ticket type matches
+      eventTicketType: eventTicketType, // Ensure the ticket type matches
     });
 
     if (!eventTicket) {
       return res.status(404).json({ message: "Event ticket not found." });
+    }
+
+    // Check if the provided eventTicketPrice matches the stored price
+    if (eventTicket.eventTicketPrice !== eventTicketPrice) {
+      return res.status(400).json({ message: "Event ticket price mismatch." });
     }
 
     // Check if the quantity to be booked is available
@@ -112,9 +120,10 @@ export const createBookingAndSendEmail = async (req, res) => {
       bookingName: user.userName,
       bookingEmail: user.userEmail,
       bookingQuantity: bookingQuantity,
-      eventId: eventId,  // Store eventId from the request body
-      eventTicketId: eventTicket.eventTicketId,  // Store event ticket ID from the EventTicket
-      userId: userId,  // Store userId from the request body
+      eventId: eventId, // Store eventId from the request body
+      eventTicketId: eventTicket.eventTicketId, // Store event ticket ID from the EventTicket
+      userId: userId, // Store userId from the request body
+      eventTicketPrice: eventTicketPrice, // Include the ticket price in the booking
     });
 
     // Save the new booking to the database
@@ -129,7 +138,7 @@ export const createBookingAndSendEmail = async (req, res) => {
       newBooking.bookingName,
       newBooking.bookingEmail,
       bookingQuantity,
-      eventTicket.eventTicketType,  // Send the ticket type in the confirmation email
+      eventTicket.eventTicketType, // Send the ticket type in the confirmation email
       eventTicket.eventId // Send the eventId for context in the email
     );
 
