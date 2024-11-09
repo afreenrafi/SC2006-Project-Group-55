@@ -65,15 +65,15 @@ export const loginUser = async (userId, userPassword) => {
 
         const data = await response.json();
         if (response.ok) {
-        console.log("Login successful:", data);
-        return { success: true, sessionToken: data.sessionToken };
-        } else {
-        console.log("Login failed:", data.message || "Unknown error");
-        return { success: false, error: data.message || "Unknown error" };
+          console.log("Login successful:", data);
+          return { success: true, sessionToken: data.sessionToken, state:"success" };
+        } else if(response.status == 404 || response.status == 401){
+          console.log("Login failed:", data.message || "Unknown error");
+          return { success: false, error: data.message || "Unknown error", state:"invalid" };
         }
     } catch (error) {
         console.log("Error:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: error.message, state:"failed" };
     }
 };
 

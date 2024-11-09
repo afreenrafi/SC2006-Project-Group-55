@@ -86,14 +86,17 @@ const LoginAccount = ({ route }) => {
     }
     try{
       const result = await loginUser(Username, Password);
-      if(result.success){
+      if(result.state == "success"){
         const assignRole = await fetchUserById(Username);
         setRole(assignRole.userRole);
         navigation.navigate('tabs', { username: Username, role: assignRole.userRole });
         setFormError('');
       }
-      else{
+      else if(result.state == "invalid"){
         setFormError('Your username/password is incorrect or does not exist.');
+      }
+      else if(result.state == "failed"){
+        setFormError('Network error. Please try again later.');
       }
     } catch( error ){
         console.log("Failed to login user:", error);
@@ -121,7 +124,7 @@ const LoginAccount = ({ route }) => {
           <StyledInput label={"Password"} pwd={true} data={Password} onChangeText={handlePassword}/>
           {pwdError ? <StyledText size={16} textContent={pwdError} fontColor="#CA3550" /> : null}
 
-          {formError ? <StyledText size={16} textContent={formError} fontColor="#CA3550" /> : null}
+          {formError ? <StyledText size={16} textContent={formError} fontColor="#CA3550" alignment="left"/> : null}
           
         </View>
         <View style={styles.btnContainer}>
