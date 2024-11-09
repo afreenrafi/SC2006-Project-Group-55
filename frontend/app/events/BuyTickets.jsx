@@ -402,28 +402,53 @@ const BuyTickets = ({ route }) => {
 
   const handleNext = async () => {
     console.log(username);
-    for (const [ticketType, bookingQuantity] of Object.entries(quantities)) {
-      try {
-        const data = await validateBookingRequestAPI(username, eventDetails.eventId, bookingQuantity, ticketType);
-        console.log(`Validation successful for ${ticketType}:`, data);
-        navigation.navigate('events/OrderDetails', { 
-          username: username, 
-          role: role, 
-          eventDetails: eventDetails,
-          totalPrice: totalPrice, 
-          totalQty: totalQty,
-          selectedDate: selectedDate,
-          quantities: quantities,
-          ticketDetails: ticketDetails
-        });
-        
-        // Process successful validation if needed
-      } catch (error) {
-        console.error(`Error validating booking for ${ticketType}:`, error.message);
-        // Handle error if needed
-      }
+    try {
+      // Use Promise.all to send all API requests concurrently
+      const results = await Promise.all(
+        Object.entries(quantities).map(([ticketType, bookingQuantity]) => 
+          validateBookingRequestAPI(username, eventDetails.eventId, bookingQuantity, ticketType)
+        )
+      );
+      
+      // If all requests succeed, navigate to the next page
+      console.log("All validations succeeded:", results);
+      navigateToNextPage(); // Replace this with your actual navigation function
+      
+    } catch (error) {
+      // If any request fails, display an error message
+      console.error("One or more validations failed:", error.message);
+      showErrorMessage("Failed to validate all bookings. Please try again."); // Replace this with your actual error handling
     }
+    
+    
+
+    // navigation.navigate('events/OrderDetails', { 
+    //   username: username, 
+    //   role: role, 
+    //   eventDetails: eventDetails,
+    //   totalPrice: totalPrice, 
+    //   totalQty: totalQty,
+    //   selectedDate: selectedDate,
+    //   quantities: quantities,
+    //   ticketDetails: ticketDetails
+    // });
+    
   };
+
+  const navigateToNextPage = () => {
+    navigation.navigate('events/OrderDetails', { 
+      username: username, 
+      role: role, 
+      eventDetails: eventDetails,
+      totalPrice: totalPrice, 
+      totalQty: totalQty,
+      selectedDate: selectedDate,
+      quantities: quantities,
+      ticketDetails: ticketDetails
+    });
+  }
+
+
   
 
   // if (loading) {
