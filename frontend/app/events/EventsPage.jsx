@@ -4,7 +4,7 @@ import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import PageHeader from "../../components/events/PageHeader";
 // import OrgDisplay from "../../components/OrgDisplay";
-import SingleFaq from "../../components/SingleFaq";
+import SingleFaq from "../../components/events/SingleFaq";
 import EventHeader from "../../components/events/EventHeader";
 import RoundBtn from "../../components/forms/RoundBtn";
 import { fetchEventById, fetchFaqByEventId, fetchFaqItemById } from "../../apicalls/EventApi";
@@ -221,6 +221,7 @@ const EventsPage = ({ route }) => {
                         <StyledText size={16} textContent={eventDetails.eventArtist[0] + " & more..."} alignment="left" fontColor="#8B8B8B"/>
                         
                     </View>
+                    {faqDetails.length != 0 && 
                     <View style={styles.tabOptions}>
                         <TouchableOpacity>
                         <StyledText size={16} textContent="FAQs" alignment="left" fontColor="#000000"/>
@@ -228,36 +229,45 @@ const EventsPage = ({ route }) => {
                         {/* <TouchableOpacity>
                         <StyledText size={16} textContent="Posts" alignment="left" fontColor="#8B8B8B"/>
                         </TouchableOpacity> */}
-                    </View>
+                    </View>}
+
+                    {faqDetails.length != 0 && 
                     <View style={styles.faqs}>
                         <StyledText size={20} textContent="Frequently Asked Questions" />
                         {faqDetails.map((faq)=>{
-                          return <View key={faq.questionContent} style={styles.singleFaq}>
-                          <View style={styles.qns}>
-                              <View style={styles.Qlogo}>
-                                  <StyledText size={25} textContent="Q" />
-                              </View>
-                              <View style={styles.Qtext}>
-                                  <StyledText size={14} textContent={faq.questionContent} alignment="left"/>
-                              </View>
-                          </View>
-                          <View style={styles.ans}>
-                              <Image style={styles.faqPic} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}/>
-                              <View style={styles.Atext}>
-                                  <View style={styles.orgDetails}>
-                                      <StyledText size={12} textContent={eventDetails.eventName} fweight='bold' alignment="left"/>
-                                      <StyledText size={12} textContent="Organiser" fontColor="#8B8B8B" alignment="left"/>
-                                  </View>
-                                  <View style={styles.comment}>
-                                      <StyledText size={14} textContent={faq.answerContent} alignment="left"/>
-                                  </View>
-                              </View>
-                          </View>
-                      </View>
+                          return <SingleFaq key={faq.questionContent} 
+                          eventQns={faq.questionContent}
+                          eventOrgPic={eventDetails.eventPic ? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}
+                          eventOrg={eventDetails.eventName}
+                          eventAns={faq.answerContent} />
+                      //     return <View key={faq.questionContent} style={styles.singleFaq}>
+                      //     <View style={styles.qns}>
+                      //         <View style={styles.Qlogo}>
+                      //             <StyledText size={25} textContent="Q" />
+                      //         </View>
+                      //         <View style={styles.Qtext}>
+                      //             <StyledText size={14} textContent={faq.questionContent} alignment="left"/>
+                      //         </View>
+                      //     </View>
+                      //     <View style={styles.ans}>
+                      //         <Image style={styles.faqPic} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}/>
+                      //         <View style={styles.Atext}>
+                      //             <View style={styles.orgDetails}>
+                      //                 <StyledText size={12} textContent={eventDetails.eventName} fweight='bold' alignment="left"/>
+                      //                 <StyledText size={12} textContent="Organiser" fontColor="#8B8B8B" alignment="left"/>
+                      //             </View>
+                      //             <View style={styles.comment}>
+                      //                 <StyledText size={14} textContent={faq.answerContent} alignment="left"/>
+                      //             </View>
+                      //         </View>
+                      //     </View>
+                      // </View>
                         })
                         }
                         
-                    </View>
+                    </View>}
+
+
                 </View>
             </View>
           </SafeAreaView>
@@ -418,62 +428,62 @@ const styles = StyleSheet.create({
     position: "relative",
     opacity: 1,
   },
-  singleFaq: {
-    width: "100%",
-    gap: 5,
-    paddingVertical: 20,
-  },
-  qns: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    position: "relative",
-  },
-  Qlogo: {
-    // backgroundColor: "#fff",
-    // height: 45,
-    width: 30,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 100,
-  },
-  Qtext:{
-    width: "100%",
-    maxWidth: "100%",
-    position: "relative",
-    flex: 1
-  },
-  ans:{
-    // width: "100%",
-    display: "flex",
-    flexDirection: "row",
-    gap: 10,
-    maxWidth: "100%",
-    position: "relative",
-  },
-  Atext: {
-    flex: 1
-  },
-  orgDetails:{
-    flexDirection: "row",
-    gap: 20,
-    flex: 1
-  },
-  faqPic: {
-    height: 30,
-    width: 30,
-    borderRadius: 50,
-    padding: 0,
-    margin: 0,
-    opacity: 1,
-    position: "relative",
-  },
-  comment: {
-    position: "relative",
-    // width: "100%",
-  },
+  // singleFaq: {
+  //   width: "100%",
+  //   gap: 5,
+  //   paddingVertical: 20,
+  // },
+  // qns: {
+  //   width: "100%",
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   gap: 10,
+  //   position: "relative",
+  // },
+  // Qlogo: {
+  //   // backgroundColor: "#fff",
+  //   // height: 45,
+  //   width: 30,
+  //   display: "flex",
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   borderRadius: 100,
+  // },
+  // Qtext:{
+  //   width: "100%",
+  //   maxWidth: "100%",
+  //   position: "relative",
+  //   flex: 1
+  // },
+  // ans:{
+  //   // width: "100%",
+  //   display: "flex",
+  //   flexDirection: "row",
+  //   gap: 10,
+  //   maxWidth: "100%",
+  //   position: "relative",
+  // },
+  // Atext: {
+  //   flex: 1
+  // },
+  // orgDetails:{
+  //   flexDirection: "row",
+  //   gap: 20,
+  //   flex: 1
+  // },
+  // faqPic: {
+  //   height: 30,
+  //   width: 30,
+  //   borderRadius: 50,
+  //   padding: 0,
+  //   margin: 0,
+  //   opacity: 1,
+  //   position: "relative",
+  // },
+  // comment: {
+  //   position: "relative",
+  //   // width: "100%",
+  // },
 
 
 

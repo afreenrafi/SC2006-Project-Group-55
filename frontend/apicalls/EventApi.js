@@ -138,6 +138,39 @@ export const fetchFaqItemById = async (faqItemId) => {
   }
 };
 
+// Function to fetch an FAQ item by faqItemId
+export const fetchTicketCatByTixId = async (tixItemId) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/eventTicketRoute/${tixItemId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok){
+      const tixItem = await response.json();
+      return {result: tixItem, state: "success"};
+    }
+    else if(response.status == 400){
+      console.log("Will be updated soon", response.message);
+      return { state: 'upcoming' };
+    }
+    else if(response.status == 404){
+      console.log("No event ticket item found:", response.message);
+      return { state: 'empty' };
+    }
+    else if (response.status == 500) {
+      console.log('Network error, please try again later');
+      return { state: 'unstable' };
+    }
+
+  } catch (error) {
+    console.error('Error fetching FAQ item:', error);
+    throw new Error('Failed to fetch FAQ item');
+    // return null;
+  }
+};
 
 
 

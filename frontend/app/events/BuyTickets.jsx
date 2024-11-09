@@ -1,22 +1,25 @@
-import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView, Image } from "react-native";
 import React, { useState, useEffect } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 // import { useStripe } from '@stripe/stripe-react-native';
 
 import PageHeader from "../../components/events/PageHeader";
-import OrgDisplay from "../../components/OrgDisplay";
+// import OrgDisplay from "../../components/OrgDisplay";
 import EventHeader from "../../components/events/EventHeader";
 import RoundBtn from "../../components/forms/RoundBtn";
 import SingleDate from "../../components/SingleDate";
 import StyledInput from "../../components/forms/StyledInput";
 import TicketSelector from "../../components/events/TicketSelector";
 
+import { fetchTicketCatByTixId } from "../../apicalls/EventApi";
+
 
 
 
 const BuyTickets = ({ route }) => {
   const { username, role, eventDetails } = route.params;
+  // console.log(eventDetails);
 
   const navigation = useNavigation();
 
@@ -35,6 +38,7 @@ const BuyTickets = ({ route }) => {
   const [totalPrice, setTotalPrice] = useState(0);
 
   const [dateArray, setDateArr] = useState([]);
+  const [ticketDetails, setTicketDetails] = useState(null)
 
   // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -50,7 +54,7 @@ const BuyTickets = ({ route }) => {
 
       // Update total quantity and total price
       const updatedTotalQty = Object.values(updatedQuantities).reduce((acc, val) => acc + val, 0);
-      const updatedTotalPrice = mockEventDetails.ticketOptions.reduce((acc, option) => {
+      const updatedTotalPrice = ticketDetails.reduce((acc, option) => {
         const quantity = updatedQuantities[option.ticketType] || 0;
         return acc + quantity * option.ticketPrice;
       }, 0);
@@ -121,19 +125,73 @@ const BuyTickets = ({ route }) => {
   useEffect(() => {
     const fetchDateArray = async () => {
       const genDateArr = await generateEventDates(eventDetails.eventStartDate, eventDetails.eventEndDate);
-      setMockEvent(await fetchEventDetails());
       setDateArr(genDateArr);
+  
+      const ticketCatArr = eventDetails.eventTicket;
+      const tixCatArr = await fetchAllTicketCategories(ticketCatArr);
+      console.log(tixCatArr);
+      setTicketDetails(tixCatArr);
+  
+      // Initialize quantities object for each ticket type
+      if (tixCatArr) {
+        const initialQuantities = {};
+        tixCatArr.forEach(option => {
+          initialQuantities[option.ticketType] = 0;
+        });
+        setQuantities(initialQuantities);
+      }
+  
+      // Set the initial selected date to the first date in eventDates
+      if (genDateArr && genDateArr.length > 0) {
+        const firstDate = `${genDateArr[0].day}-${genDateArr[0].month}`;
+        setSelectedDate(firstDate);
+      }
     };
+  
     fetchDateArray();
   }, [eventDetails]);
+  
 
-  useEffect(() => {
-    const fetchMock = async () => {
-      const mockData = await fetchEventDetails();
-      setMockEvent(mockData);
-    };
-    fetchMock();
-  }, [mockEventDetails]);
+  // useEffect(() => {
+  //   const fetchDateArray = async () => {
+  //     const genDateArr = await generateEventDates(eventDetails.eventStartDate, eventDetails.eventEndDate);
+  //     // setMockEvent(await fetchEventDetails());
+  //     setDateArr(genDateArr);
+
+  //     const ticketCatArr = eventDetails.eventTicket;
+      
+  //     const tixCatArr = await fetchAllTicketCategories(eventDetails.eventTicket);
+  //     console.log(tixCatArr);
+  //     setTicketDetails(tixCatArr);
+
+
+  //   };
+  //   // const fetchTicketArray = async () => {
+
+  //   // }
+
+  //   fetchDateArray();
+  //   // Initialize quantities object for each ticket type
+  //   const initialQuantities = {};
+  //   ticketDetails.forEach(option => {
+  //     initialQuantities[option.ticketType] = 0;
+  //   });
+  //   setQuantities(initialQuantities);
+
+  //   // Set the initial selected date to the first date in eventDates
+  //   if (dateArray && dateArray.length > 0) {
+  //       const firstDate = `${dateArray[0].day}-${dateArray[0].month}`;
+  //       setSelectedDate(firstDate);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   const fetchMock = async () => {
+  //     const mockData = await fetchEventDetails();
+  //     setMockEvent(mockData);
+  //   };
+  //   fetchMock();
+  // }, [mockEventDetails]);
   
 
   
@@ -141,32 +199,32 @@ const BuyTickets = ({ route }) => {
 
   // useEffect(() => {
     
-    // const getEventDetails = async () => {
-    //   try {
-    //     const details = await fetchEventDetails();  // Fetch event details
-    //     setEventDetails(details);                  // Set the fetched details to state
+  //   const getEventDetails = async () => {
+  //     try {
+  //       const details = await fetchEventDetails();  // Fetch event details
+  //       setEventDetails(details);                  // Set the fetched details to state
 
-    //     // Initialize quantities object for each ticket type
-    //     const initialQuantities = {};
-    //     details.ticketOptions.forEach(option => {
-    //       initialQuantities[option.ticketType] = 0;
-    //     });
-    //     setQuantities(initialQuantities);
+  //       // Initialize quantities object for each ticket type
+  //       const initialQuantities = {};
+  //       details.ticketOptions.forEach(option => {
+  //         initialQuantities[option.ticketType] = 0;
+  //       });
+  //       setQuantities(initialQuantities);
 
-    //     // Set the initial selected date to the first date in eventDates
-    //     if (details.eventDates && details.eventDates.length > 0) {
-    //         const firstDate = `${details.eventDates[0].day}-${details.eventDates[0].month}`;
-    //         setSelectedDate(firstDate);
-    //     }
+  //       // Set the initial selected date to the first date in eventDates
+  //       if (details.eventDates && details.eventDates.length > 0) {
+  //           const firstDate = `${details.eventDates[0].day}-${details.eventDates[0].month}`;
+  //           setSelectedDate(firstDate);
+  //       }
 
-    //     setLoading(false);                         // Set loading to false once data is fetched
-    //   } catch (error) {
-    //     console.error("Error fetching event details:", error);
-    //     setLoading(false);
-    //   }
-    // };
+  //       setLoading(false);                         // Set loading to false once data is fetched
+  //     } catch (error) {
+  //       console.error("Error fetching event details:", error);
+  //       setLoading(false);
+  //     }
+  //   };
 
-    // getEventDetails();  // Call the function when component mounts
+  //   getEventDetails();  // Call the function when component mounts
   // }, []);
     
 
@@ -243,6 +301,34 @@ const BuyTickets = ({ route }) => {
 
   const handleSelectDate = (date) => setSelectedDate(date);
 
+  const fetchAllTicketCategories = async (eventTicketArray) => {
+    try {
+      const ticketCategories = await Promise.all(
+        eventTicketArray.map(async (tixItemId) => {
+          const response = await fetchTicketCatByTixId(tixItemId);
+          return response.state === "success" ? response.result : null;
+        })
+      );
+  
+      // Filter out any null values (in case any fetches were unsuccessful)
+      const validTicketCategories = ticketCategories.filter(item => item !== null);
+
+      const ticketArr = validTicketCategories.flat().map(ticket => ({
+        ticketId: ticket.eventTicketId,
+        ticketType: ticket.eventTicketType,
+        ticketPrice: ticket.eventTicketPrice,
+        ticketSlots: ticket.eventTicketQuantity - ticket.eventTicketQuantityBooked,
+      }));
+  
+      
+      return ticketArr;
+    } catch (error) {
+      console.error("Error fetching ticket categories:", error);
+      return null;
+    }
+  };
+  
+
   // const createPaymentIntent = async () => {
   //   try {
   //     const response = await fetch('http://localhost:5001/api/payments/intents', {
@@ -316,10 +402,12 @@ const BuyTickets = ({ route }) => {
       navigation.navigate('events/OrderDetails', { 
         username: username, 
         role: role, 
+        eventDetails: eventDetails,
         totalPrice: totalPrice, 
         totalQty: totalQty,
         selectedDate: selectedDate,
-        quantities: quantities
+        quantities: quantities,
+        ticketDetails: ticketDetails
       });
     } catch (error) {
       console.error("Failed to submit details:", error);
@@ -348,11 +436,15 @@ const BuyTickets = ({ route }) => {
         <View style={{ flex:1 }}>
           <SafeAreaView style={[styles.container, {flex: 1}]} >
             {/* <PageHeader title={"Event Page"} onPress={()=>navigation.goBack()}/> */}
-            <OrgDisplay 
+            {/* <OrgDisplay 
               eventPic={eventDetails.eventPic} 
               eventOrgPic="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
               eventOrg={eventDetails.eventOrganiser ? eventDetails.eventOrganiser : eventDetails.eventGenre} 
-            />
+            /> */}
+            <View style={styles.heroBanner}>
+                <Image style={styles.eventBg} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}/>
+                {/* <Image style={styles.eventBg} source={require('../../assets/images/DefaultEventPic.jpg')}/> */}
+            </View>
             <View style={styles.eventCont}>
                 <View style={styles.overlap}>
                   <EventHeader 
@@ -394,14 +486,14 @@ const BuyTickets = ({ route }) => {
                     </View>
                     <View style={styles.tixChoose}>
                         <StyledText size={20} textContent="Choose the ticket" />
-                        {mockEventDetails.ticketOptions?.map((option) => (
+                        {ticketDetails?.map((option) => (
                           <TicketSelector
-                            key={option.ticketType}
+                            key={option.ticketId}
                             ticketType={option.ticketType}
                             ticketPrice={option.ticketPrice}
                             ticketSlots={option.ticketSlots}
                             eventLocation={eventDetails.eventLocation}
-                            imageUri={eventDetails.eventPic}
+                            imageUri={eventDetails.eventPic ? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}
                             quantity={quantities[option.ticketType]}
                             onQtyChange={(qty) => handleQtyChange(option.ticketType, qty)}
                             openModal={() => openModalForTicketType(option.ticketType)}
@@ -469,6 +561,15 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     // paddingBottom: 1000
     // height: 2000
+  },
+  heroBanner: {
+    width: "100%",
+    height: 200,
+    position: "relative",
+  },
+  eventBg: {
+    width: "100%",
+    height: "100%",
   },
   bgColour: {
     backgroundColor: "#FBF3F1",
