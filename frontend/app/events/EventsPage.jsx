@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import PageHeader from "../../components/events/PageHeader";
-import OrgDisplay from "../../components/OrgDisplay";
+// import OrgDisplay from "../../components/OrgDisplay";
 import SingleFaq from "../../components/SingleFaq";
 import EventHeader from "../../components/events/EventHeader";
 import RoundBtn from "../../components/forms/RoundBtn";
-import { fetchEventById } from "../../apicalls/EventApi";
+import { fetchEventById, fetchFaqByEventId, fetchFaqItemById } from "../../apicalls/EventApi";
 
 
 
@@ -19,6 +19,7 @@ const EventsPage = ({ route }) => {
   const navigation = useNavigation();
 
   const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
+  const [faqDetails, setFaqDetails] = useState(null);
   const [loading, setLoading] = useState(true);            // State to manage loading status
 
 
@@ -29,7 +30,14 @@ const EventsPage = ({ route }) => {
       try {
         const details = await fetchEventDetails(eventId);  // Fetch event details
         setEventDetails(details);                  // Set the fetched details to state
-        console.log(eventDetails);
+        // console.log(eventDetails);
+        const faqIds = await fetchFaqDetails(eventId);
+        // console.log(faqIds);
+        const faqContentArr = await fetchFaqData(faqIds);
+        console.log(faqContentArr);
+        setFaqDetails(faqContentArr);
+
+
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
         console.error("Error fetching event details:", error);
@@ -38,7 +46,7 @@ const EventsPage = ({ route }) => {
     };
 
     getEventDetails();  // Call the function when component mounts
-  }, []);
+  }, [eventId]);
 
 
 
@@ -95,6 +103,48 @@ const EventsPage = ({ route }) => {
     // });
   };
 
+  const fetchFaqDetails = async (eventId) => {
+    try {
+      const result = await fetchFaqByEventId(eventId);
+      if(result.state=="success"){
+        console.log("getting faq ids "+result.faqs);
+        const faqIdArray = result.faqs.map(item => ({
+          questionId: item.faqQuestion,
+          answerId: item.faqAnswer
+        }));
+        console.log("getting faq id array " + faqIdArray);
+        return faqIdArray;
+      }
+      
+
+    } catch (error) {
+      console.error("Error fetching FAQ page details:", error);
+    }
+  };
+
+  const fetchFaqData = async (faqIdArr) => {
+    try {
+      // Map over each item in faqArray and create two API calls per item
+      const results = await Promise.all(
+        faqIdArr.map(async (faq) => {
+          const [questionResponse, answerResponse] = await Promise.all([
+            fetchFaqItemById(faq.questionId),
+            fetchFaqItemById(faq.answerId),
+          ]);
+  
+          return {
+            questionContent: questionResponse.faqItem.faqItemContent || null, // Fetched question content
+            answerContent: answerResponse.faqItem.faqItemContent || null, // Fetched answer content
+          };
+        })
+      );
+  
+      // console.log("Fetched FAQ contents:", results);
+      return results;
+    } catch (error) {
+      console.error("Error fetching FAQ contents:", error);
+    }
+  }
   
 
 
@@ -102,7 +152,7 @@ const EventsPage = ({ route }) => {
     try {
       // const result = await submitUserDetails();  // Simulate sending data
       // console.log("User details submitted:", result);
-      navigation.navigate('events/BuyTickets', { username: username, role: role });  // Navigate to new page with email
+      navigation.navigate('events/BuyTickets', { username: username, role: role, eventDetails: eventDetails });  // Navigate to new page with email
     } catch (error) {
       console.error("Failed to submit details:", error);
     }
@@ -129,11 +179,15 @@ const EventsPage = ({ route }) => {
         <View style={{ flex:1 }}>
           <SafeAreaView style={[styles.container, {flex: 1}]} >
             {/* <PageHeader title={"Event Page"} onPress={()=>navigation.goBack()}/> */}
-            <OrgDisplay 
+            {/* <OrgDisplay 
               eventPic={eventDetails.eventPic} 
               eventOrgPic="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
               eventOrg={eventDetails.eventOrganiser ? eventDetails.eventOrganiser : eventDetails.eventGenre} 
-            />
+            /> */}
+            <View style={styles.heroBanner}>
+                <Image style={styles.eventBg} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}/>
+                {/* <Image style={styles.eventBg} source={require('../../assets/images/DefaultEventPic.jpg')}/> */}
+            </View>
             <View style={styles.eventCont}>
                 <View style={styles.overlap}>
                   <EventHeader 
@@ -175,18 +229,35 @@ const EventsPage = ({ route }) => {
                         <StyledText size={16} textContent="Posts" alignment="left" fontColor="#8B8B8B"/>
                         </TouchableOpacity> */}
                     </View>
-                    {/* <View style={styles.faqs}>
+                    <View style={styles.faqs}>
                         <StyledText size={20} textContent="Frequently Asked Questions" />
-                        {eventDetails.eventFaq.map((faq)=>{
-                          return <SingleFaq key={faq.question} 
-                          eventQns={faq.question}
-                          eventOrgPic={eventDetails.eventOrgPic}
-                          eventOrg={eventDetails.eventOrganiser}
-                          eventAns={faq.answer} />
+                        {faqDetails.map((faq)=>{
+                          return <View key={faq.questionContent} style={styles.singleFaq}>
+                          <View style={styles.qns}>
+                              <View style={styles.Qlogo}>
+                                  <StyledText size={25} textContent="Q" />
+                              </View>
+                              <View style={styles.Qtext}>
+                                  <StyledText size={14} textContent={faq.questionContent} alignment="left"/>
+                              </View>
+                          </View>
+                          <View style={styles.ans}>
+                              <Image style={styles.faqPic} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')}/>
+                              <View style={styles.Atext}>
+                                  <View style={styles.orgDetails}>
+                                      <StyledText size={12} textContent={eventDetails.eventName} fweight='bold' alignment="left"/>
+                                      <StyledText size={12} textContent="Organiser" fontColor="#8B8B8B" alignment="left"/>
+                                  </View>
+                                  <View style={styles.comment}>
+                                      <StyledText size={14} textContent={faq.answerContent} alignment="left"/>
+                                  </View>
+                              </View>
+                          </View>
+                      </View>
                         })
                         }
                         
-                    </View> */}
+                    </View>
                 </View>
             </View>
           </SafeAreaView>
@@ -275,7 +346,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   faqs: {
-    paddingVertical: 10
+    paddingVertical: 10,
   },
   bottomButtonContainer: {
     position: 'absolute',
@@ -305,7 +376,104 @@ const styles = StyleSheet.create({
   },
   bottomBtn: {
     width: "70%"
-  }
+  },
+
+  heroBanner: {
+    width: "100%",
+    height: 200,
+    position: "relative",
+  },
+  eventBg: {
+    width: "100%",
+    height: "100%",
+  },
+  orgView: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    alignContent: "center",
+    padding: 30,
+    backgroundColor: "#000000",
+    opacity: 0.8,
+    position: "absolute",
+    bottom: 0,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    gap: 20,
+    paddingBottom: 70,
+  },
+  orgLogo: {
+    height: 60,
+    width: 60,
+    borderRadius: 10,
+    padding: 0,
+    margin: 0,
+    opacity: 1,
+  },
+  orgNames: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    justifyContent: "center",
+    position: "relative",
+    opacity: 1,
+  },
+  singleFaq: {
+    width: "100%",
+    gap: 5,
+    paddingVertical: 20,
+  },
+  qns: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    position: "relative",
+  },
+  Qlogo: {
+    // backgroundColor: "#fff",
+    // height: 45,
+    width: 30,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 100,
+  },
+  Qtext:{
+    width: "100%",
+    maxWidth: "100%",
+    position: "relative",
+    flex: 1
+  },
+  ans:{
+    // width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    gap: 10,
+    maxWidth: "100%",
+    position: "relative",
+  },
+  Atext: {
+    flex: 1
+  },
+  orgDetails:{
+    flexDirection: "row",
+    gap: 20,
+    flex: 1
+  },
+  faqPic: {
+    height: 30,
+    width: 30,
+    borderRadius: 50,
+    padding: 0,
+    margin: 0,
+    opacity: 1,
+    position: "relative",
+  },
+  comment: {
+    position: "relative",
+    // width: "100%",
+  },
 
 
 

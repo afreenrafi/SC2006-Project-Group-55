@@ -16,12 +16,14 @@ import TicketSelector from "../../components/events/TicketSelector";
 
 
 const BuyTickets = ({ route }) => {
-  const { username, role } = route.params;
+  const { username, role, eventDetails } = route.params;
 
   const navigation = useNavigation();
 
-  const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
-  const [loading, setLoading] = useState(true);            // State to manage loading status
+  // const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
+  const [mockEventDetails, setMockEvent] = useState(null);  // State to hold event details
+
+  // const [loading, setLoading] = useState(true);            // State to manage loading status
   const [selectedDate, setSelectedDate] = useState(null); 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
@@ -31,6 +33,8 @@ const BuyTickets = ({ route }) => {
   const [inputQty, setInputQty] = useState(0);
   const [totalQty, setTotalQty] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+
+  const [dateArray, setDateArr] = useState([]);
 
   // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -46,7 +50,7 @@ const BuyTickets = ({ route }) => {
 
       // Update total quantity and total price
       const updatedTotalQty = Object.values(updatedQuantities).reduce((acc, val) => acc + val, 0);
-      const updatedTotalPrice = eventDetails.ticketOptions.reduce((acc, option) => {
+      const updatedTotalPrice = mockEventDetails.ticketOptions.reduce((acc, option) => {
         const quantity = updatedQuantities[option.ticketType] || 0;
         return acc + quantity * option.ticketPrice;
       }, 0);
@@ -65,7 +69,7 @@ const BuyTickets = ({ route }) => {
     // const maxSlots = selectedTicketType === 'Adult' 
     //   ? eventDetails.ticketOptions[0].ticketSlots 
     //   : eventDetails.ticketOptions[1].ticketSlots;
-    const ticket = eventDetails.ticketOptions.find(option => option.ticketType === selectedTicketType);
+    const ticket = mockEventDetails.ticketOptions.find(option => option.ticketType === selectedTicketType);
     const maxSlots = ticket ? ticket.ticketSlots : 0;
   
     // Ensure the input is a valid number and within the allowed range
@@ -92,37 +96,78 @@ const BuyTickets = ({ route }) => {
     
     setModalVisible(false); // Close the modal
   };
+
+  const generateEventDates = async (startDate, endDate) => {
+    const eventDates = [];
+    let currentDate = new Date(startDate);
+  
+    // Set end date to include it in the range
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+  
+    while (currentDate <= end) {
+      const day = currentDate.toLocaleDateString("en-GB", { day: "2-digit" });
+      const month = currentDate.toLocaleDateString("en-GB", { month: "short" }).toUpperCase();
+  
+      eventDates.push({ day, month });
+  
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  
+    return eventDates;
+  }
+
+  useEffect(() => {
+    const fetchDateArray = async () => {
+      const genDateArr = await generateEventDates(eventDetails.eventStartDate, eventDetails.eventEndDate);
+      setMockEvent(await fetchEventDetails());
+      setDateArr(genDateArr);
+    };
+    fetchDateArray();
+  }, [eventDetails]);
+
+  useEffect(() => {
+    const fetchMock = async () => {
+      const mockData = await fetchEventDetails();
+      setMockEvent(mockData);
+    };
+    fetchMock();
+  }, [mockEventDetails]);
+  
+
   
 
 
-  useEffect(() => {
-    const getEventDetails = async () => {
-      try {
-        const details = await fetchEventDetails();  // Fetch event details
-        setEventDetails(details);                  // Set the fetched details to state
+  // useEffect(() => {
+    
+    // const getEventDetails = async () => {
+    //   try {
+    //     const details = await fetchEventDetails();  // Fetch event details
+    //     setEventDetails(details);                  // Set the fetched details to state
 
-        // Initialize quantities object for each ticket type
-        const initialQuantities = {};
-        details.ticketOptions.forEach(option => {
-          initialQuantities[option.ticketType] = 0;
-        });
-        setQuantities(initialQuantities);
+    //     // Initialize quantities object for each ticket type
+    //     const initialQuantities = {};
+    //     details.ticketOptions.forEach(option => {
+    //       initialQuantities[option.ticketType] = 0;
+    //     });
+    //     setQuantities(initialQuantities);
 
-        // Set the initial selected date to the first date in eventDates
-        if (details.eventDates && details.eventDates.length > 0) {
-            const firstDate = `${details.eventDates[0].day}-${details.eventDates[0].month}`;
-            setSelectedDate(firstDate);
-        }
+    //     // Set the initial selected date to the first date in eventDates
+    //     if (details.eventDates && details.eventDates.length > 0) {
+    //         const firstDate = `${details.eventDates[0].day}-${details.eventDates[0].month}`;
+    //         setSelectedDate(firstDate);
+    //     }
 
-        setLoading(false);                         // Set loading to false once data is fetched
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-        setLoading(false);
-      }
-    };
+    //     setLoading(false);                         // Set loading to false once data is fetched
+    //   } catch (error) {
+    //     console.error("Error fetching event details:", error);
+    //     setLoading(false);
+    //   }
+    // };
 
-    getEventDetails();  // Call the function when component mounts
-  }, []);
+    // getEventDetails();  // Call the function when component mounts
+  // }, []);
     
 
 
@@ -282,14 +327,14 @@ const BuyTickets = ({ route }) => {
   };
   
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#CA3550" />
-        <StyledText size={20} textContent="Loading event details..." />
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.centered}>
+  //       <ActivityIndicator size="large" color="#CA3550" />
+  //       <StyledText size={20} textContent="Loading event details..." />
+  //     </View>
+  //   );
+  // }
 
 
   return (
@@ -305,24 +350,34 @@ const BuyTickets = ({ route }) => {
             {/* <PageHeader title={"Event Page"} onPress={()=>navigation.goBack()}/> */}
             <OrgDisplay 
               eventPic={eventDetails.eventPic} 
-              eventOrgPic={eventDetails.eventOrgPic} 
-              eventOrg={eventDetails.eventOrganiser} 
+              eventOrgPic="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+              eventOrg={eventDetails.eventOrganiser ? eventDetails.eventOrganiser : eventDetails.eventGenre} 
             />
             <View style={styles.eventCont}>
                 <View style={styles.overlap}>
                   <EventHeader 
-                  eventStart={eventDetails.eventStartDate} 
-                  eventEnd={eventDetails.eventEndDate} 
-                  eventType={eventDetails.eventType} 
-                  eventMode={eventDetails.eventMode} 
-                  eventName={eventDetails.eventName} 
+                  eventStart={new Intl.DateTimeFormat("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    // year: "numeric"
+                  }).format(new Date(eventDetails.eventStartDate))} 
+
+                  eventEnd={new Intl.DateTimeFormat("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    // year: "numeric"
+                  }).format(new Date(eventDetails.eventEndDate))} 
+
+                  eventType={eventDetails.eventGenre} 
+                  eventMode={eventDetails.eventType} 
+                  eventName={eventDetails.eventName}
                   />
                   <View style={styles.ticketCont}>
                     <View style={styles.datesCont}>
                         <ScrollView style={styles.datesScroll}>
-                            {eventDetails.eventDates.map((date, index) => {
+                            {dateArray?.map((date, index) => {
                                 const dateKey = `${date.day}-${date.month}`;
-                                const isAboveSelected = selectedDate && index === eventDetails.eventDates.findIndex(d => `${d.day}-${d.month}` === selectedDate) - 1;
+                                const isAboveSelected = selectedDate && index === dateArray?.findIndex(d => `${d.day}-${d.month}` === selectedDate) - 1;
 
                                 return (
                                 <SingleDate
@@ -339,7 +394,7 @@ const BuyTickets = ({ route }) => {
                     </View>
                     <View style={styles.tixChoose}>
                         <StyledText size={20} textContent="Choose the ticket" />
-                        {eventDetails.ticketOptions.map((option) => (
+                        {mockEventDetails.ticketOptions?.map((option) => (
                           <TicketSelector
                             key={option.ticketType}
                             ticketType={option.ticketType}
