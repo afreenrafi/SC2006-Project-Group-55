@@ -24,6 +24,7 @@ const OrderDetails = ({ route }) => {
 
   console.log(quantities);
   console.log(ticketDetails);
+  console.log(selectedDate);
 
 
   const navigation = useNavigation();
