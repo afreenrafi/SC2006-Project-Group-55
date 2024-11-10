@@ -292,7 +292,9 @@ const OrderDetails = ({ route }) => {
       role: role, 
       eventDetails: eventDetails,
       selectedDate: selectedDate,
-      eventTime: eventTime
+      eventTime: eventTime,
+      ticketDetails: ticketDetails,
+      quantities: quantities
     });
     
 
@@ -391,7 +393,9 @@ const OrderDetails = ({ route }) => {
           role: role, 
           eventDetails: eventDetails,
           selectedDate: selectedDate,
-          eventTime: eventTime
+          eventTime: eventTime,
+          ticketDetails: ticketDetails,
+          quantities: quantities
         });
       }
       

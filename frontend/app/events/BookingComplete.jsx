@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -9,8 +9,10 @@ import RoundBtn from '../../components/forms/RoundBtn';
 
 const BookingComplete = ({ route }) => {
     const navigation = useNavigation();
-    const { username, role, eventDetails, selectedDate, eventTime } = route.params;
+    const { username, role, eventDetails, selectedDate, eventTime, ticketDetails, quantities } = route.params;
     const [isQrModalVisible, setQrModalVisible] = useState(false);
+    const [eventDate, setEventDate] = useState(null);
+
     console.log(eventTime);
 
     const handleNext = async () => {
@@ -25,6 +27,15 @@ const BookingComplete = ({ route }) => {
             console.error("Failed to submit details:", error);
         }
     };
+
+    useEffect(() => {
+      const date = new Date(selectedDate);
+
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      setEventDate(date.toLocaleDateString('en-US', options));
+
+      
+    }, []);
 
     return (
         <SafeAreaView style={{ flex:1, backgroundColor: "#FBF3F1" }}>
@@ -42,7 +53,7 @@ const BookingComplete = ({ route }) => {
                 <View style={styles.ticketInfoContainer}>
                     <View style={styles.infoColumn}>
                     <Text style={styles.infoLabel}>Date</Text>
-                    <Text style={styles.infoText}>{selectedDate}</Text>
+                    <Text style={styles.infoText}>{eventDate}</Text>
                     </View>
                     <View style={styles.infoColumn}>
                     <Text style={styles.infoLabel}>Time</Text>
@@ -51,6 +62,22 @@ const BookingComplete = ({ route }) => {
                     <View style={styles.infoColumn}>
                     <Text style={styles.infoLabel}>Venue</Text>
                     <Text style={styles.infoText}>{eventDetails.eventLocation}</Text>
+                    </View>
+                      <View style={styles.infoColumn}>
+                      <Text style={styles.infoLabel}>Tickets</Text>
+                      {ticketDetails.map((option) => {
+                          const qty = quantities[option.ticketType];
+                          if (qty > 0) {
+                              return (
+                                <Text style={styles.infoText}>{qty}x {option.ticketType} Ticket</Text>
+                              // <View style={styles.priceItem} key={option.ticketType}>
+                              //     <StyledText size={20} textContent={`${qty} x ${option.ticketType} Ticket`} alignment="left" />
+                              //     <StyledText size={20} textContent={`$${(qty * option.ticketPrice).toFixed(2)}`} alignment="left" fweight="bold" />
+                              // </View>
+                              );
+                          }
+                          return null;
+                      })}
                     </View>
                 </View>
         

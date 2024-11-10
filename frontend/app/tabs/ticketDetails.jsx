@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +10,41 @@ const TicketDetails = ({ route }) => {
     const navigation = useNavigation();
     const { event } = route.params;
     const [isQrModalVisible, setQrModalVisible] = useState(false);
+    const [eventTime, setEventTime] = useState(null);
+    const [eventDate, setEventDate] = useState(null);
+
+    const formatEventTime = async (eventStartDate, eventEndDate) => {
+      // Create Date objects from the ISO strings
+      const start = new Date(eventStartDate);
+      const end = new Date(eventEndDate);
+    
+      // Format the time to get hour and period (AM/PM)
+      const startTime = start.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        hour12: true,
+      }).toLowerCase();
+    
+      const endTime = end.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        hour12: true,
+      }).toLowerCase();
+    
+      // Combine start and end times in the desired format
+      return `${startTime} - ${endTime}`;
+    }
+
+
+    useEffect(() => {
+      const timeRange = formatEventTime(event.eventDetails.eventOpen, event.eventDetails.eventClose);
+      setEventTime(timeRange);
+
+      const date = new Date(event.attendingDate);
+
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      setEventDate(date.toLocaleDateString('en-US', options));
+
+      
+    }, []);
 
     return (
       <View style={styles.container}>
@@ -19,26 +54,29 @@ const TicketDetails = ({ route }) => {
   
         {/* Ticket Image and Title */}
         <View style={styles.ticketContainer}>
-          <Image source={event.image} style={styles.ticketImage} />
-          <Text style={styles.ticketTitle}>{event.name}</Text>
+          <Image source={event.eventPic ? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.ticketImage} />
+          <Text style={styles.ticketTitle}>{event.eventDetails.eventName}</Text>
   
           {/* Ticket Info */}
           <View style={styles.ticketInfoContainer}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoText}>{event.date}</Text>
+              <Text style={styles.infoText}>{eventDate}</Text>
             </View>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Time</Text>
-              <Text style={styles.infoText}>{event.time}</Text>
+              <Text style={styles.infoText}>{eventTime}</Text>
             </View>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Venue</Text>
-              <Text style={styles.infoText}>{event.location}</Text>
+              <Text style={styles.infoText}>{event.eventDetails.eventLocation}</Text>
             </View>
             <View style={styles.infoColumn}>
-              <Text style={styles.infoLabel}>Seat</Text>
-              <Text style={styles.infoText}>{event.seat || 'No seat'}</Text>
+              <Text style={styles.infoLabel}>Tickets</Text>
+              {event.tickets.map((tix)=>(
+                <Text>{tix.totalQuantity}x {tix.eventTicketType} Tickets</Text>
+              ))}
+              {/* <Text style={styles.infoText}>{event.seat || 'No seat'}</Text> */}
             </View>
           </View>
   
