@@ -65,6 +65,34 @@ export const validateBookingRequestAPI = async (userId, eventId, bookingQuantity
       throw error; // rethrow the error if needed
     }
   }
+
+
+export const getTicketBookedAPI = async (userId) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/bookingRoute/getTicketBooked/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      // If the response is not successful, throw an error to handle in the catch block
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to retrieve bookings');
+    }
+
+    // If the response is successful, parse and return the booking data
+    const data = await response.json();
+    console.log('Bookings retrieved successfully:', data);
+    return data.bookings;
+
+  } catch (error) {
+    // Handle any errors (e.g., display an error message to the user)
+    console.error('Error retrieving bookings:', error.message);
+    throw error;
+  }
+};
     
   
   

@@ -6,6 +6,9 @@ import { AppContext } from '../context/AppContext';
 import { useNavigation } from '@react-navigation/native';
 import { fetchEvents } from '../../apicalls/EventApi';
 import StyledText from "../../components/forms/StyledText";
+import { getTicketBookedAPI } from '../../apicalls/BookingApi';
+import { fetchEventById } from "../../apicalls/EventApi";
+
 
 
 const filters = ['All', 'Museums', 'Exhibitions', 'Performances', 'Festivals']; // Filter categories
@@ -63,6 +66,10 @@ const Homepage = ({ route }) => {
       setPageFreeEvents(freeEvents);
       const paidEvents = await getPaidEvents();
       setPagePaidEvents(paidEvents);
+      const ticketEvents = await getAggregatedBookings(username);
+      setUpcomingEvents(ticketEvents);
+      console.log("ticketed "+JSON.stringify(ticketEvents));
+
 
       setLoading(false);
     } catch (error) {
@@ -70,6 +77,183 @@ const Homepage = ({ route }) => {
       setLoading(false);
     }
   }
+
+  const getAggregatedBookings = async (userId) => {
+    try {
+      const bookings = await getTicketBookedAPI(userId);
+      const enrichedAndCombinedEvents = await getEnrichedAndCombinedEvents(bookings);
+      return enrichedAndCombinedEvents;
+    } catch (error) {
+      console.error("Error fetching and processing bookings:", error);
+      return [];
+    }
+  };
+
+  // const getEnrichedAndCombinedEvents = async (bookings) => {
+  //   try {
+  //     // Step 1: Aggregate booking quantities by eventId and eventTicketId
+  //     const aggregatedBookings = bookings.reduce((acc, booking) => {
+  //       const key = `${booking.eventId}-${booking.eventTicketId}`;
+        
+  //       if (!acc[key]) {
+  //         acc[key] = {
+  //           eventId: booking.eventId,
+  //           eventTicketId: booking.eventTicketId,
+  //           totalQuantity: booking.bookingQuantity,
+  //           eventTicketType: booking.eventTicketType,
+  //           eventTicketPrice: booking.eventTicketPrice,
+  //           attendingDate: booking.attendingDate,
+  //         };
+  //       } else {
+  //         acc[key].totalQuantity += booking.bookingQuantity;
+  //       }
+        
+  //       return acc;
+  //     }, {});
+  
+  //     // Convert the result back to an array
+  //     const aggregatedArray = Object.values(aggregatedBookings);
+  
+  //     // Step 2: Fetch event details and organize data by eventId
+  //     const uniqueEventIds = [...new Set(aggregatedArray.map(booking => booking.eventId))];
+  //     const eventDetailsMap = await Promise.all(
+  //       uniqueEventIds.map(async (eventId) => {
+  //         const eventData = await fetchEventById(eventId);
+  //         return { eventId, eventData };
+  //       })
+  //     );
+  
+  //     // Step 3: Combine tickets by eventId and attach event details
+  //     const eventDataMap = eventDetailsMap.reduce((acc, { eventId, eventData }) => {
+  //       acc[eventId] = eventData;
+  //       return acc;
+  //     }, {});
+  
+  //     const combinedData = aggregatedArray.reduce((acc, item) => {
+  //       const existingEvent = acc.find(event => event.eventId === item.eventId);
+  
+  //       if (existingEvent) {
+  //         // Add ticket details to the existing event's tickets array
+  //         existingEvent.tickets.push({
+  //           eventTicketId: item.eventTicketId,
+  //           totalQuantity: item.totalQuantity,
+  //           eventTicketType: item.eventTicketType,
+  //           eventTicketPrice: item.eventTicketPrice,
+  //           attendingDate: item.attendingDate,
+  //         });
+  //       } else {
+  //         // Create a new event entry with tickets array initialized
+  //         acc.push({
+  //           eventId: item.eventId,
+  //           eventDetails: eventDataMap[item.eventId] || null,
+  //           tickets: [{
+  //             eventTicketId: item.eventTicketId,
+  //             totalQuantity: item.totalQuantity,
+  //             eventTicketType: item.eventTicketType,
+  //             eventTicketPrice: item.eventTicketPrice,
+  //             attendingDate: item.attendingDate,
+  //           }],
+  //         });
+  //       }
+        
+  //       return acc;
+  //     }, []);
+  
+  //     return combinedData;
+  
+  //   } catch (error) {
+  //     console.error("Error combining event data:", error);
+  //     return [];
+  //   }
+  // };
+
+  const getEnrichedAndCombinedEvents = async (bookings) => {
+    try {
+      // Step 1: Aggregate booking quantities by eventId, eventTicketId, and attendingDate
+      const aggregatedBookings = bookings.reduce((acc, booking) => {
+        const key = `${booking.eventId}-${booking.eventTicketId}-${booking.attendingDate}`;
+        
+        if (!acc[key]) {
+          acc[key] = {
+            eventId: booking.eventId,
+            eventTicketId: booking.eventTicketId,
+            totalQuantity: booking.bookingQuantity,
+            eventTicketType: booking.eventTicketType,
+            eventTicketPrice: booking.eventTicketPrice,
+            attendingDate: booking.attendingDate,
+          };
+        } else {
+          acc[key].totalQuantity += booking.bookingQuantity;
+        }
+        
+        return acc;
+      }, {});
+  
+      // Convert the result back to an array
+      const aggregatedArray = Object.values(aggregatedBookings);
+  
+      // Step 2: Fetch event details for each unique eventId
+      const uniqueEventIds = [...new Set(aggregatedArray.map(booking => booking.eventId))];
+      const eventDetailsMap = await Promise.all(
+        uniqueEventIds.map(async (eventId) => {
+          const eventData = await fetchEventById(eventId);
+          return { eventId, eventData };
+        })
+      );
+  
+      // Create a mapping of eventId to event details for easy access
+      const eventDataMap = eventDetailsMap.reduce((acc, { eventId, eventData }) => {
+        acc[eventId] = eventData;
+        return acc;
+      }, {});
+  
+      // Step 3: Combine tickets by eventId and attendingDate, and attach event details
+      const combinedData = aggregatedArray.reduce((acc, item) => {
+        const existingEvent = acc.find(event => 
+          event.eventId === item.eventId && event.attendingDate === item.attendingDate
+        );
+  
+        if (existingEvent) {
+          // Add ticket details to the existing event's tickets array
+          existingEvent.tickets.push({
+            eventTicketId: item.eventTicketId,
+            totalQuantity: item.totalQuantity,
+            eventTicketType: item.eventTicketType,
+            eventTicketPrice: item.eventTicketPrice,
+            attendingDate: item.attendingDate,
+          });
+        } else {
+          // Create a new event entry with tickets array initialized
+          acc.push({
+            eventId: item.eventId,
+            eventDetails: eventDataMap[item.eventId] || null,
+            attendingDate: item.attendingDate,
+            tickets: [{
+              eventTicketId: item.eventTicketId,
+              totalQuantity: item.totalQuantity,
+              eventTicketType: item.eventTicketType,
+              eventTicketPrice: item.eventTicketPrice,
+              attendingDate: item.attendingDate,
+            }],
+          });
+        }
+  
+        return acc;
+      }, []);
+  
+      return combinedData;
+  
+    } catch (error) {
+      console.error("Error combining event data:", error);
+      return [];
+    }
+  };
+  
+  
+  
+  
+
+  
 
   useEffect(() => {
     getHomepageData();
@@ -133,16 +317,22 @@ const Homepage = ({ route }) => {
       <View>
         {/* Upcoming Event Card */}
         <View style={styles.upcomingEventCard}>
-          <Image source={event.image} style={styles.eventImage} />
-          <Text style={styles.upcomingEventTitle}>{event.name}</Text>
-          <Text style={styles.upcomingEventLocation}>{event.location}</Text>
+          <Image source={event.eventPic? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
+          <Text style={styles.upcomingEventTitle}>{event.eventDetails.eventName}</Text>
+          <Text style={styles.upcomingEventLocation}>{event.eventDetails.eventLocation}</Text>
           {/* Date Toggle Buttons */}
           <View style={styles.dateToggleContainer}>
             {mockUpcomingEvents.map((upEvent, index) => {
-              const formattedDate = upEvent.date.split(' ').slice(0, 2).join(' '); // Extract day and month only
+               const date = new Date(upEvent.attendingDate);
+               const mockDataDate = date.toLocaleDateString("en-GB", {
+                 day: "2-digit",
+                 month: "short",
+                 year: "numeric"
+               }).replace(/,/g, ''); // Optional: removes any commas if included
+              const formattedDate = mockDataDate.split(' ').slice(0, 2).join(' '); // Extract day and month only
               return (
                 <TouchableOpacity
-                  key={upEvent.id}
+                  key={upEvent.eventTicketId}
                   onPress={() => setCurrentUpcomingEventIndex(index)}
                   style={[
                     styles.dateButton,
@@ -218,7 +408,7 @@ const Homepage = ({ route }) => {
       {/* Upcoming Events */}
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Upcoming Events</Text>
-        {/* {renderUpcomingEvent()} */}
+        {renderUpcomingEvent()}
       </View>
 
       {/* Popular Events Section */}
