@@ -14,6 +14,9 @@ const EventCreationForm = () => {
 
     const [genreModalVisible, setGenreModalVisible] = useState(false);
     const [typeModalVisible, setTypeModalVisible] = useState(false);
+    const [faqQuestion, setFaqQuestion] = useState('');
+    const [faqAnswer, setFaqAnswer] = useState('');
+    const [faqs, setFaqs] = useState([]);
 
     const [eventDetails, setEventDetails] = useState({
         eventName: "",
@@ -69,6 +72,18 @@ const EventCreationForm = () => {
     const handleSubmit = () => {
         console.log(eventDetails);
         navigation.navigate('CreateEvents'); 
+    };
+
+    const addFaq = () => {
+        if (faqQuestion && faqAnswer) {
+            setFaqs([...faqs, { question: faqQuestion, answer: faqAnswer }]);
+            setFaqQuestion('');
+            setFaqAnswer('');
+        }
+    };
+
+    const removeFaq = (index) => {
+        setFaqs(faqs.filter((_, i) => i !== index));
     };
 
     return (
@@ -180,12 +195,33 @@ const EventCreationForm = () => {
                 <Text style={styles.addButtonText}>Add Another Artist</Text>
             </TouchableOpacity>
 
-            {/* <Text style={styles.sectionHeader}>Organizer</Text>
+            {/* FAQ Section */}
+            <Text style={styles.sectionHeader}>Add FAQ</Text>
             <StyledInput
-                label="Organizer User ID"
-                data={eventDetails.userId}
-                onChangeText={(text) => handleChange("userId", text)}
-            /> */}
+                label="FAQ Question"
+                data={faqQuestion}
+                onChangeText={(text) => setFaqQuestion(text)}
+            />
+            <StyledInput
+                label="FAQ Answer"
+                data={faqAnswer}
+                onChangeText={(text) => setFaqAnswer(text)}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={addFaq}>
+                <Text style={styles.addButtonText}>Add FAQ</Text>
+            </TouchableOpacity>
+
+            {/* Display FAQs */}
+            <Text style={styles.sectionHeader}>Displayed FAQs</Text>
+            {faqs.map((item, index) => (
+                <View key={index} style={styles.faqItem}>
+                    <Text style={styles.faqQuestion}>{item.question}</Text>
+                    <Text style={styles.faqAnswer}>{item.answer}</Text>
+                    <TouchableOpacity onPress={() => removeFaq(index)}>
+                        <Text style={styles.removeFaq}>Remove</Text>
+                    </TouchableOpacity>
+                </View>
+            ))}
 
             <View style={styles.btnContainer}>
                 <RoundBtn onPress={handleSubmit} text="Create Event" icon="arrow-circle-right" />
@@ -264,6 +300,27 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 26,
         marginBottom: 5
+    },
+    faqItem: {
+        marginVertical: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 8,
+        backgroundColor: '#FFF',
+    },
+    faqQuestion: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    faqAnswer: {
+        marginTop: 5,
+        fontSize: 14,
+        color: '#555',
+    },
+    removeFaq: {
+        color: '#CA3550',
+        marginTop: 5,
+        fontSize: 14,
     },
 });
 export default EventCreationForm;
