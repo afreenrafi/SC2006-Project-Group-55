@@ -1,25 +1,25 @@
 import React from 'react';
 import { Image, View, StyleSheet } from 'react-native';
-import StyledText from './StyledText';
+import StyledText from '../forms/StyledText';
 
 const SingleFaq = ({ eventQns, eventOrgPic, eventOrg, eventAns }) => {
 
   return (
-    <View style={styles.singleFaq}>
+     <View style={styles.singleFaq}>
         <View style={styles.qns}>
             <View style={styles.Qlogo}>
                 <StyledText size={25} textContent="Q" />
             </View>
             <View style={styles.Qtext}>
-                <StyledText size={14} textContent={eventQns} />
+                <StyledText size={14} textContent={eventQns} alignment="left"/>
             </View>
         </View>
         <View style={styles.ans}>
-            <Image style={styles.faqPic} source={{uri: eventOrgPic}}/>
+            <Image style={styles.faqPic} source={eventOrgPic}/>
             <View style={styles.Atext}>
                 <View style={styles.orgDetails}>
-                    <StyledText size={12} textContent={eventOrg} fweight='bold'/>
-                    <StyledText size={12} textContent="Organiser" fontColor="#8B8B8B"/>
+                    <StyledText size={12} textContent={eventOrg} fweight='bold' alignment="left"/>
+                    <StyledText size={12} textContent="Organiser" fontColor="#8B8B8B" alignment="left"/>
                 </View>
                 <View style={styles.comment}>
                     <StyledText size={14} textContent={eventAns} alignment="left"/>
@@ -27,11 +27,33 @@ const SingleFaq = ({ eventQns, eventOrgPic, eventOrg, eventAns }) => {
             </View>
         </View>
     </View>
+    // <View style={styles.singleFaq}>
+    //     <View style={styles.qns}>
+    //         <View style={styles.Qlogo}>
+    //             <StyledText size={25} textContent="Q" />
+    //         </View>
+    //         <View style={styles.Qtext}>
+    //             <StyledText size={14} textContent={eventQns} />
+    //         </View>
+    //     </View>
+    //     <View style={styles.ans}>
+    //         <Image style={styles.faqPic} source={{uri: eventOrgPic}}/>
+    //         <View style={styles.Atext}>
+    //             <View style={styles.orgDetails}>
+    //                 <StyledText size={12} textContent={eventOrg} fweight='bold'/>
+    //                 <StyledText size={12} textContent="Organiser" fontColor="#8B8B8B"/>
+    //             </View>
+    //             <View style={styles.comment}>
+    //                 <StyledText size={14} textContent={eventAns} alignment="left"/>
+    //             </View>
+    //         </View>
+    //     </View>
+    // </View>
   );
 };
 
 const styles = StyleSheet.create({
-    singleFaq: {
+      singleFaq: {
         width: "100%",
         gap: 5,
         paddingVertical: 20,
@@ -40,8 +62,8 @@ const styles = StyleSheet.create({
         width: "100%",
         flexDirection: "row",
         alignItems: "center",
-        gap: 10
-        
+        gap: 10,
+        position: "relative",
       },
       Qlogo: {
         // backgroundColor: "#fff",
@@ -51,6 +73,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 100,
+      },
+      Qtext:{
+        width: "100%",
+        maxWidth: "100%",
+        position: "relative",
+        flex: 1,
+        // backgroundColor: "#000"
       },
       ans:{
         // width: "100%",

@@ -51,7 +51,7 @@ function validateUserAge(age) {
   if (isNaN(age) || age < minAge || age > maxAge) {
     errors.push("User age must be between 13 and 99 years old!");
   }
-  
+
   return errors;
 }
 
@@ -112,7 +112,7 @@ const UserSchema = new mongoose.Schema(
     },
 
     userAge: {
-      type: String, 
+      type: String,
       required: true,
       validate: {
         validator: function (value) {
@@ -130,8 +130,12 @@ const UserSchema = new mongoose.Schema(
         },
       },
     },
-    
-
+    userBookmark: [
+      {
+        type: String,
+        default: null,
+      },
+    ],
     userRole: {
       type: String,
       required: true,
@@ -148,6 +152,10 @@ const UserSchema = new mongoose.Schema(
         default: null,
       },
     ],
+    TicketBooked: {
+      type: [String], // Array of strings to store bookingId values
+      default: [],
+    },
   },
   userOptions
 );

@@ -3,7 +3,7 @@ import express from "express";
 import {
   createEventTicket,
   getAllEventTickets,
-  getEventTicketById,
+  getEventTicketsById,
   updateEventTicket,
   deleteEventTicket,
 } from "../controllers/eventTicketController.js";
@@ -18,7 +18,7 @@ router.post("/", createEventTicket);
 
 // READ
 router.get("/", getAllEventTickets);
-router.get("/:eventTicketId", getEventTicketById); 
+router.get("/:eventTicketIds", getEventTicketsById); 
 
 
 // UPDATE

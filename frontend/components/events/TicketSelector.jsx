@@ -3,46 +3,87 @@ import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import StyledText from '../forms/StyledText';
 
-const TicketSelector = ({ ticketType, ticketPrice, ticketSlots, eventLocation, imageUri, quantity, onQtyChange, openModal }) => {
-    const minusTicketCount = () => {
-        if (quantity > 0) {
-            onQtyChange(quantity - 1); // Call the callback with the new quantity
-        }
-    };
+// const TicketSelector = ({ ticketType, ticketPrice, ticketSlots, eventLocation, imageUri, quantity, onQtyChange, openModal }) => {
+//     const minusTicketCount = () => {
+//         if (quantity > 0) {
+//             onQtyChange(quantity - 1); // Call the callback with the new quantity
+//         }
+//     };
 
-    const plusTicketCount = () => {
-        if (quantity < ticketSlots) {
-            onQtyChange(quantity + 1); // Call the callback with the new quantity
-        }
-    };
+//     const plusTicketCount = () => {
+//         if (quantity < ticketSlots) {
+//             onQtyChange(quantity + 1); // Call the callback with the new quantity
+//         }
+//     };
+
+//   return (
+//     <View style={styles.selectCont}>
+//       <Image style={styles.selectBg} source={{ uri: imageUri }} />
+//       <View style={styles.selectView}>
+//         <View style={styles.selectDetails}>
+//           <StyledText size={20} textContent={`${ticketType} Ticket`} fontColor="#fff" />
+//           <StyledText style={styles.pageTitle} size={14} textContent={ticketPrice == 0 ? "FREE" : "$"+ticketPrice} fontColor="#fff" fweight="bold" />
+//         </View>
+//         <StyledText style={styles.pageTitle} size={14} textContent={eventLocation} fontColor="#fff" />
+//         <View style={styles.selectQty}>
+//           <StyledText style={styles.pageTitle} size={12} textContent={`${ticketSlots} slots left`} fontColor="#fff" />
+//         </View>
+//         <View style={styles.selectNum}>
+//           <TouchableOpacity onPress={minusTicketCount}>
+//             <FontAwesome5 name="minus" size={26} color="#ffffff" />
+//           </TouchableOpacity>
+//           <TouchableOpacity style={styles.qtyCount} onPress={openModal}>
+//             <StyledText style={styles.pageTitle} size={26} textContent={quantity.toString()} fontColor="#fff" fweight="bold" alignment="center" />
+//           </TouchableOpacity>
+//           <TouchableOpacity onPress={plusTicketCount}>
+//             <FontAwesome5 name="plus" size={26} color="#ffffff" />
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// };
+const TicketSelector = ({ ticketType, ticketPrice, ticketSlots, eventLocation, imageUri, quantity = 0, onQtyChange, openModal }) => {
+  const minusTicketCount = () => {
+      if (quantity > 0) {
+          onQtyChange(quantity - 1); // Call the callback with the new quantity
+      }
+  };
+
+  const plusTicketCount = () => {
+      if (quantity < ticketSlots) {
+          onQtyChange(quantity + 1); // Call the callback with the new quantity
+      }
+  };
 
   return (
-    <View style={styles.selectCont}>
-      <Image style={styles.selectBg} source={{ uri: imageUri }} />
-      <View style={styles.selectView}>
-        <View style={styles.selectDetails}>
-          <StyledText size={20} textContent={`${ticketType} Ticket`} fontColor="#fff" />
-          <StyledText style={styles.pageTitle} size={14} textContent={ticketPrice == 0 ? "FREE" : "$"+ticketPrice} fontColor="#fff" fweight="bold" />
-        </View>
-        <StyledText style={styles.pageTitle} size={14} textContent={eventLocation} fontColor="#fff" />
-        <View style={styles.selectQty}>
-          <StyledText style={styles.pageTitle} size={12} textContent={`${ticketSlots} slots left`} fontColor="#fff" />
-        </View>
-        <View style={styles.selectNum}>
-          <TouchableOpacity onPress={minusTicketCount}>
-            <FontAwesome5 name="minus" size={26} color="#ffffff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.qtyCount} onPress={openModal}>
-            <StyledText style={styles.pageTitle} size={26} textContent={quantity.toString()} fontColor="#fff" fweight="bold" alignment="center" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={plusTicketCount}>
-            <FontAwesome5 name="plus" size={26} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
+      <View style={styles.selectCont}>
+          <Image style={styles.selectBg} source={imageUri} />
+          <View style={styles.selectView}>
+              <View style={styles.selectDetails}>
+                  <StyledText size={20} textContent={`${ticketType} Ticket`} fontColor="#fff" />
+                  <StyledText style={styles.pageTitle} size={14} textContent={ticketPrice === 0 ? "FREE" : `$${ticketPrice}`} fontColor="#fff" fweight="bold" />
+              </View>
+              <StyledText style={styles.pageTitle} size={14} textContent={eventLocation} fontColor="#fff" />
+              <View style={styles.selectQty}>
+                  <StyledText style={styles.pageTitle} size={12} textContent={`${ticketSlots} slots left`} fontColor="#fff" />
+              </View>
+              <View style={styles.selectNum}>
+                  <TouchableOpacity onPress={minusTicketCount}>
+                      <FontAwesome5 name="minus" size={26} color="#ffffff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.qtyCount} onPress={openModal}>
+                      <StyledText style={styles.pageTitle} size={26} textContent={(quantity || 0).toString()} fontColor="#fff" fweight="bold" alignment="center" />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={plusTicketCount}>
+                      <FontAwesome5 name="plus" size={26} color="#ffffff" />
+                  </TouchableOpacity>
+              </View>
+          </View>
       </View>
-    </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   selectCont: {
@@ -54,6 +95,7 @@ const styles = StyleSheet.create({
     marginVertical: 10
   },
   selectBg: {
+    width: "100%",
     height: "100%",
   },
   selectView: {

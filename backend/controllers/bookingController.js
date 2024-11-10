@@ -1,14 +1,10 @@
 // BUSINESS LOGIC FOR BOOKING ENTITY (CRUD)
 // IMPORT NESCESSARY LIBRARIES
 import { User } from "../models/User.js";
-import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
+import Event from "../models/Event.js";
 import nodemailer from 'nodemailer';
-import { createRequire } from 'module';
-import Stripe from "stripe";
-
-const require = createRequire(import.meta.url);
-//const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+import EventTicket from "../models/EventTicket.js";
 
 // SUPPORTING FUNCTIONS RELATED TO BOOKING ENTITY
 const sendConfirmationEmail = async (
@@ -29,7 +25,7 @@ const sendConfirmationEmail = async (
     from: process.env.EMAIL_USER,
     to: bookingEmail,
     subject: "Event Booking Confirmation",
-    text: `Hello ${bookingName},\n\nYou have successfully booked ${bookingQuantity} ticket(s) for the event: ${eventName}.\n\nThank you for booking with us!`,
+    text: `Hello ${bookingName},\n\nYou have successfully booked ${bookingQuantity} ${eventName} ticket(s) for the event.\n\nThank you for booking with us!`,
   };
 
   try {
@@ -39,163 +35,163 @@ const sendConfirmationEmail = async (
   }
 };
 
-// CREATING NEW BOOKING OBJECT (FREE)
-export const createFreeBooking = async (req, res) => {
-  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATEFREEBOOKING
-  const { eventId, bookingQuantity, userId } = req.body;
+// FUNCTION TO GET AVAILABLE TICKETS FOR AN EVENT TICKET
+const getAvailableTickets = (eventTicket) => {
+  return eventTicket.eventTicketQuantity - eventTicket.eventTicketQuantityBooked;
+};
 
+// VALIDATION FUNCTION FOR USER, EVENT, AND TICKET AVAILABILITY
+export const validateBookingRequest = async (req, res) => {
   try {
-    // CHECKING IF USERID EXISTS IN USER COLLECTION
+    const { userId, eventId, bookingQuantity, eventTicketType, attendingDate } = req.body;
+
+    // Check if the user exists
     const user = await User.findOne({ userId: userId });
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
 
-    // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
-    const event = await Event.findOne({ eventId: eventId });
+    // Check if the event ticket exists for the given eventId and eventTicketType
+    const eventTicket = await EventTicket.findOne({
+      eventId: eventId,
+      eventTicketType: eventTicketType,
+    });
+    if (!eventTicket) {
+      return res.status(404).json({ message: "Event ticket not found!" });
+    }
+
+    // Check if the event exists and fetch the event details
+    // const event = await Event.findOne( {eventId: eventId});
+    const event = await Event.findOne( {eventId: eventId});
     if (!event) {
       return res.status(404).json({ message: "Event not found!" });
     }
 
-    // CHECKING IF EVENT HAS ENOUGH TICKETS AVAILABLE
+    // Validate attendingDate is within the event's time frame
+    const attendingDateObj = new Date(attendingDate);
     if (
-      event.eventTicketQuantity - event.eventTicketQuantityBooked <
-      bookingQuantity
+      attendingDateObj < new Date(event.eventStartDate) ||
+      attendingDateObj > new Date(event.eventEndDate)
     ) {
-      return res
-        .status(400)
-        .json({ message: "Selected Event does not enough tickets available!" });
+      return res.status(400).json({
+        message: "Attending date is not within the event's start and end date range.",
+        data: {
+          eventStartDate: event.eventStartDate,
+          eventEndDate: event.eventEndDate,
+        },
+      });
     }
-    // INSTANTIATING NEW BOOKING OBJECT
+
+    // Get the available ticket quantity
+    const availableTickets = getAvailableTickets(eventTicket);
+
+    // Check if there are enough tickets available
+    if (availableTickets < bookingQuantity) {
+      return res.status(400).json({
+        message: "Selected Event Ticket does not have enough tickets available!",
+        data: { availableTickets },
+      });
+    }
+
+    // Send a successful response with validated user, event ticket, and available ticket quantity
+    return res.status(200).json({
+      message: "Validation successful!",
+      data: { user, eventTicket, availableTickets },
+    });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+// FUNCTION TO CREATE BOOKING AND SEND CONFIRMATION EMAIL
+export const createBookingAndSendEmail = async (req, res) => {
+  try {
+    const { userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice, attendingDate } = req.body;
+
+    // Find the user by userId
+    const user = await User.findOne({ userId: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Find the event ticket by eventId and eventTicketType
+    const eventTicket = await EventTicket.findOne({
+      eventId: eventId,
+      eventTicketType: eventTicketType,
+    });
+
+    if (!eventTicket) {
+      return res.status(404).json({ message: "Event ticket not found." });
+    }
+
+    // Check if the quantity to be booked is available
+    if (eventTicket.eventTicketQuantity - eventTicket.eventTicketQuantityBooked < bookingQuantity) {
+      return res.status(400).json({ message: "Not enough tickets available." });
+    }
+
+    // Create a new booking document
     const newBooking = new Booking({
       bookingName: user.userName,
       bookingEmail: user.userEmail,
       bookingQuantity: bookingQuantity,
       eventId: eventId,
+      eventTicketId: eventTicket.eventTicketId,
       userId: userId,
+      eventTicketPrice: eventTicketPrice, // Include the ticket price
+      eventTicketType: eventTicketType, // Include the ticket type
+      attendingDate: new Date(attendingDate), // Include the attending date and ensure it's a Date object
     });
 
-    // SAVE NEW BOOKING OBJECT TO DATABASE
+    // Save the new booking to the database
     await newBooking.save();
 
-    // UPDATE EVENT OBJECT'S EVENTTICKETQUANTITYBOOKED ATTRIBUTE
-    event.eventTicketQuantityBooked += bookingQuantity;
-    await event.save();
+    // Update the event ticket's booked quantity
+    eventTicket.eventTicketQuantityBooked += bookingQuantity;
+    await eventTicket.save();
 
-    // SENDING CONFIRMATION EMAIL
+    // Update the user's TicketBooked array
+    user.TicketBooked.push(newBooking.bookingId); // Add the bookingId to the array
+    await user.save();
+
+    // Send confirmation email
     await sendConfirmationEmail(
       newBooking.bookingName,
       newBooking.bookingEmail,
       bookingQuantity,
-      event.eventName
+      eventTicketType, // Pass the ticket type to the email function
+      eventTicket.eventId
     );
 
-    res.status(201).json({ message: "Successfully booked tickets!" });
+    // Respond with booking details
+    return res.status(201).json({
+      message: "Successfully booked tickets! A confirmation email has been sent to your email!",
+      booking: newBooking,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
-// CREATING NEW BOOKING OBJECT (CHARGEABLE)
-export const createChargeableBooking = async (req, res) => {
-  // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION CREATECHARGEABLEBOOKING
-  const { eventId, bookingQuantity, paymentMethodId, saveCard, userId, totalAmount } =
-    req.body;
-
-  const stripeInstance = require("stripe")(process.env.STRIPE_SECRET_KEY);
-
+export const getTicketBooked = async (req, res) => {
   try {
-    // CHECKING IF USERID EXISTS IN USER COLLECTION
+    const { userId } = req.params;
+
+    // Find the user by userId
     const user = await User.findOne({ userId: userId });
+
     if (!user) {
-      return res.status(404).json({ message: "User not found!" });
+      return res.status(404).json({ message: "User not found." });
     }
 
-    // CHECKING IF EVENTID EXISTS IN EVENT COLLECTION
-    const event = await Event.findOne({ eventId: eventId });
-    if (!event) {   
-      return res.status(404).json({ message: "Event not found!" });
-    }
-
-    // CHECKING IF EVENT HAS ENOUGH TICKETS AVAILABLE
-    if (
-      event.eventTicketQuantity - event.eventTicketQuantityBooked <
-      bookingQuantity
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Selected Event does not have enough tickets available!" });
-    }
-
-    // CREATE USERSTRIPEID FOR USER OBJECT, IF USER OBJECT DOES NOT HAVE USERSTRIPEID
-    if (!user.userStripeId) {
-      const stripeCustomer = await stripeInstance.customers.create({
-        email: user.userEmail,
-        name: user.userName,
-      });
-      user.userStripeId = stripeCustomer.id;
-
-      // SAVE UPDATED USER OBJECT INTO DATABASE
-      await user.save();
-    }
-
-    // PROCESS PAYMENT VIA STRIPE
-    console.log("everything fine0");
-    const paymentIntent = await stripeInstance.paymentIntents.create({
-      amount: totalAmount * 100, // Convert amount to cents
-      currency: "sgd",
-      "automatic_payment_methods": {
-        "enabled": true
-      },
-      customer: user.userStripeId, // Attach the payment to the customer
-      confirm: true,
-    });
-    console.log("everything fine1");
-
-    // INSTANTIATE NEW BOOKING OBJECT
-    const newBooking = new Booking({
-      bookingName: user.userName,
-      bookingEmail: user.userEmail,
-      eventId: eventId,
-      bookingQuantity: bookingQuantity,
-      paymentId: paymentIntent.id, // Store the Stripe payment intent ID
+    // Retrieve all bookings associated with the user's TicketBooked array
+    const bookings = await Booking.find({
+      bookingId: { $in: user.TicketBooked },
     });
 
-    // SAVE NEW BOOKING OBJECT TO DATABASE
-    const savedBooking = await newBooking.save();
-
-    // UPDATE EVENT OBJECT'S EVENTTICKETQUANTITYBOOKED ATTRIBUTE
-    event.bookedTickets += bookingQuantity;
-    const savedEvent = await event.save();
-
-    // SAVE CARD FOR FUTURE USE, SHOULD USER OPTED FOR IT
-    let savedCard = null;
-    console.log("everything fine2");
-    if (saveCard) {
-      const paymentMethod = await stripeInstance.paymentMethods.attach(
-        paymentMethodId,
-        {
-          customer: user.userStripeId,
-        }
-      );
-      user.userPaymentMethods.push(paymentMethod.id);
-
-      // SAVE UPDATED USER OBJECT
-      savedCard = await user.save();
-    }
-
-    // SENDING CONFIRMATION EMAIL
-    await sendConfirmationEmail(
-      savedBooking.bookingName,
-      savedBooking.bookingEmail,
-      savedBooking.bookingQuantity,
-      event.eventName
-    );
-
-    res.status(201).json({
-      message: "Successfully booked tickets!",
-    });
+    // Return the booking details
+    return res.status(200).json({ bookings });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    return res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };

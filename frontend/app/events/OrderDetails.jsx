@@ -2,6 +2,8 @@ import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, Activit
 import React, { useState, useEffect } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
+import { useStripe } from '@stripe/stripe-react-native';
+import { StripeProvider } from "@stripe/stripe-react-native";
 import PageHeader from "../../components/events/PageHeader";
 // import OrgDisplay from "../../components/OrgDisplay";
 // import EventHeader from "../../components/EventHeader";
@@ -10,18 +12,29 @@ import RoundBtn from "../../components/forms/RoundBtn";
 // import StyledInput from "../../components/StyledInput";
 // import TicketSelector from "../../components/TicketSelector";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { createBookingAndSendEmailAPI } from "../../apicalls/BookingApi";
+
 
 
 
 
 const OrderDetails = ({ route }) => {
   const { username, role, totalPrice, totalQty, selectedDate, quantities } = route.params;
+  const { eventDetails, ticketDetails } = route.params;
+
+  console.log(quantities);
+  console.log(ticketDetails);
+  console.log(selectedDate);
 
 
   const navigation = useNavigation();
 
-  const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
+  // const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [loading, setLoading] = useState(true);            // State to manage loading status
+  const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
+  const [eventTime, setEventTime] = useState(null);
+  const [eventDate, setEventDate] = useState(null);
+
 //   const [selectedDate, setSelectedDate] = useState(null); 
 //   const [modalVisible, setModalVisible] = useState(false);
 //   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
@@ -32,14 +45,22 @@ const OrderDetails = ({ route }) => {
 
 
 
-  
 
 
   useEffect(() => {
     const getEventDetails = async () => {
       try {
-        const details = await fetchEventDetails();  // Fetch event details
-        setEventDetails(details);                  // Set the fetched details to state
+        // const details = await fetchEventDetails();  // Fetch event details
+        // setEventDetails(details);                  // Set the fetched details to state
+        const timeRange = await formatEventTime(eventDetails.eventOpen, eventDetails.eventClose);
+        setEventTime(timeRange);
+
+        const date = new Date(selectedDate);
+
+        // Format options
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        setEventDate(date.toLocaleDateString('en-US', options));
+        
 
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
@@ -49,7 +70,32 @@ const OrderDetails = ({ route }) => {
     };
 
     getEventDetails();  // Call the function when component mounts
+    // initializePaymentSheet();
   }, []);
+
+  const formatEventTime = async (eventStartDate, eventEndDate) => {
+    // Create Date objects from the ISO strings
+    const start = new Date(eventStartDate);
+    const end = new Date(eventEndDate);
+  
+    // Format the time to get hour and period (AM/PM)
+    const startTime = start.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true,
+    }).toLowerCase();
+  
+    const endTime = end.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      hour12: true,
+    }).toLowerCase();
+  
+    // Combine start and end times in the desired format
+    return `${startTime} - ${endTime}`;
+  }
+
+
+
+  
     
 
 
@@ -124,25 +170,235 @@ const OrderDetails = ({ route }) => {
     });
   };
 
-  const onCheckout = async () => {
-    // 1. Create a payment intent
-   
-    // 2. Initialize the Payment sheet
-    
-    // 3. Present the Payment Sheet from Stripe
-    
-    // 4. If payment ok -> create the order
-    // onCreateOrder();
+  const createPaymentIntent = async (totalPrice, customerStripe) => {
+    try {
+      console.log(typeof(parseInt(totalPrice)) + parseInt(totalPrice));
+      console.log(typeof(customerStripe) + customerStripe);
+      const response = await fetch('http://localhost:5001/api/stripeRoute/createPaymentIntent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          amount: parseInt(totalPrice),
+          currency: "sgd",
+          customerStripeId: customerStripe
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Payment Intent created successfully:', data.paymentIntent.client_secret);
+        console.log('Key created successfully:', data.ephemeralKey);
+        return data;
+      } else {
+        throw new Error(data.message || 'Failed to create payment intent');
+      }
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      return null;
+    }
   };
 
-  const handleNext = async () => {
+  const createCustomerStripe = async (userId) => {
     try {
-      navigation.navigate('events/BookingComplete', { 
-        username: username, 
-        role: role, 
-        eventDetails: eventDetails,
-        selectedDate: selectedDate
+      const response = await fetch('http://localhost:5001/api/stripeRoute/createStripeCustomer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          userId: userId
+        }),
       });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Customer created successfully', data.stripeId);
+        return data.stripeId;
+      } else {
+        throw new Error(data.message || 'Failed to create customer');
+      }
+    } catch (error) {
+      console.error('Error creating customer:', error);
+      return null;
+    }
+  }
+
+  const createOrder = async (orderDetails) => {
+    try {
+      const response = await fetch('http://localhost:5001/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderDetails),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Order created successfully:', data);
+      } else {
+        console.error('Order creation failed:', data.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
+  };
+
+  const initializePaymentSheet = async () => {
+    const clientStripeId = await createCustomerStripe("Tsiew00015");
+    const intentList = await createPaymentIntent(totalPrice, clientStripeId);
+    if (!intentList) return;
+
+    const { error: initError } = await initPaymentSheet({
+      merchantDisplayName: 'Cultivate',
+      customerId: clientStripeId,
+      paymentIntentClientSecret: intentList.paymentIntent.client_secret,
+      customerEphemeralKeySecret: intentList.ephemeralKey,
+      defaultBillingDetails: {
+        name: 'Testing',
+      }
+    });
+    
+    if (initError) {
+      console.error('Error initializing payment sheet:', initError.message);
+      return;
+    }
+  
+    const { error: paymentError } = await presentPaymentSheet();
+  
+    if (paymentError) {
+      console.log('Error presenting payment sheet:', paymentError.message);
+      // navigation.navigate('events/BuyTickets', { 
+      //   email: email, 
+      //   role: role, 
+      //   // totalPrice: totalPrice, 
+      //   // totalQty: totalQty,
+      //   // selectedDate: selectedDate,
+      //   // quantities: quantities
+      // });
+      return;
+    }
+  
+    console.log('Payment completed successfully');
+    try{
+      await createBooking(username, eventDetails.eventId, quantities, ticketDetails);
+      
+    } catch (error){
+      console.error("Failed to create one or more bookings:", error.message);
+      return;
+    }
+
+    navigation.navigate('events/BookingComplete', { 
+      username: username, 
+      role: role, 
+      eventDetails: eventDetails,
+      selectedDate: selectedDate,
+      eventTime: eventTime,
+      ticketDetails: ticketDetails,
+      quantities: quantities
+    });
+    
+
+    // const orderDetails = {
+    //   items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
+    //   total: totalPrice,
+    //   customer: { email, role },
+    //   date: selectedDate,
+    // };
+    // await createOrder(orderDetails);
+  };
+
+  const openPaymentSheet = async () => {
+    const { error } = await presentPaymentSheet();
+
+    if (error) {
+      console.error(`Error code: ${error.code}`, error.message);
+    } else {
+      console.log('Success', 'Your order is confirmed!');
+    }
+  };
+
+  const createBooking = async (userId, eventId, quantities, ticketDetails) => {
+    try {
+      const bookingResults = await Promise.all(
+        Object.entries(quantities).map(async ([ticketType, bookingQuantity]) => {
+          // Find the corresponding ticket detail
+          const ticketDetail = ticketDetails.find(detail => detail.ticketType === ticketType);
+  
+          if (!ticketDetail) {
+            throw new Error(`Ticket details for type ${ticketType} not found.`);
+          }
+  
+          const { ticketPrice } = ticketDetail;
+  
+          return await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, ticketType, ticketPrice, selectedDate);
+        })
+      );
+  
+      console.log("All bookings created successfully:", bookingResults);
+      // Proceed to the next page or display a success message
+    } catch (error) {
+      console.error("Failed to create one or more bookings:", error.message);
+      // Show error message to the user
+    }
+
+    // try {
+    //   // Use Promise.all to send all API requests concurrently
+    //   const results = await Promise.all(
+    //     Object.entries(quantities).map(([ticketType, bookingQuantity]) => 
+    //       validateBookingRequestAPI(username, eventDetails.eventId, bookingQuantity, ticketType)
+    //     )
+    //   );
+      
+    //   // If all requests succeed, navigate to the next page
+    //   console.log("All validations succeeded:", results);
+    //   navigateToNextPage(); // Replace this with your actual navigation function
+      
+    // } catch (error) {
+    //   // If any request fails, display an error message
+    //   console.error("One or more validations failed:", error.message);
+    //   showErrorMessage("Failed to validate all bookings. Please try again."); // Replace this with your actual error handling
+    // }
+
+
+
+
+    // try {
+    //   const data = await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice);
+    //   // If successful, navigate to the next page or display a success message
+    //   console.log('Booking and email sent successfully:', data);
+    // } catch (error) {
+    //   // If there is an error, show an error message to the user
+    //   console.error('Failed to create booking:', error.message);
+    // }
+  }
+
+  const handleNext = async () => {
+    console.log(totalPrice);
+    
+    try {
+      if(totalPrice > 0){
+        await initializePaymentSheet();
+      }
+      else{
+        try{
+          await createBooking(username, eventDetails.eventId, quantities, ticketDetails);
+          
+        } catch (error){
+          console.error("Failed to create one or more bookings:", error.message);
+          return;
+        }
+    
+        navigation.navigate('events/BookingComplete', { 
+          username: username, 
+          role: role, 
+          eventDetails: eventDetails,
+          selectedDate: selectedDate,
+          eventTime: eventTime,
+          ticketDetails: ticketDetails,
+          quantities: quantities
+        });
+      }
+      
     } catch (error) {
       console.error("Failed to submit details:", error);
     }
@@ -160,6 +416,8 @@ const OrderDetails = ({ route }) => {
 
 
   return (
+    <StripeProvider 
+    publishableKey="pk_test_51QAT4iFJii7b5f1yg8TXWw5pk1snYe3SzS1yRsD50msnjFX70C1lpRXHN5h3OO7gsjEGmbVEpJyRvpLOAQp1M90r003Sn6VETM">
     <View style={{ flex:1 }}>
       <SafeAreaView style={styles.bgColour}>
         <PageHeader title={"Order Details"} onPress={()=>navigation.goBack()}/>
@@ -171,18 +429,18 @@ const OrderDetails = ({ route }) => {
           <SafeAreaView style={[styles.container, {flex: 1}]} >
           <View style={styles.eventSummary}>
                 <View style={styles.selectCont}>
-                    <Image style={styles.selectBg} source={{ uri: eventDetails.eventPic }} />
+                    <Image style={styles.selectBg} source={eventDetails.eventPic? {uri: eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} />
                     <View style={styles.selectView}>
                         <StyledText size={20} textContent={eventDetails.eventName} fontColor="#fff" fweight="bold"/>                        
                         <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventLocation} fontColor="#fff" />
                         <View style={styles.selectDetails}>
                             <View style={[styles.sumDate, styles.sumTags]}>
                                 <FontAwesome5 name="calendar-alt" size={14} color="#ffffff" />
-                                <StyledText style={styles.pageTitle} size={14} textContent={selectedDate} fontColor="#fff" />
+                                <StyledText style={styles.pageTitle} size={14} textContent={eventDate} fontColor="#fff" />
                             </View>
                             <View style={[styles.sumTime, styles.sumTags]}>
                                 <FontAwesome5 name="clock" size={14} color="#ffffff" />
-                                <StyledText style={styles.pageTitle} size={14} textContent={eventDetails.eventTime} fontColor="#fff" />
+                                <StyledText style={styles.pageTitle} size={14} textContent={eventTime} fontColor="#fff" />
                             </View>
                         </View>
                     </View>
@@ -191,7 +449,7 @@ const OrderDetails = ({ route }) => {
                     <View style={styles.divTitle}>
                         <StyledText size={26} textContent="Order Summary" alignment="left"/>
                     </View>
-                    {eventDetails.ticketOptions.map((option) => {
+                    {ticketDetails.map((option) => {
                         const qty = quantities[option.ticketType];
                         if (qty > 0) {
                             return (
@@ -243,6 +501,7 @@ const OrderDetails = ({ route }) => {
       
 
     </View>
+    </StripeProvider>
   );
 };
 
@@ -379,6 +638,7 @@ const styles = StyleSheet.create({
       },
       selectBg: {
         height: "100%",
+        width: "100%"
       },
       selectView: {
         width: "100%",
