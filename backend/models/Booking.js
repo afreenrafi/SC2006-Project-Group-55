@@ -26,6 +26,10 @@ const BookingSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
+  attendingDate: {
+    type: Date,
+    required: true, // Ensure the attending date is required
+  },
   eventId: {
     type: String,
     required: true,

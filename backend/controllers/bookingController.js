@@ -1,7 +1,6 @@
 // BUSINESS LOGIC FOR BOOKING ENTITY (CRUD)
 // IMPORT NESCESSARY LIBRARIES
 import { User } from "../models/User.js";
-// import Event from "../models/Event.js";
 import Booking from "../models/Booking.js";
 import nodemailer from 'nodemailer';
 import EventTicket from "../models/EventTicket.js";
@@ -43,7 +42,7 @@ const getAvailableTickets = (eventTicket) => {
 // VALIDATION FUNCTION FOR USER, EVENT, AND TICKET AVAILABILITY
 export const validateBookingRequest = async (req, res) => {
   try {
-    const { userId, eventId, bookingQuantity, eventTicketType } = req.body;
+    const { userId, eventId, bookingQuantity, eventTicketType, attendingDate } = req.body;
 
     // Check if the user exists
     const user = await User.findOne({ userId: userId });
@@ -60,6 +59,27 @@ export const validateBookingRequest = async (req, res) => {
       return res.status(404).json({ message: "Event ticket not found!" });
     }
 
+    // Check if the event exists and fetch the event details
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found!" });
+    }
+
+    // Validate attendingDate is within the event's time frame
+    const attendingDateObj = new Date(attendingDate);
+    if (
+      attendingDateObj < new Date(event.eventStartDate) ||
+      attendingDateObj > new Date(event.eventEndDate)
+    ) {
+      return res.status(400).json({
+        message: "Attending date is not within the event's start and end date range.",
+        data: {
+          eventStartDate: event.eventStartDate,
+          eventEndDate: event.eventEndDate,
+        },
+      });
+    }
+
     // Get the available ticket quantity
     const availableTickets = getAvailableTickets(eventTicket);
 
@@ -67,7 +87,7 @@ export const validateBookingRequest = async (req, res) => {
     if (availableTickets < bookingQuantity) {
       return res.status(400).json({
         message: "Selected Event Ticket does not have enough tickets available!",
-        data: { availableTickets }
+        data: { availableTickets },
       });
     }
 
@@ -84,7 +104,7 @@ export const validateBookingRequest = async (req, res) => {
 // FUNCTION TO CREATE BOOKING AND SEND CONFIRMATION EMAIL
 export const createBookingAndSendEmail = async (req, res) => {
   try {
-    const { userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice } = req.body;
+    const { userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice, attendingDate } = req.body;
 
     // Find the user by userId
     const user = await User.findOne({ userId: userId });
@@ -118,6 +138,7 @@ export const createBookingAndSendEmail = async (req, res) => {
       userId: userId,
       eventTicketPrice: eventTicketPrice, // Include the ticket price
       eventTicketType: eventTicketType, // Include the ticket type
+      attendingDate: new Date(attendingDate), // Include the attending date and ensure it's a Date object
     });
 
     // Save the new booking to the database
@@ -149,7 +170,6 @@ export const createBookingAndSendEmail = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
-
 
 export const getTicketBooked = async (req, res) => {
   try {
