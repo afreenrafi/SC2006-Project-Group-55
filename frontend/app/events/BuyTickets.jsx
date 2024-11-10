@@ -113,8 +113,9 @@ const BuyTickets = ({ route }) => {
     while (currentDate <= end) {
       const day = currentDate.toLocaleDateString("en-GB", { day: "2-digit" });
       const month = currentDate.toLocaleDateString("en-GB", { month: "short" }).toUpperCase();
+      const isoDateTime = currentDate.toISOString();
   
-      eventDates.push({ day, month });
+      eventDates.push({ day, month, isoDateTime });
   
       // Move to the next day
       currentDate.setDate(currentDate.getDate() + 1);
@@ -144,7 +145,7 @@ const BuyTickets = ({ route }) => {
   
       // Set the initial selected date to the first date in eventDates
       if (genDateArr && genDateArr.length > 0) {
-        const firstDate = `${genDateArr[0].day}-${genDateArr[0].month}`;
+        const firstDate = genDateArr[0].isoDateTime;
         setSelectedDate(firstDate);
       }
     };
@@ -504,8 +505,8 @@ const BuyTickets = ({ route }) => {
                     <View style={styles.datesCont}>
                         <ScrollView style={styles.datesScroll}>
                             {dateArray?.map((date, index) => {
-                                const dateKey = `${date.day}-${date.month}`;
-                                const isAboveSelected = selectedDate && index === dateArray?.findIndex(d => `${d.day}-${d.month}` === selectedDate) - 1;
+                                const dateKey = date.isoDateTime;
+                                const isAboveSelected = selectedDate && index === dateArray?.findIndex(d => `${d.isoDateTime}` === selectedDate) - 1;
 
                                 return (
                                 <SingleDate

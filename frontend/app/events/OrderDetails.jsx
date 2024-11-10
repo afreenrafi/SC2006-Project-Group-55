@@ -33,6 +33,7 @@ const OrderDetails = ({ route }) => {
   const [loading, setLoading] = useState(true);            // State to manage loading status
   const { initPaymentSheet, presentPaymentSheet, confirmPaymentSheetPayment } = useStripe();
   const [eventTime, setEventTime] = useState(null);
+  const [eventDate, setEventDate] = useState(null);
 
 //   const [selectedDate, setSelectedDate] = useState(null); 
 //   const [modalVisible, setModalVisible] = useState(false);
@@ -53,6 +54,12 @@ const OrderDetails = ({ route }) => {
         // setEventDetails(details);                  // Set the fetched details to state
         const timeRange = await formatEventTime(eventDetails.eventOpen, eventDetails.eventClose);
         setEventTime(timeRange);
+
+        const date = new Date(selectedDate);
+
+        // Format options
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        setEventDate(date.toLocaleDateString('en-US', options));
         
 
         setLoading(false);                         // Set loading to false once data is fetched
@@ -321,7 +328,7 @@ const OrderDetails = ({ route }) => {
   
           const { ticketPrice } = ticketDetail;
   
-          return await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, ticketType, ticketPrice);
+          return await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, ticketType, ticketPrice, selectedDate);
         })
       );
   
@@ -425,7 +432,7 @@ const OrderDetails = ({ route }) => {
                         <View style={styles.selectDetails}>
                             <View style={[styles.sumDate, styles.sumTags]}>
                                 <FontAwesome5 name="calendar-alt" size={14} color="#ffffff" />
-                                <StyledText style={styles.pageTitle} size={14} textContent={selectedDate} fontColor="#fff" />
+                                <StyledText style={styles.pageTitle} size={14} textContent={eventDate} fontColor="#fff" />
                             </View>
                             <View style={[styles.sumTime, styles.sumTags]}>
                                 <FontAwesome5 name="clock" size={14} color="#ffffff" />

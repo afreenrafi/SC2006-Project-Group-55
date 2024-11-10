@@ -2,6 +2,7 @@
 // IMPORT NESCESSARY LIBRARIES
 import { User } from "../models/User.js";
 import Booking from "../models/Booking.js";
+import Event from "../models/Event.js";
 import nodemailer from 'nodemailer';
 import EventTicket from "../models/EventTicket.js";
 
@@ -60,7 +61,8 @@ export const validateBookingRequest = async (req, res) => {
     }
 
     // Check if the event exists and fetch the event details
-    const event = await Event.findById(eventId);
+    // const event = await Event.findOne( {eventId: eventId});
+    const event = await Event.findOne( {eventId: eventId});
     if (!event) {
       return res.status(404).json({ message: "Event not found!" });
     }

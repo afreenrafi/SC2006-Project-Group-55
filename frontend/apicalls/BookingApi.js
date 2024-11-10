@@ -29,8 +29,9 @@ export const validateBookingRequestAPI = async (userId, eventId, bookingQuantity
   }
 
 
-  export const createBookingAndSendEmailAPI = async (userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice) => {
+  export const createBookingAndSendEmailAPI = async (userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice, attendingDate) => {
     try {
+      console.log(userId+eventId+bookingQuantity+eventTicketType+eventTicketPrice+attendingDate);
       const response = await fetch('http://localhost:5001/api/bookingRoute/createBookingAndSendEmail', {
         method: 'POST',
         headers: {
@@ -42,8 +43,11 @@ export const validateBookingRequestAPI = async (userId, eventId, bookingQuantity
           bookingQuantity,
           eventTicketType,
           eventTicketPrice,
+          attendingDate
         }),
       });
+
+      
   
       if (!response.ok) {
         // If the response is not successful, throw an error to handle in the catch block
