@@ -1,5 +1,5 @@
 import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, Platform } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import PageHeader from "../../components/events/PageHeader";
@@ -8,6 +8,10 @@ import SingleFaq from "../../components/events/SingleFaq";
 import EventHeader from "../../components/events/EventHeader";
 import RoundBtn from "../../components/forms/RoundBtn";
 import { fetchEventById, fetchFaqByEventId, fetchFaqItemById } from "../../apicalls/EventApi";
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
+
 
 
 
@@ -22,6 +26,7 @@ const EventsPage = ({ route }) => {
   const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
   const [faqDetails, setFaqDetails] = useState(null);
   const [loading, setLoading] = useState(true);            // State to manage loading status
+  const { error, handleError } = useContext(ErrorContext);
 
 
 
@@ -42,6 +47,7 @@ const EventsPage = ({ route }) => {
         setLoading(false);                         // Set loading to false once data is fetched
       } catch (error) {
         console.error("Error fetching event details:", error);
+        handleError('Server error. Please try again later.');
         setLoading(false);
       }
     };
@@ -60,6 +66,7 @@ const EventsPage = ({ route }) => {
       return result;
     } catch (error) {
       console.error("Error fetching event page details:", error);
+      throw error;
     }
     // console.log("eventId is " + eventId)
     // return new Promise((resolve) => {
@@ -120,6 +127,7 @@ const EventsPage = ({ route }) => {
 
     } catch (error) {
       console.error("Error fetching FAQ page details:", error);
+      throw error;
     }
   };
 
@@ -144,6 +152,7 @@ const EventsPage = ({ route }) => {
       return results;
     } catch (error) {
       console.error("Error fetching FAQ contents:", error);
+      throw error;
     }
   }
   
@@ -156,6 +165,7 @@ const EventsPage = ({ route }) => {
       navigation.navigate('events/BuyTickets', { username: username, role: role, eventDetails: eventDetails });  // Navigate to new page with email
     } catch (error) {
       console.error("Failed to submit details:", error);
+      throw error;
     }
   }
 
@@ -166,6 +176,9 @@ const EventsPage = ({ route }) => {
         <StyledText size={20} textContent="Loading event details..." />
       </View>
     );
+  }
+  if (error) {
+    return <NetworkErrorScreen />;
   }
 
 

@@ -1,5 +1,7 @@
 import React from 'react';
 import { AppProvider } from './context/AppContext';
+import { ErrorProvider } from './context/ErrorContext';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Tabs from './tabs/_layout'; // Adjust the path if necessary
 import Login from './auth/Login'; // Adjust the path if necessary
@@ -19,6 +21,7 @@ const Stack = createNativeStackNavigator();
 
 const MainLayout = () => {
   return (
+    <ErrorProvider>
     <AppProvider>
     <Stack.Navigator initialRouteName="auth">
       <Stack.Screen
@@ -103,6 +106,7 @@ const MainLayout = () => {
       />
     </Stack.Navigator>
     </AppProvider>
+    </ErrorProvider>
   );
 };
 

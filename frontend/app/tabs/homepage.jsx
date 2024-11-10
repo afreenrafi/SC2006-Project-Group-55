@@ -8,6 +8,11 @@ import { fetchEvents } from '../../apicalls/EventApi';
 import StyledText from "../../components/forms/StyledText";
 import { getTicketBookedAPI } from '../../apicalls/BookingApi';
 import { fetchEventById } from "../../apicalls/EventApi";
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
+
+
 
 
 
@@ -15,6 +20,7 @@ const filters = ['All', 'Museums', 'Exhibitions', 'Performances', 'Festivals']; 
 
 const Homepage = ({ route }) => {
   const navigation = useNavigation();
+  
 
   const { username, role } = route.params;
   console.log("username is "+ username + " " + role);
@@ -22,6 +28,9 @@ const Homepage = ({ route }) => {
   const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
+
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
 
   const [loading, setLoading] = useState(true);            // State to manage loading status
 
@@ -47,6 +56,7 @@ const Homepage = ({ route }) => {
 
     } catch (error) {
       console.error("Error fetching free event details:", error);
+      throw error; 
     }
   };
   const getPaidEvents = async () => {
@@ -57,6 +67,7 @@ const Homepage = ({ route }) => {
 
     } catch (error) {
       console.error("Error fetching free event details:", error);
+      throw error; 
     }
   };
 
@@ -74,7 +85,9 @@ const Homepage = ({ route }) => {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching homepage details:", error);
+      // handleError('Server error. Please try again later.');
       setLoading(false);
+      throw error;
     }
   }
 
@@ -85,87 +98,11 @@ const Homepage = ({ route }) => {
       return enrichedAndCombinedEvents;
     } catch (error) {
       console.error("Error fetching and processing bookings:", error);
-      return [];
+      throw error;
+      // return [];
+      
     }
   };
-
-  // const getEnrichedAndCombinedEvents = async (bookings) => {
-  //   try {
-  //     // Step 1: Aggregate booking quantities by eventId and eventTicketId
-  //     const aggregatedBookings = bookings.reduce((acc, booking) => {
-  //       const key = `${booking.eventId}-${booking.eventTicketId}`;
-        
-  //       if (!acc[key]) {
-  //         acc[key] = {
-  //           eventId: booking.eventId,
-  //           eventTicketId: booking.eventTicketId,
-  //           totalQuantity: booking.bookingQuantity,
-  //           eventTicketType: booking.eventTicketType,
-  //           eventTicketPrice: booking.eventTicketPrice,
-  //           attendingDate: booking.attendingDate,
-  //         };
-  //       } else {
-  //         acc[key].totalQuantity += booking.bookingQuantity;
-  //       }
-        
-  //       return acc;
-  //     }, {});
-  
-  //     // Convert the result back to an array
-  //     const aggregatedArray = Object.values(aggregatedBookings);
-  
-  //     // Step 2: Fetch event details and organize data by eventId
-  //     const uniqueEventIds = [...new Set(aggregatedArray.map(booking => booking.eventId))];
-  //     const eventDetailsMap = await Promise.all(
-  //       uniqueEventIds.map(async (eventId) => {
-  //         const eventData = await fetchEventById(eventId);
-  //         return { eventId, eventData };
-  //       })
-  //     );
-  
-  //     // Step 3: Combine tickets by eventId and attach event details
-  //     const eventDataMap = eventDetailsMap.reduce((acc, { eventId, eventData }) => {
-  //       acc[eventId] = eventData;
-  //       return acc;
-  //     }, {});
-  
-  //     const combinedData = aggregatedArray.reduce((acc, item) => {
-  //       const existingEvent = acc.find(event => event.eventId === item.eventId);
-  
-  //       if (existingEvent) {
-  //         // Add ticket details to the existing event's tickets array
-  //         existingEvent.tickets.push({
-  //           eventTicketId: item.eventTicketId,
-  //           totalQuantity: item.totalQuantity,
-  //           eventTicketType: item.eventTicketType,
-  //           eventTicketPrice: item.eventTicketPrice,
-  //           attendingDate: item.attendingDate,
-  //         });
-  //       } else {
-  //         // Create a new event entry with tickets array initialized
-  //         acc.push({
-  //           eventId: item.eventId,
-  //           eventDetails: eventDataMap[item.eventId] || null,
-  //           tickets: [{
-  //             eventTicketId: item.eventTicketId,
-  //             totalQuantity: item.totalQuantity,
-  //             eventTicketType: item.eventTicketType,
-  //             eventTicketPrice: item.eventTicketPrice,
-  //             attendingDate: item.attendingDate,
-  //           }],
-  //         });
-  //       }
-        
-  //       return acc;
-  //     }, []);
-  
-  //     return combinedData;
-  
-  //   } catch (error) {
-  //     console.error("Error combining event data:", error);
-  //     return [];
-  //   }
-  // };
 
   const getEnrichedAndCombinedEvents = async (bookings) => {
     try {
@@ -256,7 +193,20 @@ const Homepage = ({ route }) => {
   
 
   useEffect(() => {
-    getHomepageData();
+    const fetchData = async () => {
+      try {
+        clearError();
+        const result = await getHomepageData();
+        // Process result
+      } catch (e) {
+        handleError('Unable to fetch events. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    
   }, []);
 
 
@@ -302,14 +252,6 @@ const Homepage = ({ route }) => {
     navigation.navigate('TicketDetails', { event });
   };
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#CA3550" />
-        <StyledText size={20} textContent="Loading event details..." />
-      </View>
-    );
-  }
 
   const renderUpcomingEvent = () => {
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
@@ -363,6 +305,18 @@ const Homepage = ({ route }) => {
         </View>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <StyledText size={20} textContent="Loading event details..." />
+      </View>
+    );
+  }
+  if (error) {
+    return <NetworkErrorScreen />;
+  }
 
   return (
     <ScrollView style={styles.container}>
