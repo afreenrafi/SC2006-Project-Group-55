@@ -45,24 +45,6 @@ export const validateBookingRequest = async (req, res) => {
   try {
     const { userId, eventId, bookingQuantity, eventTicketType, attendingDate } = req.body;
 
-    // Validate input parameters
-    if (!userId || !eventId || !bookingQuantity || !eventTicketType || !attendingDate) {
-      return res.status(400).json({
-        message: "Missing required fields: userId, eventId, bookingQuantity, eventTicketType, or attendingDate.",
-      });
-    }
-
-    // Validate bookingQuantity is a positive integer
-    if (typeof bookingQuantity !== 'number' || bookingQuantity <= 0) {
-      return res.status(400).json({ message: "Invalid booking quantity. It must be a positive number." });
-    }
-
-    // Validate attendingDate format
-    const attendingDateObj = new Date(attendingDate);
-    if (isNaN(attendingDateObj.getTime())) {
-      return res.status(400).json({ message: "Invalid attending date format. Please provide a valid date." });
-    }
-
     // Check if the user exists
     const user = await User.findOne({ userId: userId });
     if (!user) {
@@ -79,12 +61,14 @@ export const validateBookingRequest = async (req, res) => {
     }
 
     // Check if the event exists and fetch the event details
-    const event = await Event.findOne({ eventId: eventId });
+    // const event = await Event.findOne( {eventId: eventId});
+    const event = await Event.findOne( {eventId: eventId});
     if (!event) {
       return res.status(404).json({ message: "Event not found!" });
     }
 
     // Validate attendingDate is within the event's time frame
+    const attendingDateObj = new Date(attendingDate);
     if (
       attendingDateObj < new Date(event.eventStartDate) ||
       attendingDateObj > new Date(event.eventEndDate)
@@ -115,8 +99,7 @@ export const validateBookingRequest = async (req, res) => {
       data: { user, eventTicket, availableTickets },
     });
   } catch (error) {
-    // Handle unexpected errors
-    return res.status(500).json({ message: "Internal server error.", error: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -125,24 +108,9 @@ export const createBookingAndSendEmail = async (req, res) => {
   try {
     const { userId, eventId, bookingQuantity, eventTicketType, eventTicketPrice, attendingDate } = req.body;
 
-    // Validate that all required fields are provided
-    if (!userId || !eventId || !bookingQuantity || !eventTicketType || !eventTicketPrice || !attendingDate) {
-      return res.status(400).json({ message: "All fields are required." });
-    }
-
-    // Validate data types
-    if (typeof bookingQuantity !== 'number' || bookingQuantity <= 0) {
-      return res.status(400).json({ message: "Invalid booking quantity. It must be a positive number." });
-    }
-    if (typeof eventTicketPrice !== 'number' || eventTicketPrice < 0) {
-      return res.status(400).json({ message: "Invalid event ticket price. It must be a non-negative number." });
-    }
-    if (!Date.parse(attendingDate)) {
-      return res.status(400).json({ message: "Invalid attending date. It must be a valid date string." });
-    }
-
     // Find the user by userId
     const user = await User.findOne({ userId: userId });
+
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
@@ -152,24 +120,9 @@ export const createBookingAndSendEmail = async (req, res) => {
       eventId: eventId,
       eventTicketType: eventTicketType,
     });
+
     if (!eventTicket) {
       return res.status(404).json({ message: "Event ticket not found." });
-    }
-
-    // Check if attendingDate is within the event's date range
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({ message: "Event not found." });
-    }
-    const eventStartDate = new Date(event.eventStartDate);
-    const eventEndDate = new Date(event.eventEndDate);
-    const userAttendingDate = new Date(attendingDate);
-
-    if (userAttendingDate < eventStartDate || userAttendingDate > eventEndDate) {
-      return res.status(400).json({
-        message: "Attending date must be within the event's start and end dates.",
-        data: { eventStartDate, eventEndDate },
-      });
     }
 
     // Check if the quantity to be booked is available
@@ -216,35 +169,19 @@ export const createBookingAndSendEmail = async (req, res) => {
       booking: newBooking,
     });
   } catch (error) {
-    // Catch any unexpected errors and respond with a 500 Internal Server Error
-    return res.status(500).json({ message: "An unexpected error occurred.", error: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
-
 
 export const getTicketBooked = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Check if userId is provided
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required." });
-    }
-
-    // Validate the userId format (assuming it should be a string of a certain length or pattern)
-    if (typeof userId !== 'string' || userId.trim().length === 0) {
-      return res.status(400).json({ message: "Invalid User ID format." });
-    }
-
     // Find the user by userId
     const user = await User.findOne({ userId: userId });
+
     if (!user) {
       return res.status(404).json({ message: "User not found." });
-    }
-
-    // Check if the user's TicketBooked array is empty
-    if (!user.TicketBooked || user.TicketBooked.length === 0) {
-      return res.status(404).json({ message: "No bookings found for this user." });
     }
 
     // Retrieve all bookings associated with the user's TicketBooked array
@@ -252,15 +189,9 @@ export const getTicketBooked = async (req, res) => {
       bookingId: { $in: user.TicketBooked },
     });
 
-    // Check if no bookings were found (for edge cases where booking IDs are invalid)
-    if (!bookings || bookings.length === 0) {
-      return res.status(404).json({ message: "No valid bookings found for this user." });
-    }
-
     // Return the booking details
     return res.status(200).json({ bookings });
   } catch (error) {
-    // Catch any unexpected errors and respond with a 500 Internal Server Error
-    return res.status(500).json({ message: "Internal Server Error Occurred!", error: error.message });
+    return res.status(500).json({ message: "Internal Server Error Occurred!" });
   }
 };
