@@ -103,5 +103,33 @@ export const fetchUserById = async (userId) => {
       return { error: error.message };
     }
   };
+
+  // Frontend API call to delete a user by ID
+  export const deleteUserById = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/userRoute/delete/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Check if the response is successful
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete user');
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+      return result;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error; // Re-throw the error for handling in the calling code
+    }
+  };
+
+
+
   
   

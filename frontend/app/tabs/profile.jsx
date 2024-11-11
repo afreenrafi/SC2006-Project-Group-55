@@ -11,11 +11,13 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { deleteUserById } from "../../apicalls/UserApi";
 
-const Profile = () => {
+const Profile = ({ route }) => {
   const [isPushEnabled, setIsPushEnabled] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const navigation = useNavigation();
+  const { username } = route.params;
 
   const toggleSwitch = async () => {
     const newValue = !isPushEnabled;
@@ -38,11 +40,13 @@ const Profile = () => {
 
   const handleDeleteAccount = async () => {
     try {
+
       setDeleteModalVisible(false);
       
       // Optional: Show a loading indicator here if you want to indicate deletion in progress
       
       // Clear AsyncStorage and wait for it to complete
+      await deleteUserById(username);
       await AsyncStorage.clear();
   
       // Navigate to the auth screen only after storage is cleared
