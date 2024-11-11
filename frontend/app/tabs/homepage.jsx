@@ -1,6 +1,8 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, ActivityIndicator} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
 // import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
 import { useNavigation } from '@react-navigation/native';
@@ -9,25 +11,42 @@ import StyledText from "../../components/forms/StyledText";
 import { getTicketBookedAPI } from '../../apicalls/BookingApi';
 import { fetchEventById } from "../../apicalls/EventApi";
 
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
+import { useFocusEffect } from '@react-navigation/native';
+import { fetchUserById } from '../../apicalls/UserApi';
+
+import { bookmarkEvent, getBookmarkedEvents } from '../../apicalls/EventApi';
+
+
 
 
 const filters = ['All', 'Museums', 'Exhibitions', 'Performances', 'Festivals']; // Filter categories
 
 const Homepage = ({ route }) => {
   const navigation = useNavigation();
+  
 
   const { username, role } = route.params;
   console.log("username is "+ username + " " + role);
 
-  const { savedEvents, toggleBookmark } = useContext(AppContext);
+
+  // const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
+
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
 
   const [loading, setLoading] = useState(true);            // State to manage loading status
 
   const [mockPopularEvents, setPageFreeEvents] = useState(null);
   const [mockNearbyEvents, setPagePaidEvents] = useState(null);
   const [mockUpcomingEvents, setUpcomingEvents] = useState(null);
+
+  const [userDisplay, setUserDisplay] = useState('');
+  const [savedEvents, setSavedEvents] = useState([]);
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.eventGenre === selectedFilter);
@@ -38,6 +57,17 @@ const Homepage = ({ route }) => {
   //   ...mockPopularEvents,
   //   ...mockNearbyEvents,
   // ];
+  const toggleBookmark = (event) => {
+    // setSavedEvents((prevSavedEvents) => {
+    //   if (prevSavedEvents.some((e) => e.eventId === event.eventId)) {
+    //     // Remove event if already saved
+    //     return prevSavedEvents.filter((e) => e.eventId !== event.eventId);
+    //   } else {
+    //     // Add new event
+    //     return [...prevSavedEvents, event];
+    //   }
+    // });
+  };
 
   const getFreeEvents = async () => {
     try {
@@ -47,6 +77,7 @@ const Homepage = ({ route }) => {
 
     } catch (error) {
       console.error("Error fetching free event details:", error);
+      throw error; 
     }
   };
   const getPaidEvents = async () => {
@@ -57,24 +88,46 @@ const Homepage = ({ route }) => {
 
     } catch (error) {
       console.error("Error fetching free event details:", error);
+      throw error; 
     }
+  };
+
+  const fetchBookmarkedEvents = async (username) => {
+    try {
+      
+      const bookmarked = await getBookmarkedEvents(username);
+      const bookmarkedIds = bookmarked.map(event => event.eventId);
+      console.log(bookmarkedIds);
+      return bookmarkedIds;
+      // Process result
+    } catch (e) {
+      console.error("Error fetching bookmarked details:", error);
+      throw error; 
+    } 
   };
 
   const getHomepageData = async ()=> {
     try{
+      const bookmarkEventId = await fetchBookmarkedEvents(username);
+      setSavedEvents(bookmarkEventId);
+      console.log("bookmark Ids "+bookmarkEventId);
       const freeEvents = await getFreeEvents();
       setPageFreeEvents(freeEvents);
       const paidEvents = await getPaidEvents();
       setPagePaidEvents(paidEvents);
       const ticketEvents = await getAggregatedBookings(username);
       setUpcomingEvents(ticketEvents);
+      const user = await fetchUserById(username);
+      setUserDisplay(user.userName);
       console.log("ticketed "+JSON.stringify(ticketEvents));
 
 
       setLoading(false);
     } catch (error) {
       console.error("Error fetching homepage details:", error);
+      // handleError('Server error. Please try again later.');
       setLoading(false);
+      throw error;
     }
   }
 
@@ -82,90 +135,18 @@ const Homepage = ({ route }) => {
     try {
       const bookings = await getTicketBookedAPI(userId);
       const enrichedAndCombinedEvents = await getEnrichedAndCombinedEvents(bookings);
+      if(enrichedAndCombinedEvents == []){
+        return [];
+      }
       return enrichedAndCombinedEvents;
+
     } catch (error) {
       console.error("Error fetching and processing bookings:", error);
-      return [];
+      throw error;
+      // return [];
+      
     }
   };
-
-  // const getEnrichedAndCombinedEvents = async (bookings) => {
-  //   try {
-  //     // Step 1: Aggregate booking quantities by eventId and eventTicketId
-  //     const aggregatedBookings = bookings.reduce((acc, booking) => {
-  //       const key = `${booking.eventId}-${booking.eventTicketId}`;
-        
-  //       if (!acc[key]) {
-  //         acc[key] = {
-  //           eventId: booking.eventId,
-  //           eventTicketId: booking.eventTicketId,
-  //           totalQuantity: booking.bookingQuantity,
-  //           eventTicketType: booking.eventTicketType,
-  //           eventTicketPrice: booking.eventTicketPrice,
-  //           attendingDate: booking.attendingDate,
-  //         };
-  //       } else {
-  //         acc[key].totalQuantity += booking.bookingQuantity;
-  //       }
-        
-  //       return acc;
-  //     }, {});
-  
-  //     // Convert the result back to an array
-  //     const aggregatedArray = Object.values(aggregatedBookings);
-  
-  //     // Step 2: Fetch event details and organize data by eventId
-  //     const uniqueEventIds = [...new Set(aggregatedArray.map(booking => booking.eventId))];
-  //     const eventDetailsMap = await Promise.all(
-  //       uniqueEventIds.map(async (eventId) => {
-  //         const eventData = await fetchEventById(eventId);
-  //         return { eventId, eventData };
-  //       })
-  //     );
-  
-  //     // Step 3: Combine tickets by eventId and attach event details
-  //     const eventDataMap = eventDetailsMap.reduce((acc, { eventId, eventData }) => {
-  //       acc[eventId] = eventData;
-  //       return acc;
-  //     }, {});
-  
-  //     const combinedData = aggregatedArray.reduce((acc, item) => {
-  //       const existingEvent = acc.find(event => event.eventId === item.eventId);
-  
-  //       if (existingEvent) {
-  //         // Add ticket details to the existing event's tickets array
-  //         existingEvent.tickets.push({
-  //           eventTicketId: item.eventTicketId,
-  //           totalQuantity: item.totalQuantity,
-  //           eventTicketType: item.eventTicketType,
-  //           eventTicketPrice: item.eventTicketPrice,
-  //           attendingDate: item.attendingDate,
-  //         });
-  //       } else {
-  //         // Create a new event entry with tickets array initialized
-  //         acc.push({
-  //           eventId: item.eventId,
-  //           eventDetails: eventDataMap[item.eventId] || null,
-  //           tickets: [{
-  //             eventTicketId: item.eventTicketId,
-  //             totalQuantity: item.totalQuantity,
-  //             eventTicketType: item.eventTicketType,
-  //             eventTicketPrice: item.eventTicketPrice,
-  //             attendingDate: item.attendingDate,
-  //           }],
-  //         });
-  //       }
-        
-  //       return acc;
-  //     }, []);
-  
-  //     return combinedData;
-  
-  //   } catch (error) {
-  //     console.error("Error combining event data:", error);
-  //     return [];
-  //   }
-  // };
 
   const getEnrichedAndCombinedEvents = async (bookings) => {
     try {
@@ -248,16 +229,89 @@ const Homepage = ({ route }) => {
       return [];
     }
   };
-  
-  
+
+  // const handleBookmark = async (username, item, isBookmarked) => {
+  //   try{
+  //     await bookmarkEvent(username, item.eventId);
+      
+  //     // isBookmarked
+  //     // toggleBookmark(item);
+  //   }
+  //   catch(error){
+  //     handleError('Unable to bookmark. Please try again later.');
+  //   }
+  // }
+  const handleBookmark = async (username, item) => {
+    try {
+      await bookmarkEvent(username, item.eventId);
+
+      setSavedEvents((prevSavedEvents) => {
+        if (prevSavedEvents.includes(item.eventId)) {
+          // Remove event if already bookmarked
+          return prevSavedEvents.filter((id) => id !== item.eventId);
+        } else {
+          // Add event if not bookmarked
+          return [...prevSavedEvents, item.eventId];
+        }
+      });
+    } catch (error) {
+      handleError('Unable to bookmark. Please try again later.');
+    }
+  };
+
   
   
 
-  
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      clearError();
+      const result = await getHomepageData();
+      setLoading(false);
+      // Process result
+    } catch (e) {
+      handleError('Unable to fetch events. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  useEffect(() => {
-    getHomepageData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       clearError();
+  //       const result = await getHomepageData();
+  //       // Process result
+  //     } catch (e) {
+  //       handleError('Unable to fetch events. Please try again later.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+    
+  // }, []);
+
+  useFocusEffect( useCallback( ()=>{
+    // const fetchData = async () => {
+    //   try {
+    //     setLoading(true);
+    //     clearError();
+    //     const result = await getHomepageData();
+    //     setLoading(false);
+    //     // Process result
+    //   } catch (e) {
+    //     handleError('Unable to fetch events. Please try again later.');
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
+    fetchData();
+  }, [clearError, handleError]));
+
+
 
 
   
@@ -272,7 +326,7 @@ const Homepage = ({ route }) => {
 
   const renderEventCard = ({ item }) => {
     // console.log("eventcard rendering"+item.eventId);
-    const isBookmarked = savedEvents.some((e) => e.eventId === item.eventId);
+    const isBookmarked = savedEvents.includes(item.eventId);
     const dateString = item.eventStartDate;
     const date = new Date(dateString);
     const formattedDate = new Intl.DateTimeFormat("en-GB", {
@@ -280,6 +334,8 @@ const Homepage = ({ route }) => {
       month: "short",
       year: "numeric"
     }).format(date);
+
+    
 
 
     return (
@@ -291,7 +347,7 @@ const Homepage = ({ route }) => {
           <Text style={styles.eventLocation}>{item.eventLocation}</Text>
           <Text style={styles.eventDate}>{formattedDate}</Text>
         </View>
-        <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.bookmarkButton}>
+        <TouchableOpacity onPress={() => handleBookmark(username, item)} style={styles.bookmarkButton}>
           <FontAwesome name={isBookmarked ? "bookmark" : "bookmark-o"} size={20} color={isBookmarked ? "#EE1C43" : "#FFF"} />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -302,22 +358,16 @@ const Homepage = ({ route }) => {
     navigation.navigate('TicketDetails', { event });
   };
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#CA3550" />
-        <StyledText size={20} textContent="Loading event details..." />
-      </View>
-    );
-  }
 
   const renderUpcomingEvent = () => {
+    if (mockUpcomingEvents != undefined || mockUpcomingEvents != null){
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
+    console.log("eventPic"+event.eventPic);
     return (
       <View>
         {/* Upcoming Event Card */}
         <View style={styles.upcomingEventCard}>
-          <Image source={event.eventPic? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
+          <Image source={event.eventDetails.eventPic ? {uri: event.eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
           <Text style={styles.upcomingEventTitle}>{event.eventDetails.eventName}</Text>
           <Text style={styles.upcomingEventLocation}>{event.eventDetails.eventLocation}</Text>
           {/* Date Toggle Buttons */}
@@ -362,19 +412,32 @@ const Homepage = ({ route }) => {
           </View>
         </View>
     );
+  }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <StyledText size={20} textContent="Loading event details..." />
+      </View>
+    );
+  }
+  if (error) {
+    return <NetworkErrorScreen onRetry={fetchData}/>;
+  }
 
   return (
     <ScrollView style={styles.container}>
       {/* Header with location and icons */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
+        {/* <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
           <FontAwesome name="bars" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.location}>📍 Boon Lay, Jurong</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        </TouchableOpacity> */}
+        <Text style={styles.location}>🏠 Hello {userDisplay}! <FontAwesome5 name="smile-beam" size={16} color="black" /></Text>
+        {/* <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <FontAwesome name="bell" size={24} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Title */}
@@ -406,13 +469,17 @@ const Homepage = ({ route }) => {
 </ScrollView>
 
       {/* Upcoming Events */}
+      {console.log("upcoming is "+mockUpcomingEvents)}
+      {
+        mockUpcomingEvents != ''  &&
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Upcoming Events</Text>
         {renderUpcomingEvent()}
       </View>
+      }
 
       {/* Popular Events Section */}
-      {console.log(filteredPopularEvents.length)}
+      {/* {console.log(filteredPopularEvents.length)} */}
       {filteredPopularEvents.length > 0 && 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -466,6 +533,7 @@ const styles = StyleSheet.create({
     paddingBottom: '5%',
     paddingTop: '17%',
     backgroundColor: '#FBF3F1',
+    
   },
   location: {
     fontSize: 16,

@@ -1,5 +1,5 @@
 import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView, Image } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 // import { useStripe } from '@stripe/stripe-react-native';
@@ -15,6 +15,9 @@ import TicketSelector from "../../components/events/TicketSelector";
 import { fetchTicketCatByTixId } from "../../apicalls/EventApi";
 import { validateBookingRequestAPI } from "../../apicalls/BookingApi";
 
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
 
 
 
@@ -24,8 +27,12 @@ const BuyTickets = ({ route }) => {
 
   const navigation = useNavigation();
 
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
+  const [loading, setLoading] = useState(true);
+
   // const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
-  const [mockEventDetails, setMockEvent] = useState(null);  // State to hold event details
+  // const [mockEventDetails, setMockEvent] = useState(null);  // State to hold event details
 
   // const [loading, setLoading] = useState(true);            // State to manage loading status
   const [selectedDate, setSelectedDate] = useState(null); 
@@ -39,7 +46,7 @@ const BuyTickets = ({ route }) => {
   const [totalPrice, setTotalPrice] = useState(0);
 
   const [dateArray, setDateArr] = useState([]);
-  const [ticketDetails, setTicketDetails] = useState(null)
+  const [ticketDetails, setTicketDetails] = useState(null);
 
   // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -124,16 +131,18 @@ const BuyTickets = ({ route }) => {
     return eventDates;
   }
 
-  useEffect(() => {
-    const fetchDateArray = async () => {
+  const fetchDateArray = async () => {
+    try{
+      setLoading(true);
+      clearError();
       const genDateArr = await generateEventDates(eventDetails.eventStartDate, eventDetails.eventEndDate);
       setDateArr(genDateArr);
-  
+
       const ticketCatArr = eventDetails.eventTicket;
       const tixCatArr = await fetchAllTicketCategories(ticketCatArr);
       console.log(tixCatArr);
       setTicketDetails(tixCatArr);
-  
+
       // Initialize quantities object for each ticket type
       if (tixCatArr) {
         const initialQuantities = {};
@@ -142,13 +151,22 @@ const BuyTickets = ({ route }) => {
         });
         setQuantities(initialQuantities);
       }
-  
+
       // Set the initial selected date to the first date in eventDates
       if (genDateArr && genDateArr.length > 0) {
         const firstDate = genDateArr[0].isoDateTime;
         setSelectedDate(firstDate);
       }
-    };
+      setLoading(false);
+    } catch (error){
+      handleError('Server error. Please try again later.');
+      setLoading(false);
+    }
+    
+  };
+
+  useEffect(() => {
+    
   
     fetchDateArray();
   }, [eventDetails]);
@@ -326,76 +344,10 @@ const BuyTickets = ({ route }) => {
       return ticketArr;
     } catch (error) {
       console.error("Error fetching ticket categories:", error);
+      handleError('Unable to fetch tickets categories. Please try again later.');
       return null;
     }
   };
-  
-
-  // const createPaymentIntent = async () => {
-  //   try {
-  //     const response = await fetch('http://localhost:5001/api/payments/intents', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ amount: Math.floor(totalPrice * 100) }),
-  //     });
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       return data.paymentIntent;
-  //     } else {
-  //       throw new Error(data.message || 'Failed to create payment intent');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error creating payment intent:', error);
-  //     return null;
-  //   }
-  // };
-
-  // const createOrder = async (orderDetails) => {
-  //   try {
-  //     const response = await fetch('http://localhost:5001/api/orders', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(orderDetails),
-  //     });
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       console.log('Order created successfully:', data);
-  //     } else {
-  //       console.error('Order creation failed:', data.message || 'Unknown error');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error creating order:', error);
-  //   }
-  // };
-
-  // const onCheckout = async () => {
-  //   const clientSecret = await createPaymentIntent();
-  //   if (!clientSecret) return;
-  //   const { error } = await initPaymentSheet({
-  //     merchantDisplayName: 'YourAppName',
-  //     paymentIntentClientSecret: clientSecret,
-  //   });
-  //   if (error) {
-  //     console.error('Error initializing payment sheet:', error.message);
-  //     return;
-  //   }
-  //   const paymentResponse = await presentPaymentSheet();
-  //   if (paymentResponse.error) {
-  //     console.error(`Error code: ${paymentResponse.error.code}`, paymentResponse.error.message);
-  //     return;
-  //   }
-  //   const orderDetails = {
-  //     items: Object.keys(quantities).map(type => ({ type, quantity: quantities[type] })),
-  //     total: totalPrice,
-  //     customer: { email, role },
-  //     date: selectedDate,
-  //   };
-  //   await createOrder(orderDetails);
-  // };
 
 
   
@@ -404,6 +356,7 @@ const BuyTickets = ({ route }) => {
   const handleNext = async () => {
     console.log(username);
     try {
+      setLoading(true);
       // Use Promise.all to send all API requests concurrently
       const results = await Promise.all(
         Object.entries(quantities).map(([ticketType, bookingQuantity]) => 
@@ -414,11 +367,13 @@ const BuyTickets = ({ route }) => {
       // If all requests succeed, navigate to the next page
       console.log("All validations succeeded:", results);
       navigateToNextPage(); // Replace this with your actual navigation function
-      
+      setLoading(false);
     } catch (error) {
       // If any request fails, display an error message
       console.error("One or more validations failed:", error.message);
-      showErrorMessage("Failed to validate all bookings. Please try again."); // Replace this with your actual error handling
+      handleError('Server error. Please try again later.');
+      setLoading(false);
+      throw error;
     }
     
     
@@ -460,6 +415,19 @@ const BuyTickets = ({ route }) => {
   //     </View>
   //   );
   // }
+  
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <StyledText size={20} textContent="Loading event details..." />
+      </View>
+    );
+  }
+  if (error) {
+    return <NetworkErrorScreen onRetry={fetchDateArray}/>;
+  }
 
 
   return (

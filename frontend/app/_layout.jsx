@@ -1,5 +1,7 @@
 import React from 'react';
 import { AppProvider } from './context/AppContext';
+import { ErrorProvider } from './context/ErrorContext';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Tabs from './tabs/_layout'; // Adjust the path if necessary
 import Login from './auth/Login'; // Adjust the path if necessary
@@ -13,12 +15,14 @@ import EventsPage from './events/EventsPage';
 import BuyTickets from './events/BuyTickets';
 import OrderDetails from './events/OrderDetails';
 import BookingComplete from './events/BookingComplete';
-
+// profile pages
+import UpdateProfile from './profile/UpdateProfile';
 
 const Stack = createNativeStackNavigator();
 
 const MainLayout = () => {
   return (
+    <ErrorProvider>
     <AppProvider>
     <Stack.Navigator initialRouteName="auth">
       <Stack.Screen
@@ -91,6 +95,14 @@ const MainLayout = () => {
           title: 'Booking Complete'
          }}
       />
+      
+      <Stack.Screen
+        name="profile/UpdateProfile"
+        component={UpdateProfile}
+        options={{ headerShown: false,
+          title: 'Update Profile'
+         }}
+      />
 
 
       
@@ -103,6 +115,7 @@ const MainLayout = () => {
       />
     </Stack.Navigator>
     </AppProvider>
+    </ErrorProvider>
   );
 };
 

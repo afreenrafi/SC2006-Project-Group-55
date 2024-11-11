@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 import { useNavigation } from '@react-navigation/native';
 import { fetchAllEvents } from '../../apicalls/EventApi';
+
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 
 const TicketsScreen = () => {
   const [allEvents, setAllEvents] = useState(null);
@@ -11,14 +14,19 @@ const TicketsScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
+
   const navigation = useNavigation();
 
   const toEventPage = async (eventId) => {
     navigation.navigate('events/EventsPage', { eventId: eventId });
   };
 
-  useEffect(() => {
-    const getAllEvents = async () => {
+  const getAllEvents = async () => {
+    try{
+      setLoading(true);
+      clearError();
       const events = await fetchAllEvents();
       if (events) {
         const uniqueEvents = Array.from(new Map(events.map(item => [item.eventId, item])).values());
@@ -26,10 +34,18 @@ const TicketsScreen = () => {
         setDisplayEvents(uniqueEvents);
       }
       setLoading(false);
-    };
+    } catch (error){
+      handleError('Server error. Please try again later.');
+      setLoading(false);
+    }
+    
+  };
 
+
+  useEffect(() => {
     getAllEvents();
   }, []);
+
 
   const renderEvent = ({ item }) => (
     <TouchableOpacity style={styles.eventCard} onPress={() => toEventPage(item.eventId)}>
@@ -64,6 +80,9 @@ const TicketsScreen = () => {
         <Text>Loading event details...</Text>
       </View>
     );
+  }
+  if (error) {
+    return <NetworkErrorScreen onRetry={getAllEvents}/>;
   }
 
   return (

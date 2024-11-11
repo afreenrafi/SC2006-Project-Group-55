@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, SafeAreaView, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
@@ -7,11 +7,22 @@ import PageHeader from '../../components/events/PageHeader';
 import StyledText from '../../components/StyledText';
 import RoundBtn from '../../components/forms/RoundBtn';
 
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
 const BookingComplete = ({ route }) => {
     const navigation = useNavigation();
     const { username, role, eventDetails, selectedDate, eventTime, ticketDetails, quantities } = route.params;
     const [isQrModalVisible, setQrModalVisible] = useState(false);
     const [eventDate, setEventDate] = useState(null);
+
+    const { error, handleError } = useContext(ErrorContext);
+    const [loading, setLoading] = useState(true);            // State to manage loading status
+    const { clearError } = useContext(ErrorContext);
+
+  
+
+    
 
     console.log(eventTime);
 
@@ -25,18 +36,32 @@ const BookingComplete = ({ route }) => {
             });
         } catch (error) {
             console.error("Failed to submit details:", error);
+            handleError('Server error. Please try again later.');
         }
     };
 
     useEffect(() => {
+      setLoading(true);
+      clearError();
       const date = new Date(selectedDate);
 
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       setEventDate(date.toLocaleDateString('en-US', options));
-
+      setLoading(false);
       
     }, []);
 
+    if (loading) {
+      return (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#CA3550" />
+          <StyledText size={20} textContent="Loading event details..." />
+        </View>
+      );
+    }
+    if (error) {
+      return <NetworkErrorScreen onRetry={getEventDetails}/>;
+    }
     return (
         <SafeAreaView style={{ flex:1, backgroundColor: "#FBF3F1" }}>
             {/* <PageHeader title={"Booking Complete"} onPress={()=>navigation.goBack()}/> */}

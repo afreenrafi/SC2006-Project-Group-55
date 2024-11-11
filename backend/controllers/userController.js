@@ -125,7 +125,7 @@ export const updateUser = async (req, res) => {
     // UPDATE EACH USER OBJECT ATTRIBUTE RESPECTIVELY, IF PROVIDED
     if (userName) user.userName = userName;
     if (userEmail) user.userEmail = userEmail;
-    if (userPassword) {
+    if (userPassword && userPassword != "") {
       user.userPassword = await bcrypt.hash(userPassword, 10);
     }
 

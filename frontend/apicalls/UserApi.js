@@ -103,5 +103,75 @@ export const fetchUserById = async (userId) => {
       return { error: error.message };
     }
   };
+
+  // Frontend API call to delete a user by ID
+  export const deleteUserById = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/userRoute/delete/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // Check if the response is successful
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete user');
+      }
+
+      const result = await response.json();
+      console.log(result.message);
+      return result;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error; // Re-throw the error for handling in the calling code
+    }
+  };
+
+
+  export const updateUser = async (userId, userData) => {
+    try {
+      console.log(userData);
+      const jsonData = {
+        userName: userData.editedDisplayName,
+        userPassword: userData.Password,
+        userEmail: userData.editedEmail
+      };
+      console.log(jsonData);
+      
+
+
+      const response = await fetch(`http://localhost:5001/api/userRoute/update/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
+      });
+  
+      const result = await response.json();
+      if(response.status == 404){
+        console.log("user not found");
+        return null;
+      }
+      else if (response.ok) {
+        console.log(result.message); // User profile updated successfully!
+        return result;
+      } else {
+        console.log(result.message); // User not found or other error messages
+        return null;
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return null;
+    }
+  };
+
+
+
+
+
+
   
   

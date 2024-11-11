@@ -40,7 +40,7 @@ const Details = ({ route }) => {
       setAge(numericAge);
       setAgeError("");
     } else {
-      setAgeError("Age must be a number between 0 and 120.");
+      setAgeError("Age must be a number between 0 and 100.");
     }
   };
   
@@ -83,7 +83,7 @@ const Details = ({ route }) => {
   
     if (!isNameValid) setNameError("Name cannot be empty or just spaces.");
     else setNameError("");
-    if (!isAgeValid) setAgeError("Age must be a number between 0 and 120.");
+    if (!isAgeValid) setAgeError("Age must be a number between 0 and 100.");
     if (!isEmailValid) setEmailError("Invalid email format.");
     if (!isGenderValid) setGenderError("Gender cannot be empty.");
   

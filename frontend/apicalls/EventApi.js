@@ -166,11 +166,67 @@ export const fetchTicketCatByTixId = async (tixItemId) => {
     }
 
   } catch (error) {
-    console.error('Error fetching FAQ item:', error);
-    throw new Error('Failed to fetch FAQ item');
+    console.error('Error fetching ticket category:', error);
+    throw new Error('Failed to fetch ticket category');
     // return null;
   }
 };
+
+export const bookmarkEvent = async (userId, eventId) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/eventRoute/bookmark/${userId}/${eventId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      // Check for client or server errors
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to bookmark/unbookmark event');
+    }
+
+    const data = await response.json();
+    console.log(data.message); // Logs "Event bookmarked!" or "Event unbookmarked!"
+    return data.userBookmark;  // Return the updated userBookmark array
+  } catch (error) {
+    console.error("Error in bookmarkEvent:", error);
+    throw error;
+  }
+}
+
+
+export const getBookmarkedEvents = async (userId) => {
+  try {
+    const response = await fetch(`http://localhost:5001/api/eventRoute/bookmark/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status == 404){
+      console.log("no bookmarked events");
+      return [];
+    }
+    else if (!response.ok) {
+      // Check for client or server errors
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to retrieve bookmarked events');
+    }
+
+    const bookmarkedEvents = await response.json();
+    console.log("Bookmarked Events:", bookmarkedEvents); // Log the retrieved events
+    
+    return bookmarkedEvents; // Return the list of bookmarked events
+  } catch (error) {
+    console.error("Error in getBookmarkedEvents:", error);
+    throw error;
+  }
+}
+
+
 
 
 

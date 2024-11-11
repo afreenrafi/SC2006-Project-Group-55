@@ -54,7 +54,7 @@ const TicketDetails = ({ route }) => {
   
         {/* Ticket Image and Title */}
         <View style={styles.ticketContainer}>
-          <Image source={event.eventPic ? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.ticketImage} />
+          <Image source={event.eventDetails.eventPic ? {uri: event.eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.ticketImage} />
           <Text style={styles.ticketTitle}>{event.eventDetails.eventName}</Text>
   
           {/* Ticket Info */}

@@ -1,5 +1,5 @@
 import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, Platform } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import { useStripe } from '@stripe/stripe-react-native';
@@ -13,6 +13,9 @@ import RoundBtn from "../../components/forms/RoundBtn";
 // import TicketSelector from "../../components/TicketSelector";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { createBookingAndSendEmailAPI } from "../../apicalls/BookingApi";
+
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 
 
 
@@ -35,6 +38,9 @@ const OrderDetails = ({ route }) => {
   const [eventTime, setEventTime] = useState(null);
   const [eventDate, setEventDate] = useState(null);
 
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
+
 //   const [selectedDate, setSelectedDate] = useState(null); 
 //   const [modalVisible, setModalVisible] = useState(false);
 //   const [selectedTicketType, setSelectedTicketType] = useState(null); // Track which ticket type is selected
@@ -43,35 +49,41 @@ const OrderDetails = ({ route }) => {
 //   const [totalQty, setTotalQty] = useState(0);
 //   const [totalPrice, setTotalPrice] = useState(0);
 
+const getEventDetails = async () => {
+
+  try {
+    setLoading(true);
+    clearError();
+    // const details = await fetchEventDetails();  // Fetch event details
+    // setEventDetails(details);                  // Set the fetched details to state
+    const timeRange = await formatEventTime(eventDetails.eventOpen, eventDetails.eventClose);
+    setEventTime(timeRange);
+
+    const date = new Date(selectedDate);
+
+    // Format options
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    setEventDate(date.toLocaleDateString('en-US', options));
+    
+
+    setLoading(false);                         // Set loading to false once data is fetched
+  } catch (error) {
+    console.error("Error fetching event details:", error);
+    handleError('Server error. Please try again later.');
+    setLoading(false);
+  }
+};
+
 
 
 
 
   useEffect(() => {
-    const getEventDetails = async () => {
-      try {
-        // const details = await fetchEventDetails();  // Fetch event details
-        // setEventDetails(details);                  // Set the fetched details to state
-        const timeRange = await formatEventTime(eventDetails.eventOpen, eventDetails.eventClose);
-        setEventTime(timeRange);
-
-        const date = new Date(selectedDate);
-
-        // Format options
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        setEventDate(date.toLocaleDateString('en-US', options));
-        
-
-        setLoading(false);                         // Set loading to false once data is fetched
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-        setLoading(false);
-      }
-    };
-
+  
     getEventDetails();  // Call the function when component mounts
     // initializePaymentSheet();
   }, []);
+
 
   const formatEventTime = async (eventStartDate, eventEndDate) => {
     // Create Date objects from the ISO strings
@@ -195,7 +207,8 @@ const OrderDetails = ({ route }) => {
       }
     } catch (error) {
       console.error('Error creating payment intent:', error);
-      return null;
+      throw error;
+      // return null;
     }
   };
 
@@ -219,32 +232,33 @@ const OrderDetails = ({ route }) => {
       }
     } catch (error) {
       console.error('Error creating customer:', error);
-      return null;
+      throw error;
+      // return null;
     }
   }
 
-  const createOrder = async (orderDetails) => {
-    try {
-      const response = await fetch('http://localhost:5001/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderDetails),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        console.log('Order created successfully:', data);
-      } else {
-        console.error('Order creation failed:', data.message || 'Unknown error');
-      }
-    } catch (error) {
-      console.error('Error creating order:', error);
-    }
-  };
+  // const createOrder = async (orderDetails) => {
+  //   try {
+  //     const response = await fetch('http://localhost:5001/api/orders', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(orderDetails),
+  //     });
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       console.log('Order created successfully:', data);
+  //     } else {
+  //       console.error('Order creation failed:', data.message || 'Unknown error');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error creating order:', error);
+  //   }
+  // };
 
   const initializePaymentSheet = async () => {
-    const clientStripeId = await createCustomerStripe("Tsiew00015");
+    const clientStripeId = await createCustomerStripe(username);
     const intentList = await createPaymentIntent(totalPrice, clientStripeId);
     if (!intentList) return;
 
@@ -284,7 +298,8 @@ const OrderDetails = ({ route }) => {
       
     } catch (error){
       console.error("Failed to create one or more bookings:", error.message);
-      return;
+      throw error;
+      // return;
     }
 
     navigation.navigate('events/BookingComplete', { 
@@ -338,6 +353,7 @@ const OrderDetails = ({ route }) => {
       // Proceed to the next page or display a success message
     } catch (error) {
       console.error("Failed to create one or more bookings:", error.message);
+      throw error;
       // Show error message to the user
     }
 
@@ -385,7 +401,8 @@ const OrderDetails = ({ route }) => {
           
         } catch (error){
           console.error("Failed to create one or more bookings:", error.message);
-          return;
+          throw error;
+          // return;
         }
     
         navigation.navigate('events/BookingComplete', { 
@@ -401,6 +418,7 @@ const OrderDetails = ({ route }) => {
       
     } catch (error) {
       console.error("Failed to submit details:", error);
+      handleError('Server error. Please try again later.');
     }
   };
   
@@ -412,6 +430,9 @@ const OrderDetails = ({ route }) => {
         <StyledText size={20} textContent="Loading event details..." />
       </View>
     );
+  }
+  if (error) {
+    return <NetworkErrorScreen onRetry={getEventDetails}/>;
   }
 
 

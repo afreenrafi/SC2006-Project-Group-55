@@ -218,13 +218,43 @@ export const bookmarkEvent = async (req, res) => {
     // SAVE UPDATED USER OBJECT
     await user.save();
 
-    res
-      .status(200)
-      .json({
-        message:
-          bookmarkIndex === -1 ? "Event bookmarked!" : "Event unbookmarked!",
-        userBookmark: user.userBookmark,
-      });
+    res.status(200).json({
+      message:
+        bookmarkIndex === -1 ? "Event bookmarked!" : "Event unbookmarked!",
+      userBookmark: user.userBookmark,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
+};
+
+// RETRIEVING SPECIFIC EVENT OBJECTS FROM DATABASE USING USERID
+export const getBookmarkedEvents = async (req, res) => {
+  try {
+    // SELECTIVELY EXTRACT FIELD INPUTS RELEVANT TO FUNCTION GETBOOKMARKEDEVENTS
+    const { userId } = req.params;
+
+    // RETRIEVE CURRENT USER OBJECT FROM DATABASE
+    const user = await User.findOne({ userId: userId });
+    if (!user) return res.status(404).json({ message: "User not found!" });
+
+    // RETRIEVE USERBOOKMARK 
+    const userBookmarkArray = user.userBookmark;
+
+    // CHECK IF USERBOOKMARK ARRAY IS VALID
+    if (userBookmarkArray.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No bookmarked events!" });
+    }
+
+    // FIND ALL EVENTS THAT USER HAS BOOKMARKED
+    const bookmarkedEvents = await Event.find({
+      eventId: { $in: userBookmarkArray },
+    });
+
+    res.status(200).json(bookmarkedEvents);
+
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error Occurred!" });
   }

@@ -116,7 +116,7 @@ const LoginAccount = ({ route }) => {
     >
       <SafeAreaView style={styles.container}>
         {/* <StyledText size={30} textContent="Account Setup" /> */}
-        <PageHeader title={"Account Setup"} onPress={()=>navigation.goBack()} fontSize={30}/>
+        <PageHeader title={"Account Login"} onPress={()=>navigation.goBack()} fontSize={30}/>
         <View style={styles.inputs}>
           <StyledInput label={"Username"} data={Username} onChangeText={handleUsername}/>
           {usernameError ? <StyledText size={16} textContent={usernameError} fontColor="#CA3550" /> : null}
