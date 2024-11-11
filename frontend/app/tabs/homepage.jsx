@@ -8,8 +8,10 @@ import { fetchEvents } from '../../apicalls/EventApi';
 import StyledText from "../../components/forms/StyledText";
 import { getTicketBookedAPI } from '../../apicalls/BookingApi';
 import { fetchEventById } from "../../apicalls/EventApi";
+
 import { ErrorContext } from '../context/ErrorContext';
 import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
 import { useFocusEffect } from '@react-navigation/native';
 
 
@@ -212,8 +214,10 @@ const Homepage = ({ route }) => {
   useFocusEffect( useCallback(()=>{
     const fetchData = async () => {
       try {
+        setLoading(true);
         clearError();
         const result = await getHomepageData();
+        setLoading(false);
         // Process result
       } catch (e) {
         handleError('Unable to fetch events. Please try again later.');

@@ -166,8 +166,8 @@ export const fetchTicketCatByTixId = async (tixItemId) => {
     }
 
   } catch (error) {
-    console.error('Error fetching FAQ item:', error);
-    throw new Error('Failed to fetch FAQ item');
+    console.error('Error fetching ticket category:', error);
+    throw new Error('Failed to fetch ticket category');
     // return null;
   }
 };

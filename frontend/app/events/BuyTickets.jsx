@@ -1,5 +1,5 @@
 import { View, SafeAreaView, Modal, StyleSheet, ActivityIndicator, ScrollView, Image } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 // import { useStripe } from '@stripe/stripe-react-native';
@@ -15,6 +15,9 @@ import TicketSelector from "../../components/events/TicketSelector";
 import { fetchTicketCatByTixId } from "../../apicalls/EventApi";
 import { validateBookingRequestAPI } from "../../apicalls/BookingApi";
 
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+
 
 
 
@@ -25,7 +28,7 @@ const BuyTickets = ({ route }) => {
   const navigation = useNavigation();
 
   // const [eventDetails, setEventDetails] = useState(null);  // State to hold event details
-  const [mockEventDetails, setMockEvent] = useState(null);  // State to hold event details
+  // const [mockEventDetails, setMockEvent] = useState(null);  // State to hold event details
 
   // const [loading, setLoading] = useState(true);            // State to manage loading status
   const [selectedDate, setSelectedDate] = useState(null); 
@@ -39,7 +42,11 @@ const BuyTickets = ({ route }) => {
   const [totalPrice, setTotalPrice] = useState(0);
 
   const [dateArray, setDateArr] = useState([]);
-  const [ticketDetails, setTicketDetails] = useState(null)
+  const [ticketDetails, setTicketDetails] = useState(null);
+
+  const [loading, setLoading] = useState(true);            // State to manage loading status
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
 
   // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -126,28 +133,37 @@ const BuyTickets = ({ route }) => {
 
   useEffect(() => {
     const fetchDateArray = async () => {
-      const genDateArr = await generateEventDates(eventDetails.eventStartDate, eventDetails.eventEndDate);
-      setDateArr(genDateArr);
-  
-      const ticketCatArr = eventDetails.eventTicket;
-      const tixCatArr = await fetchAllTicketCategories(ticketCatArr);
-      console.log(tixCatArr);
-      setTicketDetails(tixCatArr);
-  
-      // Initialize quantities object for each ticket type
-      if (tixCatArr) {
-        const initialQuantities = {};
-        tixCatArr.forEach(option => {
-          initialQuantities[option.ticketType] = 0;
-        });
-        setQuantities(initialQuantities);
+      try{
+        setLoading(true);
+        clearError();
+        const genDateArr = await generateEventDates(eventDetails.eventStartDate, eventDetails.eventEndDate);
+        setDateArr(genDateArr);
+    
+        const ticketCatArr = eventDetails.eventTicket;
+        const tixCatArr = await fetchAllTicketCategories(ticketCatArr);
+        console.log(tixCatArr);
+        setTicketDetails(tixCatArr);
+    
+        // Initialize quantities object for each ticket type
+        if (tixCatArr) {
+          const initialQuantities = {};
+          tixCatArr.forEach(option => {
+            initialQuantities[option.ticketType] = 0;
+          });
+          setQuantities(initialQuantities);
+        }
+    
+        // Set the initial selected date to the first date in eventDates
+        if (genDateArr && genDateArr.length > 0) {
+          const firstDate = genDateArr[0].isoDateTime;
+          setSelectedDate(firstDate);
+        }
+        setLoading(false);
+      } catch (error) {
+        handleError('Unable to fetch events. Please try again later.');
+        setLoading(false);
       }
-  
-      // Set the initial selected date to the first date in eventDates
-      if (genDateArr && genDateArr.length > 0) {
-        const firstDate = genDateArr[0].isoDateTime;
-        setSelectedDate(firstDate);
-      }
+      
     };
   
     fetchDateArray();
@@ -326,6 +342,7 @@ const BuyTickets = ({ route }) => {
       return ticketArr;
     } catch (error) {
       console.error("Error fetching ticket categories:", error);
+      handleError('Unable to fetch tickets categories. Please try again later.');
       return null;
     }
   };
@@ -460,6 +477,18 @@ const BuyTickets = ({ route }) => {
   //     </View>
   //   );
   // }
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <StyledText size={20} textContent="Loading event details..." />
+      </View>
+    );
+  }
+  if (error) {
+    return <NetworkErrorScreen />;
+  }
+  
 
 
   return (
