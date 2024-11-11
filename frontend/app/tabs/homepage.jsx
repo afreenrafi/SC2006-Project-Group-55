@@ -193,14 +193,13 @@ const Homepage = ({ route }) => {
   };
   
   
-  
-  
 
   const fetchData = async () => {
     try {
       setLoading(true);
       clearError();
       const result = await getHomepageData();
+      setLoading(false);
       // Process result
     } catch (e) {
       handleError('Unable to fetch events. Please try again later.');
@@ -226,23 +225,23 @@ const Homepage = ({ route }) => {
     
   // }, []);
 
-  useFocusEffect( useCallback(()=>{
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        clearError();
-        const result = await getHomepageData();
-        setLoading(false);
-        // Process result
-      } catch (e) {
-        handleError('Unable to fetch events. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  useFocusEffect( useCallback( ()=>{
+    // const fetchData = async () => {
+    //   try {
+    //     setLoading(true);
+    //     clearError();
+    //     const result = await getHomepageData();
+    //     setLoading(false);
+    //     // Process result
+    //   } catch (e) {
+    //     handleError('Unable to fetch events. Please try again later.');
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
 
     fetchData();
-  }, [clearError, handleError]))
+  }, [clearError, handleError]));
 
 
 
@@ -293,8 +292,7 @@ const Homepage = ({ route }) => {
   const renderUpcomingEvent = () => {
     if (mockUpcomingEvents != undefined || mockUpcomingEvents != null){
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
-    if (event != undefined){
-      console.log("eventPic"+event.eventPic);
+    console.log("eventPic"+event.eventPic);
     return (
       <View>
         {/* Upcoming Event Card */}

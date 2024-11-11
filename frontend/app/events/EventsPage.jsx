@@ -169,7 +169,8 @@ const EventsPage = ({ route }) => {
       // console.log("User details submitted:", result);
       navigation.navigate('events/BuyTickets', { username: username, role: role, eventDetails: eventDetails });  // Navigate to new page with email
     } catch (error) {
-      console.error("Failed to submit details:", error);
+      console.error("Failed to go next page:", error);
+      handleError('Page error. Please try again later.');
       throw error;
     }
   }

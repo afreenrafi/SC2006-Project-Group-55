@@ -48,10 +48,6 @@ const BuyTickets = ({ route }) => {
   const [dateArray, setDateArr] = useState([]);
   const [ticketDetails, setTicketDetails] = useState(null);
 
-  const [loading, setLoading] = useState(true);            // State to manage loading status
-  const { error, handleError } = useContext(ErrorContext);
-  const { clearError } = useContext(ErrorContext);
-
   // const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
 
@@ -375,6 +371,7 @@ const BuyTickets = ({ route }) => {
     } catch (error) {
       // If any request fails, display an error message
       console.error("One or more validations failed:", error.message);
+      handleError('Server error. Please try again later.');
       setLoading(false);
       throw error;
     }
@@ -418,17 +415,6 @@ const BuyTickets = ({ route }) => {
   //     </View>
   //   );
   // }
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#CA3550" />
-        <StyledText size={20} textContent="Loading event details..." />
-      </View>
-    );
-  }
-  if (error) {
-    return <NetworkErrorScreen />;
-  }
   
 
   if (loading) {

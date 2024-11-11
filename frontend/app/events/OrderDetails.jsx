@@ -1,5 +1,5 @@
 import { View, SafeAreaView, Image, Modal, StyleSheet, TouchableOpacity, ActivityIndicator, Button, ScrollView, Platform } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import StyledText from "../../components/forms/StyledText";
 import { useNavigation } from '@react-navigation/native';
 import { useStripe } from '@stripe/stripe-react-native';
@@ -298,7 +298,8 @@ const getEventDetails = async () => {
       
     } catch (error){
       console.error("Failed to create one or more bookings:", error.message);
-      return;
+      throw error;
+      // return;
     }
 
     navigation.navigate('events/BookingComplete', { 
