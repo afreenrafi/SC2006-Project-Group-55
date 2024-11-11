@@ -11,7 +11,9 @@ const sendConfirmationEmail = async (
   bookingName,
   bookingEmail,
   bookingQuantity,
-  eventName
+  eventName,
+  eventTicketType,
+
 ) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -25,7 +27,7 @@ const sendConfirmationEmail = async (
     from: process.env.EMAIL_USER,
     to: bookingEmail,
     subject: "Event Booking Confirmation",
-    text: `Hello ${bookingName},\n\nYou have successfully booked ${bookingQuantity} ${eventName} ticket(s) for the event.\n\nThank you for booking with us!`,
+    text: `Hello ${bookingName},\n\nYou have successfully booked ${bookingQuantity} ${eventTicketType} ticket(s) for ${eventName}.\n\nThank you for booking with us!`,
   };
 
   try {
@@ -159,6 +161,7 @@ export const createBookingAndSendEmail = async (req, res) => {
       newBooking.bookingName,
       newBooking.bookingEmail,
       bookingQuantity,
+      eventName,
       eventTicketType, // Pass the ticket type to the email function
       eventTicket.eventId
     );
