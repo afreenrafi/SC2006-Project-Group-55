@@ -239,28 +239,23 @@ export const getBookmarkedEvents = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found!" });
 
     // RETRIEVE USERBOOKMARK 
-    const userBookmarkArray = user.userBookmark.split(",");
+    const userBookmarkArray = user.userBookmark;
 
     // CHECK IF USERBOOKMARK ARRAY IS VALID
     if (userBookmarkArray.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No bookmarked events!" });
-    }
-
-    // FIND ALL EVENTS THAT USER HAS BOOKMARKED
-    const bookmarkedEvents = await Event.find({
-      eventTicketId: { $in: userBookmarkArray },
-    });
-
-    // CHECK IF ANY EVENT TICKETS WERE FOUND
-    if (bookmarkedEvents.length === 0) {
       return res
         .status(404)
         .json({ message: "No bookmarked events!" });
     }
 
+    // FIND ALL EVENTS THAT USER HAS BOOKMARKED
+    const bookmarkedEvents = await Event.find({
+      eventId: { $in: userBookmarkArray },
+    });
+
     res.status(200).json(bookmarkedEvents);
 
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error Occurred!" });
+  }
 };

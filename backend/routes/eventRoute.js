@@ -22,7 +22,7 @@ router.post("/", createEvent);
 // READ
 router.get("/", getAllEvents);
 router.get("/search", searchEvents);
-router.get("/bookmark", getBookmarkedEvents);
+router.get("/bookmark/:userId", getBookmarkedEvents);
 router.get("/:eventId", getEventById);
 
 // UPDATE

@@ -17,6 +17,7 @@ import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchUserById } from '../../apicalls/UserApi';
 
+import { bookmarkEvent, getBookmarkedEvents } from '../../apicalls/EventApi';
 
 
 
@@ -31,7 +32,7 @@ const Homepage = ({ route }) => {
   console.log("username is "+ username + " " + role);
 
 
-  const { savedEvents, toggleBookmark } = useContext(AppContext);
+  // const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
 
@@ -45,6 +46,7 @@ const Homepage = ({ route }) => {
   const [mockUpcomingEvents, setUpcomingEvents] = useState(null);
 
   const [userDisplay, setUserDisplay] = useState('');
+  const [savedEvents, setSavedEvents] = useState([]);
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.eventGenre === selectedFilter);
@@ -55,6 +57,17 @@ const Homepage = ({ route }) => {
   //   ...mockPopularEvents,
   //   ...mockNearbyEvents,
   // ];
+  const toggleBookmark = (event) => {
+    // setSavedEvents((prevSavedEvents) => {
+    //   if (prevSavedEvents.some((e) => e.eventId === event.eventId)) {
+    //     // Remove event if already saved
+    //     return prevSavedEvents.filter((e) => e.eventId !== event.eventId);
+    //   } else {
+    //     // Add new event
+    //     return [...prevSavedEvents, event];
+    //   }
+    // });
+  };
 
   const getFreeEvents = async () => {
     try {
@@ -79,8 +92,25 @@ const Homepage = ({ route }) => {
     }
   };
 
+  const fetchBookmarkedEvents = async (username) => {
+    try {
+      
+      const bookmarked = await getBookmarkedEvents(username);
+      const bookmarkedIds = bookmarked.map(event => event.eventId);
+      console.log(bookmarkedIds);
+      return bookmarkedIds;
+      // Process result
+    } catch (e) {
+      console.error("Error fetching bookmarked details:", error);
+      throw error; 
+    } 
+  };
+
   const getHomepageData = async ()=> {
     try{
+      const bookmarkEventId = await fetchBookmarkedEvents(username);
+      setSavedEvents(bookmarkEventId);
+      console.log("bookmark Ids "+bookmarkEventId);
       const freeEvents = await getFreeEvents();
       setPageFreeEvents(freeEvents);
       const paidEvents = await getPaidEvents();
@@ -199,6 +229,36 @@ const Homepage = ({ route }) => {
       return [];
     }
   };
+
+  // const handleBookmark = async (username, item, isBookmarked) => {
+  //   try{
+  //     await bookmarkEvent(username, item.eventId);
+      
+  //     // isBookmarked
+  //     // toggleBookmark(item);
+  //   }
+  //   catch(error){
+  //     handleError('Unable to bookmark. Please try again later.');
+  //   }
+  // }
+  const handleBookmark = async (username, item) => {
+    try {
+      await bookmarkEvent(username, item.eventId);
+
+      setSavedEvents((prevSavedEvents) => {
+        if (prevSavedEvents.includes(item.eventId)) {
+          // Remove event if already bookmarked
+          return prevSavedEvents.filter((id) => id !== item.eventId);
+        } else {
+          // Add event if not bookmarked
+          return [...prevSavedEvents, item.eventId];
+        }
+      });
+    } catch (error) {
+      handleError('Unable to bookmark. Please try again later.');
+    }
+  };
+
   
   
 
@@ -266,7 +326,7 @@ const Homepage = ({ route }) => {
 
   const renderEventCard = ({ item }) => {
     // console.log("eventcard rendering"+item.eventId);
-    const isBookmarked = savedEvents.some((e) => e.eventId === item.eventId);
+    const isBookmarked = savedEvents.includes(item.eventId);
     const dateString = item.eventStartDate;
     const date = new Date(dateString);
     const formattedDate = new Intl.DateTimeFormat("en-GB", {
@@ -274,6 +334,8 @@ const Homepage = ({ route }) => {
       month: "short",
       year: "numeric"
     }).format(date);
+
+    
 
 
     return (
@@ -285,7 +347,7 @@ const Homepage = ({ route }) => {
           <Text style={styles.eventLocation}>{item.eventLocation}</Text>
           <Text style={styles.eventDate}>{formattedDate}</Text>
         </View>
-        <TouchableOpacity onPress={() => toggleBookmark(item)} style={styles.bookmarkButton}>
+        <TouchableOpacity onPress={() => handleBookmark(username, item)} style={styles.bookmarkButton}>
           <FontAwesome name={isBookmarked ? "bookmark" : "bookmark-o"} size={20} color={isBookmarked ? "#EE1C43" : "#FFF"} />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -417,7 +479,7 @@ const Homepage = ({ route }) => {
       }
 
       {/* Popular Events Section */}
-      {console.log(filteredPopularEvents.length)}
+      {/* {console.log(filteredPopularEvents.length)} */}
       {filteredPopularEvents.length > 0 && 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>

@@ -1,9 +1,60 @@
-import React, {useContext} from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { AppContext } from '../context/AppContext';
 
-const SavedEvents = () => {
-  const { savedEvents } = useContext(AppContext);
+import { ErrorContext } from '../context/ErrorContext';
+import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
+import { useFocusEffect } from '@react-navigation/native';
+import { getBookmarkedEvents } from '../../apicalls/EventApi';
+import StyledText from '../../components/forms/StyledText';
+
+
+
+
+const SavedEvents = ({ route }) => {
+  const { username, role } = route.params;
+
+  // const { savedEvents } = useContext(AppContext);
+  const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
+
+  const [loading, setLoading] = useState(true);
+  const [ savedEvents, setSavedEvents] = useState(null);
+
+
+  const fetchBookmarkedEvents = async () => {
+    try {
+      setLoading(true);
+      clearError();
+      const bookmarked = await getBookmarkedEvents(username);
+      console.log(bookmarked);
+      setSavedEvents(bookmarked);
+      setLoading(false);
+      // Process result
+    } catch (e) {
+      handleError('Unable to fetch events. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect( useCallback( ()=>{
+    // console.log("saved " + savedEvents);
+    fetchBookmarkedEvents();
+  }, [clearError, handleError]));
+
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#CA3550" />
+        <StyledText size={20} textContent="Loading event details..." />
+      </View>
+    );
+  }
+  if (error) {
+    return <NetworkErrorScreen onRetry={fetchBookmarkedEvents}/>;
+  }
 
   return (
     <ScrollView style={styles.container}>
