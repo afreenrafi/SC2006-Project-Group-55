@@ -244,7 +244,7 @@ const OrderDetails = ({ route }) => {
   };
 
   const initializePaymentSheet = async () => {
-    const clientStripeId = await createCustomerStripe("Tsiew00015");
+    const clientStripeId = await createCustomerStripe(username);
     const intentList = await createPaymentIntent(totalPrice, clientStripeId);
     if (!intentList) return;
 

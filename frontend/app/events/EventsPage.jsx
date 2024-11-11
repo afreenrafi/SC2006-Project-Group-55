@@ -19,7 +19,7 @@ import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 const EventsPage = ({ route }) => {
   const { username, role } = route.params;
   const { eventId } = route.params;
-  console.log(username);
+  console.log(eventId);
 
   const navigation = useNavigation();
 

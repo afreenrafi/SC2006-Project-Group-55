@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, ActivityIndicator} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
@@ -10,7 +10,7 @@ import { getTicketBookedAPI } from '../../apicalls/BookingApi';
 import { fetchEventById } from "../../apicalls/EventApi";
 import { ErrorContext } from '../context/ErrorContext';
 import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
-
+import { useFocusEffect } from '@react-navigation/native';
 
 
 
@@ -192,7 +192,24 @@ const Homepage = ({ route }) => {
 
   
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       clearError();
+  //       const result = await getHomepageData();
+  //       // Process result
+  //     } catch (e) {
+  //       handleError('Unable to fetch events. Please try again later.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+    
+  // }, []);
+
+  useFocusEffect( useCallback(()=>{
     const fetchData = async () => {
       try {
         clearError();
@@ -206,8 +223,9 @@ const Homepage = ({ route }) => {
     };
 
     fetchData();
-    
-  }, []);
+  }, [clearError, handleError]))
+
+
 
 
   
