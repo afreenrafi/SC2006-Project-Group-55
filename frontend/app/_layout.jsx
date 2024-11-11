@@ -15,7 +15,8 @@ import EventsPage from './events/EventsPage';
 import BuyTickets from './events/BuyTickets';
 import OrderDetails from './events/OrderDetails';
 import BookingComplete from './events/BookingComplete';
-
+// profile pages
+import UpdateProfile from './profile/UpdateProfile';
 
 const Stack = createNativeStackNavigator();
 
@@ -92,6 +93,14 @@ const MainLayout = () => {
         component={BookingComplete}
         options={{ headerShown: false,
           title: 'Booking Complete'
+         }}
+      />
+      
+      <Stack.Screen
+        name="profile/UpdateProfile"
+        component={UpdateProfile}
+        options={{ headerShown: false,
+          title: 'Update Profile'
          }}
       />
 

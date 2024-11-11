@@ -12,12 +12,14 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { deleteUserById } from "../../apicalls/UserApi";
+import { fetchUserById } from "../../apicalls/UserApi";
 
 const Profile = ({ route }) => {
   const [isPushEnabled, setIsPushEnabled] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const navigation = useNavigation();
   const { username } = route.params;
+  console.log("username is "+username)
 
   const toggleSwitch = async () => {
     const newValue = !isPushEnabled;
@@ -61,6 +63,29 @@ const Profile = ({ route }) => {
     }
   };
 
+  const prepareUpdateInfo = async () => {
+    try{
+      // const user = await fetchUserById(username);
+      // console.log("got user info "+ JSON.stringify(user));
+      navigation.navigate('profile/UpdateProfile', { 
+        username: username
+      })
+
+
+      
+    } catch (error) {
+      console.error("Error fetching homepage details:", error);
+      // handleError('Server error. Please try again later.');
+      throw error;
+    }
+    // try {
+    //   const userDetails = await fetchUserById(username);
+      
+    // } catch (error){
+    //   throw error;
+    // }
+  }
+
   useEffect(() => {
     const loadSwitchState = async () => {
       try {
@@ -85,23 +110,23 @@ const Profile = ({ route }) => {
 
       {/* Profile Options */}
       <View style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.optionCard}>
+        <TouchableOpacity onPress={prepareUpdateInfo} style={styles.optionCard}>
           <FontAwesome name="id-card" size={30} color="#333" style={styles.icon} />
-          <Text style={styles.optionTitle}>Personal Information</Text>
+          <Text style={styles.optionTitle}>Update Personal Information</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionCard}>
+        {/* <TouchableOpacity style={styles.optionCard}>
           <FontAwesome name="credit-card" size={30} color="#333" style={styles.icon} />
           <Text style={styles.optionTitle}>Payment Methods</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity style={styles.optionCard}>
+        {/* <TouchableOpacity style={styles.optionCard}>
           <MaterialIcons name="lock" size={30} color="#333" style={styles.icon} />
           <Text style={styles.optionTitle}>Change Password</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Push Notifications Switch */}
-        <View style={styles.optionCard}>
+        {/* <View style={styles.optionCard}>
           <FontAwesome name="bell" size={30} color="#333" style={styles.icon} />
           <View style={styles.textContainer}>
             <Text style={styles.optionTitle}>Push Notifications</Text>
@@ -114,7 +139,7 @@ const Profile = ({ route }) => {
               style={styles.switch}
             />
           </View>
-        </View>
+        </View> */}
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.optionCard} onPress={handleLogout}>
