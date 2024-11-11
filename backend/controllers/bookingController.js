@@ -22,6 +22,7 @@ const sendConfirmationEmail = async (
       pass: process.env.EMAIL_PASS,
     },
   });
+  console.log(eventName);
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -156,12 +157,14 @@ export const createBookingAndSendEmail = async (req, res) => {
     user.TicketBooked.push(newBooking.bookingId); // Add the bookingId to the array
     await user.save();
 
+    const event = await Event.findOne({ eventId: eventId });
+
     // Send confirmation email
     await sendConfirmationEmail(
       newBooking.bookingName,
       newBooking.bookingEmail,
       bookingQuantity,
-      eventName,
+      event.eventName, 
       eventTicketType, // Pass the ticket type to the email function
       eventTicket.eventId
     );

@@ -333,6 +333,7 @@ const getEventDetails = async () => {
   };
 
   const createBooking = async (userId, eventId, quantities, ticketDetails) => {
+    console.log("eventId " + eventId);
     try {
       const bookingResults = await Promise.all(
         Object.entries(quantities).map(async ([ticketType, bookingQuantity]) => {
