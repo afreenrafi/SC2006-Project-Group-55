@@ -256,11 +256,12 @@ const Homepage = ({ route }) => {
   const renderUpcomingEvent = () => {
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
     if (event != undefined){
+      console.log("eventPic"+event.eventPic);
     return (
       <View>
         {/* Upcoming Event Card */}
         <View style={styles.upcomingEventCard}>
-          <Image source={event.eventPic? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
+          <Image source={event.eventDetails.eventPic ? {uri: event.eventDetails.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
           <Text style={styles.upcomingEventTitle}>{event.eventDetails.eventName}</Text>
           <Text style={styles.upcomingEventLocation}>{event.eventDetails.eventLocation}</Text>
           {/* Date Toggle Buttons */}
