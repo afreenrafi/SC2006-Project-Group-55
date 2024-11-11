@@ -73,9 +73,13 @@ const TicketDetails = ({ route }) => {
             </View>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Tickets</Text>
-              {event.tickets.map((tix)=>(
-                <Text>{tix.totalQuantity}x {tix.eventTicketType} Tickets</Text>
-              ))}
+              {event.tickets.map((tix) => {
+                if(tix.totalQuantity > 0){
+                  return(<Text key={tix.eventTicketType}>{tix.totalQuantity}x {tix.eventTicketType} Tickets</Text>);
+                }
+                return null;
+              }
+              )}
               {/* <Text style={styles.infoText}>{event.seat || 'No seat'}</Text> */}
             </View>
           </View>

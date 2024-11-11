@@ -345,8 +345,10 @@ const getEventDetails = async () => {
           }
   
           const { ticketPrice } = ticketDetail;
-  
-          return await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, ticketType, ticketPrice, selectedDate);
+          if(bookingQuantity > 0){
+            return await createBookingAndSendEmailAPI(userId, eventId, bookingQuantity, ticketType, ticketPrice, selectedDate);
+          }
+          
         })
       );
   
