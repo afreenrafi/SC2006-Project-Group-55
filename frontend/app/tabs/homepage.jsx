@@ -97,7 +97,11 @@ const Homepage = ({ route }) => {
     try {
       const bookings = await getTicketBookedAPI(userId);
       const enrichedAndCombinedEvents = await getEnrichedAndCombinedEvents(bookings);
+      if(enrichedAndCombinedEvents == []){
+        return [];
+      }
       return enrichedAndCombinedEvents;
+
     } catch (error) {
       console.error("Error fetching and processing bookings:", error);
       throw error;
@@ -192,7 +196,18 @@ const Homepage = ({ route }) => {
   
   
 
-  
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      clearError();
+      const result = await getHomepageData();
+      // Process result
+    } catch (e) {
+      handleError('Unable to fetch events. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -276,6 +291,7 @@ const Homepage = ({ route }) => {
 
 
   const renderUpcomingEvent = () => {
+    if (mockUpcomingEvents != undefined || mockUpcomingEvents != null){
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
     if (event != undefined){
       console.log("eventPic"+event.eventPic);
@@ -340,7 +356,7 @@ const Homepage = ({ route }) => {
     );
   }
   if (error) {
-    return <NetworkErrorScreen />;
+    return <NetworkErrorScreen onRetry={fetchData}/>;
   }
 
   return (

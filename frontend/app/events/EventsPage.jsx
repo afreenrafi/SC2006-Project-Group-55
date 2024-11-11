@@ -27,30 +27,35 @@ const EventsPage = ({ route }) => {
   const [faqDetails, setFaqDetails] = useState(null);
   const [loading, setLoading] = useState(true);            // State to manage loading status
   const { error, handleError } = useContext(ErrorContext);
+  const { clearError } = useContext(ErrorContext);
+
+  const getEventDetails = async () => {
+    try {
+      setLoading(true);
+      clearError();
+      const details = await fetchEventDetails(eventId);  // Fetch event details
+      setEventDetails(details);                  // Set the fetched details to state
+      // console.log(eventDetails);
+      const faqIds = await fetchFaqDetails(eventId);
+      // console.log(faqIds);
+      const faqContentArr = await fetchFaqData(faqIds);
+      console.log(faqContentArr);
+      setFaqDetails(faqContentArr);
+      setLoading(false);                         // Set loading to false once data is fetched
+    } catch (error) {
+      console.error("Error fetching event details:", error);
+      handleError('Server error. Please try again later.');
+      setLoading(false);
+    }
+  };
 
 
 
   // Fetch event details when component mounts
   useEffect(() => {
-    const getEventDetails = async () => {
-      try {
-        const details = await fetchEventDetails(eventId);  // Fetch event details
-        setEventDetails(details);                  // Set the fetched details to state
-        // console.log(eventDetails);
-        const faqIds = await fetchFaqDetails(eventId);
-        // console.log(faqIds);
-        const faqContentArr = await fetchFaqData(faqIds);
-        console.log(faqContentArr);
-        setFaqDetails(faqContentArr);
+    
 
-
-        setLoading(false);                         // Set loading to false once data is fetched
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-        handleError('Server error. Please try again later.');
-        setLoading(false);
-      }
-    };
+    
 
     getEventDetails();  // Call the function when component mounts
   }, [eventId]);
@@ -178,7 +183,7 @@ const EventsPage = ({ route }) => {
     );
   }
   if (error) {
-    return <NetworkErrorScreen />;
+    return <NetworkErrorScreen onRetry={getEventDetails}/>;
   }
 
 

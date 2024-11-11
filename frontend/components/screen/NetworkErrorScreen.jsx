@@ -4,19 +4,21 @@ import { ErrorContext } from '../../app/context/ErrorContext';
 import { useNavigation } from '@react-navigation/native';
 
 
-const NetworkErrorScreen = () => {
+const NetworkErrorScreen = ({ onRetry }) => {
 
   const { clearError } = useContext(ErrorContext);
   const navigation = useNavigation();
+
+  const handleRetry = () => {
+    clearError();  // Clear the error state
+    onRetry();     // Call the retry function
+  };
   
 
   return (
     <View style={styles.container}>
       <Text style={styles.errorMessage}>Network Error. Please try again later.</Text>
-      <Button title="Retry" onPress={() => {
-        clearError;
-        navigation.navigate('auth');
-        }} />
+      <Button title="Retry" onPress={handleRetry}/>
     </View>
   );
 };

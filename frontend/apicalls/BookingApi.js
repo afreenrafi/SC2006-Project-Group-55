@@ -75,12 +75,17 @@ export const getTicketBookedAPI = async (userId) => {
         'Content-Type': 'application/json',
       },
     });
-
-    if (!response.ok) {
+    console.log(response.status)
+    if(response.status == 404){
+      console.log('No bookings available:');
+      return [];
+    }
+    else if (!response.ok) {
       // If the response is not successful, throw an error to handle in the catch block
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to retrieve bookings');
     }
+    
 
     // If the response is successful, parse and return the booking data
     const data = await response.json();

@@ -167,9 +167,9 @@ const Setup = ({ route }) => {
         modalVisible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
         oneOptPress={() => handleRoleSelect("Public")} 
-        twoOptPress={() => handleRoleSelect("Organiser")} 
+        twoOptPress={() => handleRoleSelect("Artist")} 
         optOne="Public"
-        optTwo="Organiser"
+        optTwo="Artist"
         />
 
       </SafeAreaView>
