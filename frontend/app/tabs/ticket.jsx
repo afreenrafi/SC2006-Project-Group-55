@@ -24,15 +24,21 @@ const TicketsScreen = () => {
   };
 
   const getAllEvents = async () => {
-    setLoading(true);
-    clearError();
-    const events = await fetchAllEvents();
-    if (events) {
-      const uniqueEvents = Array.from(new Map(events.map(item => [item.eventId, item])).values());
-      setAllEvents(uniqueEvents);
-      setDisplayEvents(uniqueEvents);
+    try{
+      setLoading(true);
+      clearError();
+      const events = await fetchAllEvents();
+      if (events) {
+        const uniqueEvents = Array.from(new Map(events.map(item => [item.eventId, item])).values());
+        setAllEvents(uniqueEvents);
+        setDisplayEvents(uniqueEvents);
+      }
+      setLoading(false);
+    } catch (error){
+      handleError('Server error. Please try again later.');
+      setLoading(false);
     }
-    setLoading(false);
+    
   };
 
 
@@ -76,7 +82,7 @@ const TicketsScreen = () => {
     );
   }
   if (error) {
-    return <NetworkErrorScreen onRetry={fetchData}/>;
+    return <NetworkErrorScreen onRetry={getAllEvents}/>;
   }
 
   return (
