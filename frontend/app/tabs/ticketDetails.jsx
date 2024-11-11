@@ -13,10 +13,10 @@ const TicketDetails = ({ route }) => {
     const [eventTime, setEventTime] = useState(null);
     const [eventDate, setEventDate] = useState(null);
 
-    const formatEventTime = async (eventStartDate, eventEndDate) => {
+    const formatEventTime = async (eventOpen, eventClose) => {
       // Create Date objects from the ISO strings
-      const start = new Date(eventStartDate);
-      const end = new Date(eventEndDate);
+      const start = new Date(eventOpen);
+      const end = new Date(eventClose);
     
       // Format the time to get hour and period (AM/PM)
       const startTime = start.toLocaleTimeString('en-US', {

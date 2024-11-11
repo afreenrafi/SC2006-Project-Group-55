@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { AppContext } from '../context/AppContext';
 
 import { ErrorContext } from '../context/ErrorContext';
@@ -7,12 +7,15 @@ import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 import { useFocusEffect } from '@react-navigation/native';
 import { getBookmarkedEvents } from '../../apicalls/EventApi';
 import StyledText from '../../components/forms/StyledText';
+import { useNavigation } from '@react-navigation/native';
+
 
 
 
 
 const SavedEvents = ({ route }) => {
-  const { username, role } = route.params;
+  const navigation = useNavigation();
+  const { username } = route.params;
 
   // const { savedEvents } = useContext(AppContext);
   const { error, handleError } = useContext(ErrorContext);
@@ -20,6 +23,10 @@ const SavedEvents = ({ route }) => {
 
   const [loading, setLoading] = useState(true);
   const [ savedEvents, setSavedEvents] = useState(null);
+
+  const toEventPage = async (eventId) => {
+    navigation.navigate('events/EventsPage', { eventId: eventId, username: username });
+  };
 
 
   const fetchBookmarkedEvents = async () => {
@@ -65,7 +72,8 @@ const SavedEvents = ({ route }) => {
         </View>
       ) : (
         savedEvents.map((event) => (
-          <View key={event.eventId} style={styles.savedEventCard}>
+          <TouchableOpacity key={event.eventId} onPress={() => toEventPage(event.eventId)}>
+          <View style={styles.savedEventCard}>
             <Image source={event.eventPic ? {uri: event.eventPic} : require('../../assets/images/DefaultEventPic.jpg')} style={styles.eventImage} />
             <View style={styles.eventDetailsContainer}>
               <Text style={styles.eventType}>{event.eventGenre}</Text>
@@ -80,6 +88,7 @@ const SavedEvents = ({ route }) => {
               <Text style={styles.eventLocation}>{event.eventLocation}</Text>
             </View>
           </View>
+          </TouchableOpacity>
         ))
       )}
     </ScrollView>
