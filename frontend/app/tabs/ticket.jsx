@@ -8,7 +8,8 @@ import { fetchAllEvents } from '../../apicalls/EventApi';
 import { ErrorContext } from '../context/ErrorContext';
 import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 
-const TicketsScreen = () => {
+const TicketsScreen = ({ route }) => {
+  const { username } = route.params;
   const [allEvents, setAllEvents] = useState(null);
   const [displayEvents, setDisplayEvents] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,7 +21,7 @@ const TicketsScreen = () => {
   const navigation = useNavigation();
 
   const toEventPage = async (eventId) => {
-    navigation.navigate('events/EventsPage', { eventId: eventId });
+    navigation.navigate('events/EventsPage', { eventId: eventId, username: username });
   };
 
   const getAllEvents = async () => {
