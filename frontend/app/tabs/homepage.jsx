@@ -255,6 +255,7 @@ const Homepage = ({ route }) => {
 
   const renderUpcomingEvent = () => {
     const event = mockUpcomingEvents[currentUpcomingEventIndex];
+    if (event != undefined){
     return (
       <View>
         {/* Upcoming Event Card */}
@@ -304,6 +305,7 @@ const Homepage = ({ route }) => {
           </View>
         </View>
     );
+  }
   };
 
   if (loading) {
@@ -360,10 +362,14 @@ const Homepage = ({ route }) => {
 </ScrollView>
 
       {/* Upcoming Events */}
+      {console.log("upcoming is "+mockUpcomingEvents)}
+      {
+        mockUpcomingEvents != ''  &&
        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Upcoming Events</Text>
         {renderUpcomingEvent()}
       </View>
+      }
 
       {/* Popular Events Section */}
       {console.log(filteredPopularEvents.length)}
