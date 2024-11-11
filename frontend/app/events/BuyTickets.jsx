@@ -367,7 +367,7 @@ const BuyTickets = ({ route }) => {
       // If all requests succeed, navigate to the next page
       console.log("All validations succeeded:", results);
       navigateToNextPage(); // Replace this with your actual navigation function
-      
+      setLoading(false);
     } catch (error) {
       // If any request fails, display an error message
       console.error("One or more validations failed:", error.message);

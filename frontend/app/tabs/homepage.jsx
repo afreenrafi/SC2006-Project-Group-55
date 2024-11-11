@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, ActivityIndicator} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import { AppContext } from '../context/AppContext';
 // import { mockUpcomingEvents, mockPopularEvents, mockNearbyEvents } from './mockData';
 import { useNavigation } from '@react-navigation/native';
@@ -13,6 +15,7 @@ import { ErrorContext } from '../context/ErrorContext';
 import NetworkErrorScreen from '../../components/screen/NetworkErrorScreen';
 
 import { useFocusEffect } from '@react-navigation/native';
+import { fetchUserById } from '../../apicalls/UserApi';
 
 
 
@@ -27,6 +30,7 @@ const Homepage = ({ route }) => {
   const { username, role } = route.params;
   console.log("username is "+ username + " " + role);
 
+
   const { savedEvents, toggleBookmark } = useContext(AppContext);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [currentUpcomingEventIndex, setCurrentUpcomingEventIndex] = useState(0); // To toggle between upcoming events
@@ -39,6 +43,8 @@ const Homepage = ({ route }) => {
   const [mockPopularEvents, setPageFreeEvents] = useState(null);
   const [mockNearbyEvents, setPagePaidEvents] = useState(null);
   const [mockUpcomingEvents, setUpcomingEvents] = useState(null);
+
+  const [userDisplay, setUserDisplay] = useState('');
 
   // Filter the events based on selected filter
   const filteredPopularEvents = selectedFilter === 'All' ? mockPopularEvents : mockPopularEvents.filter(event => event.eventGenre === selectedFilter);
@@ -81,6 +87,8 @@ const Homepage = ({ route }) => {
       setPagePaidEvents(paidEvents);
       const ticketEvents = await getAggregatedBookings(username);
       setUpcomingEvents(ticketEvents);
+      const user = await fetchUserById(username);
+      setUserDisplay(user.userName);
       console.log("ticketed "+JSON.stringify(ticketEvents));
 
 
@@ -361,13 +369,13 @@ const Homepage = ({ route }) => {
     <ScrollView style={styles.container}>
       {/* Header with location and icons */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
+        {/* <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
           <FontAwesome name="bars" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.location}>📍 Boon Lay, Jurong</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        </TouchableOpacity> */}
+        <Text style={styles.location}>🏠 Hello {userDisplay}! <FontAwesome5 name="smile-beam" size={16} color="black" /></Text>
+        {/* <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <FontAwesome name="bell" size={24} color="black" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Title */}
@@ -463,6 +471,7 @@ const styles = StyleSheet.create({
     paddingBottom: '5%',
     paddingTop: '17%',
     backgroundColor: '#FBF3F1',
+    
   },
   location: {
     fontSize: 16,
