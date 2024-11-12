@@ -94,7 +94,7 @@ const BookingComplete = ({ route }) => {
                           const qty = quantities[option.ticketType];
                           if (qty > 0) {
                               return (
-                                <Text style={styles.infoText}>{qty}x {option.ticketType} Ticket</Text>
+                                <Text style={styles.infoText} key={option.ticketType}>{qty}x {option.ticketType} Ticket</Text>
                               // <View style={styles.priceItem} key={option.ticketType}>
                               //     <StyledText size={20} textContent={`${qty} x ${option.ticketType} Ticket`} alignment="left" />
                               //     <StyledText size={20} textContent={`$${(qty * option.ticketPrice).toFixed(2)}`} alignment="left" fweight="bold" />
