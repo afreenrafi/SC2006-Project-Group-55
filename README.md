@@ -40,7 +40,6 @@ Cultivate was made with the **MERN** tech stack where:
 
 ## **External APIs used:**
 1. Stripe for payment 
-2. Google Maps API for location 
 
 ---
 
